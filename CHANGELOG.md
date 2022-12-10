@@ -1,3 +1,7 @@
+## v4.0.0-unstable.3 - [December 10, 2022](https://github.com/lando/core-next/releases/tag/v4.0.0-unstable.3)
+
+* DEPLOY TEST 2
+
 ## v4.0.0-unstable.2 - [December 10, 2022](https://github.com/lando/core-next/releases/tag/v4.0.0-unstable.2)
 
 * DEPLOY TEST
