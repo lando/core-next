@@ -1,10 +1,10 @@
 name: Publish to NPM
 
-# on:
-#   release:
-#     types:
-#       - published
-#       - edited
+on:
+  release:
+    types:
+      - published
+      - edited
 
 jobs:
   deploy:
@@ -41,13 +41,13 @@ jobs:
       - name: Publish to npm
         run: |
           if [ "${{ github.event.release.prerelease }}" ==  "false" ]; then
-            npm publish --access public --dry-run
-            npm publish --access public
-            echo "::notice title=Published ${{ github.ref_name }} to @${{ github.repository }}::This is a stable release published to the default 'latest' npm tag"
+            npm publish --access public --tag next --dry-run
+            npm publish --access public --tag next
+            echo "::notice title=Published ${{ github.ref_name }} to @${{ github.repository }}::This is a special next release published to the 'next' npm tag"
           else
-            npm publish --access public --tag ${{ env.PRERELEASE_TAG }} --dry-run
-            npm publish --access public --tag ${{ env.PRERELEASE_TAG }}
-            echo "::notice title=Published ${{ github.ref_name }} to @${{ github.repository }}@${{ env.PRERELEASE_TAG }}::This is a pre-release published to the '${{ env.PRERELEASE_TAG }}' npm tag"
+            npm publish --access public --tag next-${{ env.PRERELEASE_TAG }} --dry-run
+            npm publish --access public --tag next-${{ env.PRERELEASE_TAG }}
+            echo "::notice title=Published ${{ github.ref_name }} to @${{ github.repository }}@${{ env.PRERELEASE_TAG }}::This is a pre-release published to the 'next-${{ env.PRERELEASE_TAG }}' npm tag"
           fi
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_DEPLOY_TOKEN}}
