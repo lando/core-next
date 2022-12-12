@@ -1,5 +1,4 @@
 import {defineUserConfig} from '@vuepress/cli';
-import {viteBundler} from '@vuepress/bundler-vite';
 import {defaultThemePlus} from '@lando/vuepress-theme-default-plus';
 
 export default defineUserConfig({
