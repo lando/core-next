@@ -7,15 +7,6 @@ export default defineUserConfig({
   title: 'Lando 4',
   description: 'Lando 4 Config Docs.',
   base: '/core/v4/',
-  bundler: viteBundler({
-    viteOptions: {
-      server: {
-        fs: {
-          strict: false,
-        },
-      },
-    },
-  }),
   head: [
     ['meta', {name: 'viewport', content: 'width=device-width, initial-scale=1'}],
     ['link', {rel: 'icon', href: '/config/favicon.ico', size: 'any'}],
@@ -29,7 +20,7 @@ export default defineUserConfig({
     logo: '/images/icon.svg',
     docsDir: 'docs',
     docsBranch: 'main',
-    repo: 'lando/core',
+    repo: 'lando/core-next',
     sidebarHeader: {
       enabled: true,
       title: 'Core',
