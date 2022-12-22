@@ -14,7 +14,7 @@
   "engines": {
     "node": ">=16.0.0"
   },
-  "main": "legacy/lando.js",
+  "main": "legacy/lib/lando.js",
   "nyc": {
     "include": [
       "lib/**/*.js",
