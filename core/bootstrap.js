@@ -1,6 +1,8 @@
 const path = require('path');
+const groupBy = require('lodash/groupBy');
 const Config = require('./config');
 const Plugin = require('./plugin');
+
 
 class Bootstrapper {
   static findApp(files, startFrom) {
@@ -29,7 +31,7 @@ class Bootstrapper {
     // the global config
     this.config = new Config(options);
     // debugger
-    this.debug = require('debug')(`${this.id}:@lando/core:bootstrap`);
+    this.debug = require('debug')(`${this.id}:@lando/core:${this.id}`);
     // just save the options
     this.options = options;
     // a registry of loaded component classes
@@ -105,15 +107,26 @@ class Bootstrapper {
   getPlugins(options = {}) {
     // if we've already done this then return the result
     if (this.#plugins) return this.#plugins;
+
     // if we get here then we need to do plugin discovery
     this.debug('running %o plugin discovery...', this.id);
 
+    // define "internals" so we can force it into the source list
+    const internalPluginDir = {
+      type: 'core',
+      dir: path.join(__dirname, '..', 'plugins'),
+      depth: 2,
+    };
+    const configPluginDirs = this.config.getUncoded('plugin.dirs');
+
+    // munge all dirs together and translate into an object
+    const dirs = Object.entries({internal: internalPluginDir, ...configPluginDirs}).map(([name, value]) => ({...value, name}));
+    // group into sources
+    const sources = Object.entries(groupBy(dirs, 'type')).map(([store, dirs]) => ({store, dirs}));
+
     // do the discovery
     const {plugins, invalids} = require('../utils/get-plugins')(
-      [
-        {store: 'global', dirs: this.config.get('plugin.global-plugin-dirs')},
-        {store: 'core', plugins: this.#corePlugins},
-      ],
+      sources,
       this.Plugin,
       {channel: this.config.get('core.release-channel'), ...options, type: 'global'},
     );
@@ -173,14 +186,12 @@ class Bootstrapper {
   async run(config = {}) {
     // get an id
     config.id = this.config.get('core.id') || this.config.get('core.id') || config.bin || path.basename(process.argv[1]);
-
     // reconcile debug flag
     config.debug = this.config.get('core.debug') || config.debug || false;
     // enable debugging if the config is set
     // @NOTE: this is only for core.debug=true set via the configfile, the --debug turns debugging on before this
     // @TODO: right now you cannot pass in --debug = string and you should be able to
     if (config.debug) require('debug').enable(config.debug === true || config.debug === 1 ? '*' : config.debug);
-
     // @TODO: this has to be config.id because it will vary based on what is using the bootstrap eg lando/hyperdrive
     config[config.id] = this;
   }

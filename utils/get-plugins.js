@@ -15,10 +15,13 @@ module.exports = (sources = [], Plugin = DefaultPlugin, options = {}) => {
 
     // if we have directories to scan then scan them
     if (source.dirs && Array.isArray(source.dirs)) {
-      source.plugins = [...source.plugins, ...source.dirs
-      .map(dir => findPlugins(dir.dir, dir.depth))
-      .flat(Number.POSITIVE_INFINITY)
-      .map(dir => new Plugin(dir, {type: source.store, ...options}))];
+      source.plugins = [
+        ...source.plugins,
+        ...source.dirs
+          .map(dir => findPlugins(dir.dir, dir.depth))
+          .flat(Number.POSITIVE_INFINITY)
+          .map(dir => new Plugin(dir, {type: source.store, version: dir.version, ...options})),
+        ];
     }
 
     // then separate out valid and invalid plugins
@@ -29,7 +32,7 @@ module.exports = (sources = [], Plugin = DefaultPlugin, options = {}) => {
   }
 
   // stuff
-  const debug = require('debug')(`${Plugin.id}:@lando/utils:get-plugins`);
+  const debug = require('debug')(`${Plugin.id}:@lando/core:utils:get-plugins`);
   const plugins = new Config({env: false});
   const invalids = new Config({env: false});
 

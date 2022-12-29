@@ -124,6 +124,7 @@ class Plugin {
     id = Plugin.id || 'lando',
     installer = Plugin.installer,
     type = 'app',
+    version = undefined,
   } = {}) {
     // core props
     this.root = location;
@@ -144,6 +145,18 @@ class Plugin {
     this.package = this.pjson.name;
     this.updateAvailable = undefined;
     this.version = this.pjson.version;
+
+    // if we dont have a version at this point lets traverse up and see if we can find a parent
+    if (!this.version) {
+      // get the list of potential parents
+      const ppsjons = require('../utils/traverse-up')(['package.json'], path.resolve(this.root, '..'));
+      // remove the root
+      ppsjons.pop();
+      // paternity test
+      const pjsons = ppsjons.filter(pjson => fs.existsSync(pjson));
+      // if we have parents then use the closest
+      if (pjsons.length > 0) this.version = require(pjsons[0]).version;
+    }
 
     // add some computed properties
     // @TODO: this.attached? this.detached?

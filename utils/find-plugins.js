@@ -13,7 +13,7 @@ module.exports = (dir, depth = 1) => {
   if (!fs.existsSync(dir)) return [];
 
   // list of files that indicate we have a plugin
-  const pConfigFiles = ['plugin.js', 'plugin.yml', 'package.json'];
+  const pConfigFiles = ['plugin.js', 'plugin.yaml', 'plugin.yml', 'package.json'];
   // rescurse through dirs until we are good
   return readdirSyncAbsDir(dir)
   .map(dir => {
