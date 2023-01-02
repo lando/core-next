@@ -1,11 +1,11 @@
 'use strict';
 
-module.exports = lando => {
+module.exports = (lando, cli) => {
   return {
     command: 'share',
     describe: 'Shares your local site publicly',
     run: options => {
-      console.log(lando.cli.makeArt('shareWait'));
+      console.log(cli.makeArt('shareWait'));
       /*
       if (u.parse(options.url).hostname !== 'localhost' || u.parse(options.url).protocol !== 'http:') {
         throw new Error('Need a url of the form http://localhost:port!');

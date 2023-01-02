@@ -3,6 +3,7 @@ const debug = require('debug')('static@lando/core:plugin');
 const fs = require('fs-extra');
 const has = require('lodash/has');
 const makeError = require('../utils/make-error');
+const merge = require('lodash/merge');
 const os = require('os');
 const path = require('path');
 const parsePkgName = require('../utils/parse-package-name');
@@ -121,6 +122,7 @@ class Plugin {
    */
   constructor(location, {
     channel = 'stable',
+    config = {},
     id = Plugin.id || 'lando',
     installer = Plugin.installer,
     type = 'app',
@@ -138,13 +140,21 @@ class Plugin {
     // set top level things
     this.location = this.root;
     this.pjson = require(path.join(this.root, 'package.json'));
-    this.config = {...this.pjson.lando, ...this.#load()};
-    this.name = this.config.name || this.pjson.name;
+
+    // get the manifest
+    this.manifest = {...this.pjson.lando, ...this.#load(config)};
+
+    // set some key props
+    this.name = this.manifest.name || this.pjson.name;
     this.nm = path.join(this.root, 'node_modules');
     this.debug = require('debug')(`${id}:@lando/core:plugin:${this.name}`);
     this.package = this.pjson.name;
     this.updateAvailable = undefined;
     this.version = this.pjson.version;
+
+    // extract the plugin config from teh manifest and merge in any user injected config
+    this.cspace = this.manifest.cspace || this.name;
+    this.config = merge({}, this.manifest.config, config[this.cspace]);
 
     // if we dont have a version at this point lets traverse up and see if we can find a parent
     if (!this.version) {
@@ -162,7 +172,7 @@ class Plugin {
     // @TODO: this.attached? this.detached?
     this.isInstalled = false;
     this.isValid = false ||
-      Object.keys(this.config).length > 0 ||
+      Object.keys(this.manifest).length > 0 ||
       has(this.pjson, 'lando') ||
       (this.pjson.keywords && this.pjson.keywords.includes('lando-plugin'));
 
@@ -189,14 +199,13 @@ class Plugin {
   // @NOTE: this will differ from "init" which should require in all needed files?
   // @TODO: we might want to replace this with Config?
   // @TODO: how will plugin config merge with the global/app config?
-  #load() {
-    const {root, options} = this;
+  #load(config) {
     // return the plugin.js return first
-    if (fs.existsSync(path.join(root, 'plugin.js'))) return require(path.join(root, 'plugin.js'))(options);
+    if (fs.existsSync(path.join(this.root, 'plugin.js'))) return require(path.join(this.root, 'plugin.js'))(config);
     // otherwise return the plugin.yaml content
-    if (fs.existsSync(path.join(root, 'plugin.yaml'))) return yaml.parse(fs.readFileSync(path.join(root, 'plugin.yaml'), 'utf8'));
+    if (fs.existsSync(path.join(this.root, 'plugin.yaml'))) return yaml.parse(fs.readFileSync(path.join(this.root, 'plugin.yaml'), 'utf8'));
     // otherwise return the plugin.yml content
-    if (fs.existsSync(path.join(root, 'plugin.yml'))) return yaml.parse(fs.readFileSync(path.join(root, 'plugin.yml'), 'utf8'));
+    if (fs.existsSync(path.join(this.root, 'plugin.yml'))) return yaml.parse(fs.readFileSync(path.join(this.root, 'plugin.yml'), 'utf8'));
     // otherwise return uh, nothing?
     return {};
   }

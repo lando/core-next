@@ -20,7 +20,7 @@ module.exports = (sources = [], Plugin = DefaultPlugin, options = {}) => {
         ...source.dirs
           .map(dir => findPlugins(dir.dir, dir.depth))
           .flat(Number.POSITIVE_INFINITY)
-          .map(dir => new Plugin(dir, {type: source.store, version: dir.version, ...options})),
+          .map(dir => new Plugin(dir, {type: source.store, ...options})),
         ];
     }
 

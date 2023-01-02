@@ -3,9 +3,12 @@ const fs = require('fs');
 /*
  * TBD
  */
-module.exports = (component, config, registry = {}, {cache = true, configDefaults} = {}) => {
+module.exports = (component, config, registry = {}, {cache = undefined, configDefaults} = {}) => {
   // save the orignal component before it is mutated
   const originalComponent = component;
+  // determine whether we should cache or not
+  // @TODO: do we need a stronger check?
+  const shouldCache = typeof cache === 'object';
 
   // throw error if config is not a Config class
   if (!config.constructor || config.constructor.name !== 'Config') {
@@ -15,7 +18,7 @@ module.exports = (component, config, registry = {}, {cache = true, configDefault
   // setup debugger
   // @TODO figure app namespace out?
   const id = config.get('system.id') || 'lando';
-  const debug = require('debug')(`${id}:@lando/utils:get-class`);
+  const debug = require('debug')(`${id}:@lando/core:utils:get-class`);
 
   // first provide some nice handling around "core" components
   // this lets you do stuff like getClass('core.engine') and get whatever that is set to
@@ -24,18 +27,19 @@ module.exports = (component, config, registry = {}, {cache = true, configDefault
   }
 
   // if class is already loaded in registry and cache is true then just return the class
-  if (registry[component] && cache) {
+  if (shouldCache && cache[component]) {
     debug('getting %o from component registry', component);
-    return registry[component];
+    return cache[component];
   }
 
   // if there is no component or it does not exist then throw an error
-  if (!config.get(`registry.${component}`) || !fs.existsSync(config.get(`registry.${component}`) + '.js')) {
+  // @TODO: what if component already is a JS file?
+  if (!registry.get(component) || !fs.existsSync(`${registry.get(path.basename(component, '.js'))}`.js)) {
     throw new Error(`could not find component ${originalComponent} (${component})`);
   }
 
   // otherwise try to load the component from the config
-  const loader = require(config.get(`registry.${component}`));
+  const loader = require(registry.get(component));
   const isDynamic = loader.extends && typeof loader.getClass === 'function';
 
   // if component is "dynamically extended" then get its parent and run its getClass function
@@ -59,9 +63,9 @@ module.exports = (component, config, registry = {}, {cache = true, configDefault
   };
 
   // and set in cache if applicable
-  if (cache) {
+  if (shouldCache) {
     debug('adding component %o into %o registry', component, id);
-    registry[component] = Component;
+    cache[component] = Component;
   }
 
   // and return

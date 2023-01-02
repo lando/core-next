@@ -1,12 +1,12 @@
 'use strict';
 
-module.exports = lando => {
+module.exports = (lando, cli) => {
   return {
     command: 'poweroff',
     level: 'engine',
     describe: 'Spins down all lando related containers',
     run: () => {
-      console.log(lando.cli.makeArt('poweroff', {phase: 'pre'}));
+      console.log(cli.makeArt('poweroff', {phase: 'pre'}));
       // Get all our containers
       return lando.engine.list()
       // SHUT IT ALL DOWN
@@ -16,7 +16,7 @@ module.exports = lando => {
       // Emit poweroff
       .then(() => lando.events.emit('poweroff'))
       // Finish up
-      .then(() => console.log(lando.cli.makeArt('poweroff', {phase: 'post'})));
+      .then(() => console.log(cli.makeArt('poweroff', {phase: 'post'})));
     },
   };
 };

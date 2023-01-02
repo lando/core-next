@@ -24,6 +24,12 @@ class Config extends nconf.Provider {
     return require('../utils/get-object-keys')(data, {prefix, expandArrays});
   }
 
+  static wrap(data, options = {}) {
+    const config = new Config(options);
+    config.add('data', {type: 'literal', store: data});
+    return config;
+  }
+
   constructor(options = {}) {
     // get parent stuff
     super();
@@ -76,7 +82,7 @@ class Config extends nconf.Provider {
   // basically do what you have to do to make sure run() will complete succesfully
   // @TODO: reduce complexity?
   #init(options) {
-    this.debug('initializing config');
+    this.debug('initializing config %o', options.id);
     const cached = options.cached || false;
     const env = options.env || this.id.toUpperCase();
     const sources = options.sources || {};
@@ -158,11 +164,7 @@ class Config extends nconf.Provider {
     }
 
     // dump the result to file
-    if (cached) {
-      fs.mkdirSync(path.dirname(cached), {recursive: true});
-      this.#writeFile(this.get(), cached);
-      this.debug('dumped compiled and cached config file to %o', cached);
-    }
+    if (cached) this.dumpCache();
 
     // The YAML spec returns null for an empty yaml document but for merging purposes we want this to be an empty
     // object so lets transform that here
@@ -222,6 +224,12 @@ class Config extends nconf.Provider {
   // this.#decode
   decode(data) {
     return require('camelcase-keys')(data, {deep: true});
+  }
+
+  dumpCache() {
+    fs.mkdirSync(path.dirname(this.options.cached), {recursive: true});
+    this.#writeFile(this.getUncoded(), this.options.cached);
+    this.debug('dumped compiled and cached config file to %o', this.options.cached);
   }
 
   // this.#encode
@@ -293,6 +301,8 @@ class Config extends nconf.Provider {
     // finally debug and reset
     this.debug('removed %o from %o', path, dest);
     this.reset();
+    // dump cache if that makes sense
+    if (this.options.cached) this.dumpCache();
   }
 
   // overriden save method
@@ -337,6 +347,8 @@ class Config extends nconf.Provider {
     // finally debug and reset
     this.debug('saved %o to %o', data, dest);
     this.reset();
+    // dump cache if that makes sense
+    if (this.options.cached) this.dumpCache();
   }
 }
 

@@ -7,10 +7,10 @@ const filterServices = (service, services = []) => {
   return !_.isEmpty(services) ? _.includes(services, service) : true;
 };
 
-module.exports = lando => ({
+module.exports = (lando, cli) => ({
   command: 'info',
   describe: 'Prints info about your app',
-  options: _.merge({}, lando.cli.formatOptions(), {
+  options: _.merge({}, cli.formatOptions(), {
     deep: {
       describe: 'Get ALL the info',
       alias: ['d'],
@@ -33,10 +33,10 @@ module.exports = lando => ({
       return app.init().then(() => lando.engine.list({project: app.project})
         .filter(container => filterServices(container.service, options.service))
         .each(container => lando.engine.scan(container)
-          .then(data => console.log(lando.cli.formatData(data, options)))),
+          .then(data => console.log(cli.formatData(data, options)))),
         );
     } else if (app && !options.deep) {
-      return app.init().then(() => console.log(lando.cli.formatData(
+      return app.init().then(() => console.log(cli.formatData(
         _.filter(app.info, service => filterServices(service.service, options.service)),
         options,
       )));

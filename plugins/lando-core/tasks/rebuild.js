@@ -3,7 +3,7 @@
 const _ = require('lodash');
 const utils = require('./../lib/utils');
 
-module.exports = lando => {
+module.exports = (lando, cli) => {
   return {
     command: 'rebuild',
     describe: 'Rebuilds your app from scratch, preserving data',
@@ -13,11 +13,11 @@ module.exports = lando => {
         alias: ['s'],
         array: true,
       },
-      yes: lando.cli.confirm('Are you sure you want to rebuild?'),
+      yes: cli.confirm('Are you sure you want to rebuild?'),
     },
     run: options => {
       if (!options.yes) {
-        console.log(lando.cli.makeArt('appRebuild', {phase: 'abort'}));
+        console.log(cli.makeArt('appRebuild', {phase: 'abort'}));
         return;
       }
       // Try to get our app
@@ -28,11 +28,11 @@ module.exports = lando => {
         if (!_.isEmpty(options.service)) {
           app.opts = _.merge({}, app.opts, {services: options.service});
         }
-        console.log(lando.cli.makeArt('appRebuild', {name: app.name, phase: 'pre'}));
+        console.log(cli.makeArt('appRebuild', {name: app.name, phase: 'pre'}));
         return app.rebuild().then(() => {
           const type = !_.isEmpty(app.warnings) ? 'report' : 'post';
-          console.log(lando.cli.makeArt('appRebuild', {name: app.name, phase: type, warnings: app.warnings}));
-          console.log(lando.cli.formatData(utils.startTable(app), {format: 'table'}, {border: false}));
+          console.log(cli.makeArt('appRebuild', {name: app.name, phase: type, warnings: app.warnings}));
+          console.log(cli.formatData(utils.startTable(app), {format: 'table'}, {border: false}));
           console.log('');
         });
       }

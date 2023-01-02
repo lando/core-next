@@ -2,11 +2,11 @@
 
 const _ = require('lodash');
 
-module.exports = lando => ({
+module.exports = (lando, cli) => ({
   command: 'config',
   level: 'tasks',
   describe: 'Displays the lando configuration',
-  options: _.merge({}, lando.cli.formatOptions(['filter']), {
+  options: _.merge({}, cli.formatOptions(['filter']), {
     // @NOTE: This is for backwards compat and needs to be removed
     field: {
       describe: 'Show only a specific field',
@@ -16,6 +16,6 @@ module.exports = lando => ({
   }),
   run: options => {
     if (!_.isNil(options.field)) options.path = options.field;
-    console.log(lando.cli.formatData(lando.config, options, {sort: true}));
+    console.log(cli.formatData(lando.config, options, {sort: true}));
   },
 });

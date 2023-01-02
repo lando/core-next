@@ -35,7 +35,6 @@ class MinApp {
   #landofileExt
 
   // plugin stuff
-  #corePlugins;
   #invalidPlugins;
   #plugins;
 
@@ -200,7 +199,6 @@ class MinApp {
       [
         {store: 'app', plugins: localAppPlugins, dirs: [{dir: this.pluginsDir, depth: 2}]},
         {store: 'global', dirs: this.config.get('plugin.global-plugin-dirs')},
-        {store: 'core', plugins: this.#corePlugins},
       ],
       this.Plugin,
       {channel: this.config.get('core.release-channel'), ...options},
@@ -237,11 +235,6 @@ class MinApp {
     this.#invalidPlugins = undefined;
     // return the plugin
     return plugin;
-  }
-
-  // helper to set internal corePlugins prop
-  setCorePlugins(plugins) {
-    this.#corePlugins = plugins;
   }
 }
 

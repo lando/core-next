@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 
-module.exports = lando => ({
+module.exports = cli => ({
   command: 'logs',
   describe: 'Displays logs for your app',
   options: {

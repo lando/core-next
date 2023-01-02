@@ -1,8 +1,8 @@
+const fs = require('fs');
 const path = require('path');
 const groupBy = require('lodash/groupBy');
 const Config = require('./config');
 const Plugin = require('./plugin');
-
 
 class Bootstrapper {
   static findApp(files, startFrom) {
@@ -17,15 +17,12 @@ class Bootstrapper {
     return require('../utils/normalize-plugins')(plugins, by);
   }
 
-  #corePlugins;
   #invalidPlugins;
   #plugins;
+  #registry;
+  #tasks;
 
   constructor(options = {}) {
-    // @NOTE: _plugins is a "faux" internal property meant to hold a list of detected potential plugins
-    // use getPlugins() to return a list of resolved and instantiated plugins
-    this._plugins = new Config({env: false});
-
     // the id
     this.id = options.id || 'lando';
     // the global config
@@ -34,19 +31,31 @@ class Bootstrapper {
     this.debug = require('debug')(`${this.id}:@lando/core:${this.id}`);
     // just save the options
     this.options = options;
-    // a registry of loaded component classes
+    // a cache of loaded component classes
     this.registry = options.registry || {};
 
-    // add some helper classes
+    // add some helpful things
     Config.id = this.id;
     Plugin.id = this.id;
+
+    // add some helper classes
     this.Bootstrapper = Bootstrapper;
     this.Config = Config;
     this.Plugin = Plugin;
+
+    // some "important" caches
+    this.pluginsCache = path.join(this.config.get('system.cache-dir'), 'plugins.json');
+    this.registryCache = path.join(this.config.get('system.cache-dir'), 'registry.json');
+
+    // @TODO: eventually optimize the below, init method?
+    this.#plugins = this.getPlugins();
+    this.#registry = this.getRegistry(this.#plugins);
   }
 
   // @TODO: the point of this is to have a high level way to "fetch" a certain kind of plugin eg global and
   // have it return a fully armed and operational instantiated plugin eg has the installer
+  // @TODO: plugin.global-install-dir is not a thing anymore?
+  // @TODO: would be cool for different "types"
   async addPlugin(name, dest = this.config.get('plugin.global-install-dir')) {
     // attempt to add the plugin
     const plugin = await this.Plugin.fetch(name, dest, {
@@ -75,22 +84,25 @@ class Bootstrapper {
   }
 
   // helper to get a class
-  getClass(component, {cache = true, defaults} = {}) {
-    return require('../utils/get-class')(
-      component,
-      this.config,
-      this.registry,
-      {cache, defaults},
-    );
+  getClass(component, {cache = this.registry, defaults} = {}) {
+    // configigy the registry
+    const registry = new Config({env: false});
+    registry.add('all', {type: 'literal', store: this.getRegistry()});
+    // get the class
+    return require('../utils/get-class')(component, this.config, registry, {cache, defaults});
   }
 
   // helper to get a component (and config?) from the registry
   async getComponent(component, constructor = {}, opts = {}) {
+    // configigy the registry
+    const registry = new Config({env: false});
+    registry.add('all', {type: 'literal', store: this.getRegistry()});
+    // get the component
     return require('../utils/get-component')(
       component,
       constructor,
       this.config,
-      {cache: opts.cache, defaults: opts.defaults, init: opts.init, registry: this.registry},
+      {cache: opts.cache, defaults: opts.defaults, init: opts.init, registry},
     );
   }
 
@@ -102,11 +114,15 @@ class Bootstrapper {
   }
 
   // helper to return resolved and instantiated plugins eg this should be the list a given context needs
-  // @TODO: we probably will also need dirs for core plugins for lando
   // @TODO: we probably will also need a section for "team" plugins
   getPlugins(options = {}) {
+    // if no plugins but a cache then set plugins
+    if (!this.#plugins && fs.existsSync(this.pluginsCache)) this.#plugins = require(this.pluginsCache);
     // if we've already done this then return the result
-    if (this.#plugins) return this.#plugins;
+    if (this.#plugins) {
+      this.debug('grabbed %o %o plugins from cache', Object.keys(this.#plugins).length, this.id);
+      return this.#plugins;
+    }
 
     // if we get here then we need to do plugin discovery
     this.debug('running %o plugin discovery...', this.id);
@@ -128,14 +144,64 @@ class Bootstrapper {
     const {plugins, invalids} = require('../utils/get-plugins')(
       sources,
       this.Plugin,
-      {channel: this.config.get('core.release-channel'), ...options, type: 'global'},
+      {channel: this.config.get('core.release-channel'), ...options, config: this.config.get(), type: 'global'},
     );
 
     // set things
     this.#plugins = plugins;
     this.#invalidPlugins = invalids;
+    // dump
+    const pluginCache = Config.wrap(this.#plugins, {env: false, cached: this.pluginsCache});
+    pluginCache.dumpCache();
     // return
     return this.#plugins;
+  }
+
+  getRegistry(plugins = this.getPlugins()) {
+    // if no plugins but a cache then set plugins
+    if (!this.#registry && fs.existsSync(this.registryCache)) this.#registry = require(this.registryCache);
+    // if we've already done this then return the result
+    if (this.#registry) {
+      this.debug('grabbed %o %o components from cache', this.Config.keys(this.#registry).length, this.id);
+      return this.#registry;
+    }
+
+    // if we get here then we need to do registry discovery
+    this.debug('running %o registry discovery...', this.id);
+    // spin up a config instance to help us merge it all together
+    const registry = new Config({env: false, cached: path.join(this.config.get('system.cache-dir'), 'registry.json')});
+
+    // start by going through the config and adding in each store as we normalize plugins, the order here is important
+    for (const [name, store] of Object.entries(this.config.stores)) {
+      // if a file store then we need to normalize the registry
+      if (store.type === 'file') {
+        registry.add(name, {
+          type: 'literal',
+          store: require('../utils/normalize-registry-paths')(store.get('registry'), path.dirname(store.file)),
+        });
+      // otherwise just add it as is
+      } else if (store.type !== 'env') {
+        registry.add(name, {type: 'literal', store: store.get('registry')});
+      }
+    }
+
+    // then go through all the plugins and do the same, the order here is not important
+    for (const [name, plugin] of Object.entries(plugins)) {
+      registry.add(name, {
+        type: 'literal',
+        store: require('../utils/normalize-registry-paths')(plugin.manifest.registry, plugin.location),
+      });
+    }
+
+    // @TODO: merge in any "default" components
+    // @NOTE: maybe when we make @lando/core-next also a plugin that gets loaded first we dont need ^
+
+    // dump
+    registry.dumpCache();
+    // set
+    this.#registry = registry.getUncoded();
+    // return
+    return this.#registry;
   }
 
   // helper to remove a plugin
@@ -155,11 +221,6 @@ class Bootstrapper {
     this.#invalidPlugins = undefined;
     // return the plugin
     return plugin;
-  }
-
-  // helper to set internal corePlugins prop
-  setCorePlugins(plugins) {
-    this.#corePlugins = plugins;
   }
 
   // return some system status information

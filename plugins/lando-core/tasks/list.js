@@ -3,12 +3,12 @@
 // Modules
 const _ = require('lodash');
 
-module.exports = lando => {
+module.exports = (lando, cli) => {
   return {
     command: 'list',
     describe: 'Lists all running lando apps and containers',
     level: 'engine',
-    options: _.merge({}, lando.cli.formatOptions(), {
+    options: _.merge({}, cli.formatOptions(), {
       all: {
         describe: 'Show all containers, even those not running',
         alias: ['a'],
@@ -23,7 +23,7 @@ module.exports = lando => {
       // List all the apps
       return lando.engine.list(options)
       // Map each app to a summary and print results
-      .then(containers => console.log(lando.cli.formatData(
+      .then(containers => console.log(cli.formatData(
         _(containers)
           .map(container => _.omit(container, ['lando', 'id', 'instance']))
           .value(),

@@ -105,9 +105,9 @@ class DockerDesktop extends DockerEngine {
   getInstalled() {
     const binPath = this.binPath();
     switch (process.platform) {
-    case 'darwin': return fs.existsSync(binPath);
-    case 'linux': return fs.existsSync(binPath);
-    case 'win32': return fs.existsSync(binPath);
+      case 'darwin': return fs.existsSync(binPath);
+      case 'linux': return fs.existsSync(binPath);
+      case 'win32': return fs.existsSync(binPath);
     }
   }
 

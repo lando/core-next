@@ -7,10 +7,10 @@ const opts = require('./../lib/options');
 const path = require('path');
 
 // Helper for init display
-const showInit = (lando, options) => {
-  console.log(lando.cli.makeArt('init'));
+const showInit = (lando, cli, options) => {
+  console.log(cli.makeArt('init'));
   // Print the table
-  console.log(lando.cli.formatData({
+  console.log(cli.formatData({
     name: options.name,
     location: options.destination,
     recipe: options.recipe,
@@ -42,7 +42,7 @@ const runBuild = (lando, options = {}, steps = []) => lando.Promise.each(steps, 
   };
 });
 
-module.exports = lando => {
+module.exports = (lando, cli) => {
   // Stuffz we need
   const inits = lando.config.inits;
   const sources = lando.config.sources;
@@ -93,7 +93,7 @@ module.exports = lando => {
         // Merge and dump the config file
         lando.yaml.dump(dest, _.merge(landoFile, config));
         // Show it
-        showInit(lando, options);
+        showInit(lando, cli, options);
       })
 
       // Post init event
