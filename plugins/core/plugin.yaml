@@ -1,9 +1,4 @@
 name: "@lando/core"
-
-cspace: 'pirog'
-# config:
-#   setting: 1
-
 registry:
   legacy:
     tasks:
