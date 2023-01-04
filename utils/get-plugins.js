@@ -1,3 +1,4 @@
+const debug = require('debug')('@lando/core:utils:get-plugins');
 const findPlugins = require('./find-plugins');
 const normalizePlugins = require('./normalize-plugins');
 
@@ -32,9 +33,8 @@ module.exports = (sources = [], Plugin = DefaultPlugin, options = {}) => {
   }
 
   // stuff
-  const debug = require('debug')(`${Plugin.id}:@lando/core:utils:get-plugins`);
-  const plugins = new Config({env: false});
-  const invalids = new Config({env: false});
+  const plugins = new Config({env: false, id: 'valid-plugins'});
+  const invalids = new Config({env: false, id: 'invalid-plugins'});
 
   // do the priority resolution
   for (const source of sources) {

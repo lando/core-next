@@ -1,6 +1,6 @@
 name: "@lando/recipes"
-registry:
-  legacy:
-    tasks:
-      init: './tasks/init'
+# registry:
+#   legacy:
+#     tasks:
+#       init: './tasks/init'
 

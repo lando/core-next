@@ -65,13 +65,13 @@ class FileStorage extends NodeCache {
 
     // Try to set cache
     if (this.__set(key, data, ttl)) {
-      this.debug('Cached %j with key %o for %o', data, key, {persist, ttl});
+      this.debug('cached %j with key %o at %o', data, key, path.join(this.dir, key));
     } else {
-      this.debug('Failed to cache %o with key %o', data, key);
+      this.debug('failed to cache %o with key %o', data, key);
     }
 
     // And add to file if we have persistence
-    if (persist) jsonfile.writeFileSync(path.join(this.cacheDir, key), data);
+    if (persist) jsonfile.writeFileSync(path.join(this.dir, key), data);
   };
 
   /**
@@ -91,14 +91,14 @@ class FileStorage extends NodeCache {
 
     // Return result if its in memcache
     if (memResult) {
-      this.debug('Retrieved from memcache with key %o', key);
+      this.debug('retrieved from memcache with key %o', key);
       return memResult;
     } else {
       try {
-        this.debug('Trying to retrieve from file cache with key %o', key);
-        return jsonfile.readFileSync(path.join(this.cacheDir, key));
+        this.debug('trying to retrieve from file cache with key %o', key);
+        return jsonfile.readFileSync(path.join(this.dir, key));
       } catch (e) {
-        this.debug('File cache miss with key %o', key);
+        this.debug('file cache miss with key %o', key);
       }
     }
   };
@@ -114,15 +114,15 @@ class FileStorage extends NodeCache {
    * lando.cache.remove('mykey');
    */
   remove(key) {
-    // Try to get cache
-    if (this.__del(key)) this.debug('Removed key %o from memcache.', key);
-    else this.debug('Failed to remove key %o from memcache.', key);
+    // Remove from memcace
+    this.__del(key);
 
     // Also remove file if applicable
     try {
-      fs.unlinkSync(path.join(this.cacheDir, key));
+      this.debug('removed key %o from memory and file cache', key);
+      fs.unlinkSync(path.join(this.dir, key));
     } catch (e) {
-      this.debug('No file cache with key %o', key);
+      this.debug('no file cache with key %o', key);
     }
   };
 };

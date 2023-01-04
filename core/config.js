@@ -25,7 +25,7 @@ class Config extends nconf.Provider {
   }
 
   static wrap(data, options = {}) {
-    const config = new Config(options);
+    const config = new Config(merge({}, {env: false, id: 'wrapped'}, options));
     config.add('data', {type: 'literal', store: data});
     return config;
   }
