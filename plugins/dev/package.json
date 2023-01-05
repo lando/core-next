@@ -1,0 +1,4 @@
+{
+  "name": "@lando/dev",
+  "description": "An optional core plugin to help with Lando development"
+}
