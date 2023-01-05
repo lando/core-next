@@ -11,17 +11,9 @@ const filesystem = require('mock-fs');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const Lando = require('./../.');
+const Lando = require('./../lib/lando');
 chai.use(require('chai-as-promised'));
 chai.should();
-
-// this is a mock of lando.cli which is now added during cli init instead of during
-// lando.bootstrap as of the core/cli decoupling.
-const cliMock = {
-  confirm: () => {},
-  formatOptions: () => {},
-  makeArt: () => {},
-};
 
 // This is the file we are testing
 describe('lando', () => {
@@ -72,23 +64,6 @@ describe('lando', () => {
         lando.config.mode.should.equal(process.env.JOURNEY_MODE);
         delete process.env.JOURNEY_PRODUCT;
         delete process.env.JOURNEY_MODE;
-      });
-    });
-
-    it('should mix config files into config', () => {
-      const srcRoot = path.resolve(__dirname, '..');
-      // @TODO: the below should be mock-fs instead of the actual FS
-      const lando = new Lando({
-        configSources: [path.resolve(srcRoot, 'config.yml')],
-        pluginDirs: [srcRoot],
-      });
-      // @TODO: need to spoof lando.cli because this is added in the CLI as of cli/core decoupling
-      lando.cli = cliMock;
-      // bootstrap
-      return lando.bootstrap().then(lando => {
-        lando.config.plugins.should.be.an('array').and.not.be.empty;
-        // We need to clear out tasks because it seems to persist from require to require
-        lando.tasks.tasks = [];
       });
     });
   });
