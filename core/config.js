@@ -140,6 +140,7 @@ class Config extends nconf.Provider {
         transform: obj => {
           if (obj.key.startsWith(rootKey.toLowerCase())) {
             obj.key = obj.key.replace(rootKey.toLowerCase(), '');
+            obj.key = obj.key.replace(new RegExp(`${separator}${separator}`, 'g'), '-');
             obj.key = obj.key.replace(new RegExp(separator, 'g'), '.');
             return obj;
           }
