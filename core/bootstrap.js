@@ -143,15 +143,27 @@ class Bootstrapper {
     this.debug('running %o plugin discovery...', this.id);
 
     // define "internals" so we can force it into the source list
-    const internalPluginDir = {
-      type: 'core',
-      dir: path.join(__dirname, '..', 'plugins'),
-      depth: 2,
+    const internalPluginDirs = {
+      internalCore: {
+        type: 'core',
+        dir: path.join(__dirname, '..'),
+        depth: 0,
+      },
+      internalContrib: {
+        type: 'core',
+        dir: path.join(__dirname, '..', 'plugins'),
+        depth: 2,
+      },
+      // internalExternal: {
+      //   type: 'core',
+      //   dir: path.join(__dirname, '..', 'node_modules', '@lando'),
+      //   depth: 2,
+      // },
     };
     const configPluginDirs = this.config.getUncoded('plugin.dirs');
 
     // munge all dirs together and translate into an object
-    const dirs = Object.entries({internal: internalPluginDir, ...configPluginDirs}).map(([name, value]) => ({...value, name}));
+    const dirs = Object.entries({...internalPluginDirs, ...configPluginDirs}).map(([name, value]) => ({...value, name}));
     // group into sources
     const sources = Object.entries(groupBy(dirs, 'type')).map(([store, dirs]) => ({store, dirs}));
 

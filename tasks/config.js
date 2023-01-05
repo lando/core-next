@@ -14,9 +14,9 @@ module.exports = (lando, cli) => ({
       string: true,
     },
   }),
-  run: async (options, {debug}) => {
-    debug('hello');
+  run: async (options, {cli, lando, debug}) => {
     // if (!_.isNil(options.field)) options.path = options.field;
     // console.log(cli.formatData(lando.config, options, {sort: true}));
+    cli.log(lando.config.get());
   },
 });
