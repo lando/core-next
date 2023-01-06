@@ -65,9 +65,9 @@ class FileStorage extends NodeCache {
 
     // Try to set cache
     if (this.__set(key, data, ttl)) {
-      this.debug('cached %j with key %o at %o', data, key, path.join(this.dir, key));
+      this.debug('stored %j with key %o at %o', data, key, path.join(this.dir, key));
     } else {
-      this.debug('failed to cache %o with key %o', data, key);
+      this.debug('failed to store %o with key %o', data, key);
     }
 
     // And add to file if we have persistence
@@ -95,8 +95,9 @@ class FileStorage extends NodeCache {
       return memResult;
     } else {
       try {
-        this.debug('trying to retrieve from file cache with key %o', key);
-        return jsonfile.readFileSync(path.join(this.dir, key));
+        const data = jsonfile.readFileSync(path.join(this.dir, key));
+        this.debug('retrieved data from file cache %o with key %o', this.dir, key);
+        return data;
       } catch (e) {
         this.debug('file cache miss with key %o', key);
       }
@@ -119,10 +120,10 @@ class FileStorage extends NodeCache {
 
     // Also remove file if applicable
     try {
-      this.debug('removed key %o from memory and file cache', key);
+      this.debug('removed key %o from memory and file storage', key);
       fs.unlinkSync(path.join(this.dir, key));
     } catch (e) {
-      this.debug('no file cache with key %o', key);
+      this.debug('no file storage with key %o', key);
     }
   };
 };
