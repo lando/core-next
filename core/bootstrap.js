@@ -18,7 +18,7 @@ class Bootstrapper {
     return require('../utils/normalize-plugins')(plugins, by);
   }
 
-  // an internal and protect caching mechanism
+  // an internal and protected caching mechanism
   #_cache;
 
   // this is designed to specifically remove things from #_cache
@@ -40,6 +40,7 @@ class Bootstrapper {
     // the id
     this.id = options.id || 'lando';
     // the global config
+    // @TODO: mix in defaults to options?
     this.config = new Config(options);
     // debugger
     this.debug = require('debug')(`${this.id}:@lando/core:${this.id}`);
@@ -104,7 +105,7 @@ class Bootstrapper {
   // helper to get a class
   getClass(component, {cache = this.registry, defaults} = {}) {
     // configigy the registry
-    const registry = Config.wrap(this.getRegistry(), {id: 'class-cache', env: false});
+    const registry = Config.wrap(this.getRegistry(), {id: `${this.id}-class-cache`, env: false});
     // get the class
     return require('../utils/get-class')(component, this.config, registry, {cache, defaults});
   }
@@ -112,7 +113,7 @@ class Bootstrapper {
   // helper to get a component (and config?) from the registry
   async getComponent(component, constructor = {}, opts = {}) {
     // configigy the registry
-    const registry = Config.wrap(this.getRegistry(), {id: 'component-cache', env: false});
+    const registry = Config.wrap(this.getRegistry(), {id: `${this.id}-class-cache`, env: false});
     // get the component
     return require('../utils/get-component')(
       component,
@@ -193,9 +194,6 @@ class Bootstrapper {
     this.debug('running %o registry discovery...', this.id);
     // build the registry with config and plugins
     const registry = require('../utils/get-registry')(this.config, plugins);
-
-    // @TODO: merge in any "default" components
-    // @NOTE: maybe when we make @lando/core-next also a plugin that gets loaded first we dont need ^
 
     // set
     this.#_cache.set('registry', registry);

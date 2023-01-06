@@ -1,14 +1,16 @@
 const crypto = require('crypto');
 const fs = require('fs');
 const get = require('lodash/get');
+const groupBy = require('lodash/groupBy');
 const path = require('path');
 const slugify = require('slugify');
 const yaml = require('yaml');
 
 const parsePkgName = require('../utils/parse-package-name');
 
-const Config = require('../core/config');
-const Plugin = require('../core/plugin');
+const Config = require('./config');
+const FileStorage = require('./../components/file-storage');
+const Plugin = require('./plugin');
 
 /**
  * @NOTE: the purpose of the minapp is something we can just new MinApp() without a helper async load/init function
@@ -21,36 +23,33 @@ const Plugin = require('../core/plugin');
  * to use, that needs to be done outside of this but how do we do that? probably in the load app util function?
  */
 class MinApp {
-  static name = 'minapp';
-  static cspace = 'minapp';
-  static config = {};
-  static deps = [
-    'core.engine',
-    'core.plugin-installer',
-  ];
+  // an internal and protected caching mechanism
+  #_landoCache
+  #_cache;
 
   // landofilestuff
   #landofile
   #landofiles
   #landofileExt
 
-  // plugin stuff
-  #invalidPlugins;
-  #plugins;
+  // this is designed to specifically remove things from #_cache
+  #clearInternalCache(keys) {
+    // if cache is a string then make into an array
+    if (typeof keys === 'string') keys = [keys];
+
+    // loop through and remove caches
+    for (const key of keys) {
+      this.#_cache.remove(key);
+    }
+
+    // return keys that have been removed
+    return keys ? keys : 'all';
+  }
 
   /**
    * @TODO: options? channel?
    */
-  constructor({
-    landofile,
-    cacheDir = MinApp.config.cacheDir,
-    config = {},
-    configDir = MinApp.config.configDir,
-    dataDir = MinApp.config.dataDir,
-    instance = MinApp.config.instance,
-    landofiles = MinApp.config.landofiles,
-    product = MinApp.config.product,
-  } = {}) {
+  constructor({landofile, config} = {}) {
     // @TODO: throw error if no landofile or doesnt exist
     // @TODO: if no name then we should throw an error
     // start by loading in the main landofile and getting the name
@@ -61,6 +60,10 @@ class MinApp {
     Plugin.id = this.name;
     this.Config = Config;
     this.Plugin = Plugin;
+
+    // get needed props from the system config
+    const {cacheDir, configDir, dataDir, instance, product} = config.get('system');
+    const {landofiles} = config.get('core');
 
     // set other props that are name-dependent
     this.cacheDir = path.join(cacheDir, 'apps', this.name);
@@ -81,12 +84,15 @@ class MinApp {
     this.#landofiles = this.getLandofiles(get(mainfile, 'config.core.landofiles', landofiles));
 
     // created needed dirs
-    for (const dir of [this.cacheDir, this.configDir, this.dataDir, this.logsDir, this.pluginsDir]) {
+    for (const dir of [this.cacheDir, this.configDir, this.dataDir, this.logsDir]) {
       fs.mkdirSync(path.dirname(dir), {recursive: true});
       this.debug('ensured directory %o exists', dir);
     }
 
     // build the app config by loading in the apps
+    // @NOTE: appConfig merging is currently a breaking change with V3 as it REPLACES arrays
+    // instead of combining them. this is "better" behavior and what we want for V4 but maybe we should
+    // do something to help make this "less" breaking?
     this.appConfig = new Config({
       cached: path.join(this.cacheDir, 'landofiles.json'),
       managed: 'main',
@@ -96,11 +102,35 @@ class MinApp {
     });
 
     // separate out the config and mix in the global ones
-    // @TODO: what other props should we include in here?
-    const appStuff = {name: this.name, location: this.root};
-    this.config = new Config({id: this.name});
+    // @NOTE: im guessing "other" things like composeCache, etc will be dumped via the cache?
+    const appStuff = {
+      name: this.name,
+      location: this.root,
+      cacheDir: this.cacheDir,
+      configDir: this.configDir,
+      dataDir: this.dataDir,
+      logsDir: this.logsDir,
+      pluginsDir: this.pluginsDir,
+    };
+    this.config = new Config({id: this.name, cached: path.join(appStuff.cacheDir, 'config.json')});
     this.config.add('app', {type: 'literal', store: {app: appStuff, ...this.appConfig.getUncoded('config')}});
-    this.config.add(product, {type: 'literal', store: config});
+    this.config.add(product, {type: 'literal', store: config.getUncoded()});
+    // dump the cache
+    this.config.dumpCache();
+
+    // #_cache is an internal and protected property that hardcodes use of the core file-storage component
+    // we do this because we need a way a to cache things before plugins/the registry are compiled,
+    // because we cannot use something like async getComponent inside the constructor and because we do not
+    // want a full-blow async init() method we need to call EVERY time we new Bootstrap()
+    this.#_cache = new FileStorage(({debugspace: this.name, dir: this.cacheDir}));
+    // similar to above but for lando itself, we do this so we have access to "global" plugins and registry
+    this.#_landoCache = new FileStorage(({debugspace: this.product, dir: this.config.get('system.cache-dir')}));
+
+    // load plugins and registry stuff
+    // @TODO: should we do this every time?
+    // @TODO: maybe a protected non-async #init or #setup?
+    this.getPlugins();
+    this.getRegistry(this.#_cache.get('plugins'));
   }
 
   // @TODO: the point of this is to have a high level way to "fetch" a certain kind of plugin eg global and
@@ -119,30 +149,31 @@ class MinApp {
     // modify the landofile with the updated plugin
     this.appConfig.save({plugins: {[plugin.name]: source}});
 
-    // reset the plugin cache
-    this.#plugins = undefined;
-    this.#invalidPlugins = undefined;
+    // rebuild the registry
+    this.rebuildRegistry();
+
     // return the plugin
     return plugin;
   }
 
   // helper to get a class
   getClass(component, {cache = true, defaults} = {}) {
-    return require('../utils/get-class')(
-      component,
-      this.config,
-      this.registry,
-      {cache, defaults},
-    );
+    // configigy the registry
+    const registry = Config.wrap(this.getRegistry(), {id: `${this.name}-class-cache`, env: false});
+    // get the class
+    return require('../utils/get-class')(component, this.config, registry, {cache, defaults});
   }
 
   // helper to get a component (and config?) from the registry
   async getComponent(component, constructor = {}, opts = {}) {
+    // configigy the registry
+    const registry = Config.wrap(this.getRegistry(), {id: `${this.name}-class-cache`, env: false});
+    // get the component
     return require('../utils/get-component')(
       component,
       constructor,
       this.config,
-      {cache: opts.cache, defaults: opts.defaults, init: opts.init, registry: this.registry},
+      {cache: opts.cache, defaults: opts.defaults, init: opts.init, registry},
     );
   }
 
@@ -183,32 +214,92 @@ class MinApp {
   // @TODO: we probably will also need dirs for core plugins for lando
   // @TODO: we probably will also need a section for "team" plugins
   getPlugins(options = {}) {
-    // if we've already done this then return the result
-    if (this.#plugins) return this.#plugins;
-    // if we get here then we need to do plugin discovery
-    this.debug('running app plugin discovery...');
+    // if we have something cached then just return that
+    if (this.#_cache.get('plugins')) {
+      const plugins = this.#_cache.get('plugins');
+      this.debug('grabbed %o %o plugin(s) from cache', Object.keys(plugins).length, this.name);
+      return plugins;
+    }
 
-    // before we do the discovery we need to check to see if we have any
-    // local app plugins
-    const localAppPlugins = Object.entries(this.appConfig.getUncoded('plugins'))
-    .filter(plugin => fs.existsSync(path.join(this.root, plugin[1])))
-    .map(plugin => new this.Plugin(path.join(this.root, plugin[1]), {type: 'app', ...options}));
+    // if we get here then we need to do plugin discovery
+    this.debug('running %o plugin discovery...', this.name);
+
+    // start to build out our sources
+    // @TODO: we need to make sure we can directly pass in plugins
+    // define "internals" so we can force it into the source list
+    const appPluginDirs = {app: {type: 'app', dir: this.pluginsDir, depth: 2}};
+
+    // if we have additional pluginDirs then lets add them
+    if (this.appConfig.getUncoded('pluginDirs').length > 0) {
+      for (const pluginDir of this.appConfig.getUncoded('pluginDirs')) {
+        appPluginDirs[`app_${pluginDir}`] = {
+          type: 'app',
+          dir: path.resolve(this.root, pluginDir),
+          depth: 2,
+        };
+      };
+    }
+
+    // munge all dirs together and translate into an object
+    const dirs = Object.entries({...appPluginDirs}).map(([name, value]) => ({...value, name}));
+    // group into sources
+    const sources = Object.entries(groupBy(dirs, 'type')).map(([store, dirs]) => ({store, dirs}));
+
+    // if we have "local" plugins then lets put those in the front
+    if (Object.keys(this.appConfig.getUncoded('plugins').length > 0)) {
+      const appStore = sources.find(source => source.store === 'app');
+      appStore.plugins = Object.entries(this.appConfig.getUncoded('plugins'))
+        .filter(plugin => fs.existsSync(path.join(this.root, plugin[1])))
+        .map(plugin => new this.Plugin(path.join(this.root, plugin[1]), {type: 'app', ...options}));
+    }
+
+    // if we have "global" (we should btw) lando plugins then lets put those in the front
+    if (this.#_landoCache.get('plugins')) {
+      sources.unshift({
+        store: 'global',
+        plugins: Object.entries(this.#_landoCache.get('plugins')).map(([name, value]) => value),
+      });
+    }
 
     // do the discovery
     const {plugins, invalids} = require('../utils/get-plugins')(
-      [
-        {store: 'app', plugins: localAppPlugins, dirs: [{dir: this.pluginsDir, depth: 2}]},
-        {store: 'global', dirs: this.config.get('plugin.global-plugin-dirs')},
-      ],
+      sources,
       this.Plugin,
-      {channel: this.config.get('core.release-channel'), ...options},
+      {channel: this.config.get('core.release-channel'), ...options, config: this.config.get(), type: 'app'},
     );
 
     // set things
-    this.#plugins = plugins;
-    this.#invalidPlugins = invalids;
+    this.#_cache.set('plugins', plugins);
+    this.#_cache.set('invalid-plugins', invalids);
     // return
-    return this.#plugins;
+    return plugins;
+  }
+
+  getRegistry(plugins = this.getPlugins()) {
+    // if we have something cached then just return that
+    if (this.#_cache.get('registry')) {
+      const registry = this.#_cache.get('registry');
+      this.debug('grabbed %o %o component(s) from cache', this.Config.keys(registry).length, this.name);
+      return registry;
+    }
+
+    // if we get here then we need to do registry discovery
+    this.debug('running %o registry discovery...', this.name);
+
+    // build the registry with config and plugins
+    const registry = require('../utils/get-registry')(this.config, plugins);
+
+    // set
+    this.#_cache.set('registry', registry);
+    // return
+    return registry;
+  }
+
+  // helper to rebuild the plugin an registry
+  rebuildRegistry() {
+    this.#clearInternalCache(['plugins', 'invalid-plugins', 'registry']);
+    this.getPlugins();
+    this.getRegistry();
   }
 
   // helper to remove a plugin
@@ -227,12 +318,10 @@ class MinApp {
 
     // if we get here then remove the plugin
     plugin.remove();
-    // and remove it from the landofile
-    this.appConfig.remove(`plugins.${plugin.name}`);
 
-    // reset cache
-    this.#plugins = undefined;
-    this.#invalidPlugins = undefined;
+    // rebuld registry
+    this.rebuildRegistry();
+
     // return the plugin
     return plugin;
   }
