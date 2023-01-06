@@ -1,4 +1,3 @@
-const crypto = require('crypto');
 const fs = require('fs');
 const get = require('lodash/get');
 const groupBy = require('lodash/groupBy');
@@ -49,57 +48,104 @@ class MinApp {
   /**
    * @TODO: options? channel?
    */
-  constructor({landofile, config} = {}) {
+  constructor({landofile, config, id, productCacheDir, product} = {}) {
     // @TODO: throw error if no landofile or doesnt exist
     // @TODO: if no name then we should throw an error
-    // start by loading in the main landofile and getting the name
+    // @TODO: throw error if config is not a Config object?
+
+    // start by loading in the main landofile
     const mainfile = yaml.parse(fs.readFileSync(landofile, 'utf8'));
+    // compute some things we need with the mainfile
     this.name = slugify(mainfile.name, {lower: true, strict: true});
     this.root = path.dirname(landofile);
+    this.sluggypath = slugify(this.root, {lower: true, strict: true});
+    // and its downstreams
+    this.debug = require('debug')(`${this.name}:@lando/core:minapp`);
+    this.repoDir = path.join(this.root, '.lando');
+    this.pluginsDir = path.join(this.repoDir, 'plugins');
+    this.product = product || config.get('system.product') || 'lando';
+    this.idPath = path.join(this.repoDir, 'id');
+
+    // build the app config
+    const {landofiles} = config.get('core');
+    this.#landofileExt = landofile.split('.').pop();
+    this.#landofile = path.basename(landofile, `.${this.#landofileExt}`);
+    // @NOTE: landofiles can only be overridden in the main landofile for, we hope, obvious reasons
+    this.#landofiles = this.getLandofiles(get(mainfile, 'config.core.landofiles', landofiles));
+    // build the app config by loading in the apps
+    // @NOTE: appConfig merging is currently a breaking change with V3 as it REPLACES arrays
+    // instead of combining them. this is "better" behavior and what we want for V4 but maybe we should
+    // do something to help make this "less" breaking?
+    this.appConfig = new Config({
+      // @TODO: below is a chicken-n-egg problem, can we find a place to put the cached landofiles that doesnt rely on cacheDir?
+      // cached: path.join(this.cacheDir, 'landofiles.json'),
+      managed: 'main',
+      env: this.env,
+      id: this.name,
+      sources: Object.fromEntries(this.#landofiles.map(landofile => ([landofile.type, landofile.path]))),
+    });
+
+    // some helpful classes to add to this
     Config.id = this.name;
     Plugin.id = this.name;
     this.Config = Config;
     this.Plugin = Plugin;
 
-    // get needed props from the system config
-    const {cacheDir, configDir, dataDir, instance, product} = config.get('system');
-    const {landofiles} = config.get('core');
+    // try to find the app id
+    // prioritize something passed in @NOTE: should we?
+    this.id = id;
+    // if we dont have an id yet then use appConfig.get('id)
+    if (!this.id) {
+      this.debug('trying to get id for app %o from landofiles', this.name);
+      this.id = this.appConfig.get('id');
+    }
+    // if we still dont have one try to get from id path
+    if (!this.id && fs.existsSync(this.idPath)) {
+      this.debug('trying to get id for app %o from %o', this.name, this.idPath);
+      try {
+        this.id = fs.readFileSync(this.idPath, 'utf8');
+      } catch {
+        this.debug('could not get id from %o', this.idPath);
+      }
+    }
+    // OMG if we dont have an id at this point then i guess like we should generate one?
+    if (!this.id) {
+      const {customAlphabet} = require('nanoid');
+      const nanoid = customAlphabet('1234567890abcdefl', 17);
+      this.id = nanoid();
+      this.debug('generated id %o for app %o', this.id, this.name);
+
+      // @TODO: how should we actually persist the id?
+      // should we just write to the landofile? that already exists and would be easier than handling
+      // creation of `.lando/id` and asking user to gitignore or not?
+      //
+      // but i guess for now: write to this.idPath
+      fs.mkdirSync(path.dirname(this.idPath), {recursive: true});
+      fs.writeFileSync(this.idPath, this.id);
+    }
+
+    // @TODO: is it possible to not have an ID at this point? should we error?
+
+    // get needed props from the system config for other
+    const {cacheDir, configDir, dataDir, instance} = config.get('system');
 
     // set other props that are name-dependent
-    this.cacheDir = path.join(cacheDir, 'apps', this.name);
-    this.configDir = path.join(configDir, 'apps', this.name);
-    this.dataDir = path.join(dataDir, 'apps', this.name);
+    // @TODO: should we put more dirz into repoDir?
+    this.cacheDir = path.join(cacheDir, 'apps', this.id);
+    this.configDir = path.join(configDir, 'apps', this.id);
+    this.dataDir = path.join(dataDir, 'apps', this.id);
     this.logsDir = path.join(this.dataDir, 'logs');
-    this.pluginsDir = path.join(this.root, '.lando', 'plugins');
-    this.debug = require('debug')(`${this.name}:@lando/core:minapp`);
-    this.env = `${product}-${this.name}`.toUpperCase().replace(/-/gi, '_');
-    this.id = slugify(crypto.createHash('sha1').update(`${landofile}:${this.name}`).digest('base64'));
+    this.env = `${this.product}-${this.name}`.toUpperCase().replace(/-/gi, '_');
     this.instance = instance;
     this.registry = [];
 
     // private props
-    this.#landofileExt = landofile.split('.').pop();
-    this.#landofile = path.basename(landofile, `.${this.#landofileExt}`);
-    // @NOTE: landofiles can only be overridden in the main landofile for, i hope, obvious reasons
-    this.#landofiles = this.getLandofiles(get(mainfile, 'config.core.landofiles', landofiles));
 
     // created needed dirs
     for (const dir of [this.cacheDir, this.configDir, this.dataDir, this.logsDir]) {
       fs.mkdirSync(path.dirname(dir), {recursive: true});
       this.debug('ensured directory %o exists', dir);
     }
-
-    // build the app config by loading in the apps
-    // @NOTE: appConfig merging is currently a breaking change with V3 as it REPLACES arrays
-    // instead of combining them. this is "better" behavior and what we want for V4 but maybe we should
-    // do something to help make this "less" breaking?
-    this.appConfig = new Config({
-      cached: path.join(this.cacheDir, 'landofiles.json'),
-      managed: 'main',
-      env: this.env,
-      id: this.name,
-      sources: Object.fromEntries(this.#landofiles.map(landofile => ([landofile.type, landofile.path]))),
-    });
 
     // separate out the config and mix in the global ones
     // @NOTE: im guessing "other" things like composeCache, etc will be dumped via the cache?
@@ -123,8 +169,8 @@ class MinApp {
     // because we cannot use something like async getComponent inside the constructor and because we do not
     // want a full-blow async init() method we need to call EVERY time we new Bootstrap()
     this.#_cache = new FileStorage(({debugspace: this.name, dir: this.cacheDir}));
-    // similar to above but for lando itself, we do this so we have access to "global" plugins and registry
-    this.#_landoCache = new FileStorage(({debugspace: this.product, dir: this.config.get('system.cache-dir')}));
+    // get access to, presumably, the lando cache
+    this.#_landoCache = new FileStorage(({debugspace: this.product, dir: productCacheDir || config.get('system.cache-dir')}));
 
     // load plugins and registry stuff
     // @TODO: should we do this every time?
