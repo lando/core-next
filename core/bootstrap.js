@@ -36,18 +36,20 @@ class Bootstrapper {
   }
 
 
-  constructor(options = {}) {
+  constructor({
+    config = {},
+    noCache = false,
+    registry = {},
+  } = {}) {
     // the id
-    this.id = options.id || 'lando';
+    this.id = config.id || 'lando';
     // the global config
     // @TODO: mix in defaults to options?
-    this.config = new Config(options);
+    this.config = new Config(config);
     // debugger
     this.debug = require('debug')(`${this.id}:@lando/core:${this.id}`);
-    // just save the options
-    this.options = options;
     // a cache of loaded component classes
-    this.registry = options.registry || {};
+    this.registry = registry || {};
 
     // add some helpful things
     Config.id = this.id;
@@ -63,6 +65,10 @@ class Bootstrapper {
     // because we cannot use something like async getComponent inside the constructor and because we do not
     // want a full-blow async init() method we need to call EVERY time we new Bootstrap()
     this.#_cache = new FileStorage(({debugspace: this.id, dir: this.config.get('system.cache-dir')}));
+
+    // if no-cache is set then lets force a rebuild
+    // @TODO: should we nuke the whole cache or just the registry?
+    if (noCache) this.rebuildRegistry();
 
     // @TODO: should we do this every time?
     // @TODO: maybe a protected non-async #init or #setup?
