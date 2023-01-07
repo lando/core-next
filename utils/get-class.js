@@ -33,8 +33,8 @@ module.exports = (component, config, registry = {}, {cache = undefined, configDe
   }
 
   // if there is no component or it does not exist then throw an error
-  // @TODO: what if component already is a JS file?
-  if (!registry.get(component) || !fs.existsSync(`${registry.get(component)}.js`)) {
+  if (!registry.get(component) ||
+    (!fs.existsSync(registry.get(component) && !fs.existsSync(`${registry.get(component)}.js`)))) {
     throw new Error(`could not find component ${originalComponent} (${component})`);
   }
 
