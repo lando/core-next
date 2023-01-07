@@ -43,8 +43,9 @@ class Bootstrapper {
   } = {}) {
     // the id
     this.id = config.id || 'lando';
+    // add our defaults as a source
+    config.sources = {defaults: path.join(__dirname, '..', 'config', 'defaults.js'), ...config.sources};
     // the global config
-    // @TODO: mix in defaults to options?
     this.config = new Config(config);
     // debugger
     this.debug = require('debug')(`${this.id}:@lando/core:${this.id}`);

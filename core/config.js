@@ -30,20 +30,6 @@ class Config extends nconf.Provider {
     return config;
   }
 
-  constructor(options = {}) {
-    // get parent stuff
-    super();
-    // get the id first since we need this for downstream things
-    this.id = options.id || options.product || path.basename(process.argv[1]) || Config.id;
-    // properties
-    this.managed = options.managed || 'managed';
-    // namespaces utils
-    this.debug = require('debug')(`${this.id}:@lando/core:config`);
-    // keep options around
-    this.options = options;
-    // Then run our own init
-    this.#init(options);
-  }
 
   #clean(data = {}) {
     delete data.type;
@@ -203,6 +189,21 @@ class Config extends nconf.Provider {
         throw new Error(error);
       }
     }
+  }
+
+  constructor(options = {}) {
+    // get parent stuff
+    super();
+    // get the id first since we need this for downstream things
+    this.id = options.id || options.product || path.basename(process.argv[1]) || Config.id;
+    // properties
+    this.managed = options.managed || 'managed';
+    // namespaces utils
+    this.debug = require('debug')(`${this.id}:@lando/core:config`);
+    // keep options around
+    this.options = options;
+    // Then run our own init
+    this.#init(options);
   }
 
   add(name, options, usage) {
