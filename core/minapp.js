@@ -48,7 +48,14 @@ class MinApp {
   /**
    * @TODO: options? channel?
    */
-  constructor({landofile, config, id, productCacheDir, product} = {}) {
+  constructor({
+    landofile,
+    config,
+    id,
+    noCache = false,
+    productCacheDir,
+    product,
+  } = {}) {
     // @TODO: throw error if no landofile or doesnt exist
     // @TODO: if no name then we should throw an error
     // @TODO: throw error if config is not a Config object?
@@ -171,6 +178,10 @@ class MinApp {
     this.#_cache = new FileStorage(({debugspace: this.name, dir: this.cacheDir}));
     // get access to, presumably, the lando cache
     this.#_landoCache = new FileStorage(({debugspace: this.product, dir: productCacheDir || config.get('system.cache-dir')}));
+
+    // if no-cache is set then lets force a rebuild
+    // @TODO: should we nuke the whole cache or just the registry?
+    if (noCache) this.rebuildRegistry();
 
     // load plugins and registry stuff
     // @TODO: should we do this every time?
