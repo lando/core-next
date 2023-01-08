@@ -30,7 +30,6 @@ class Config extends nconf.Provider {
     return config;
   }
 
-
   #clean(data = {}) {
     delete data.type;
     delete data.logicalSeparator;
@@ -146,7 +145,7 @@ class Config extends nconf.Provider {
 
     // set some defaults
     if (sources.defaults) {
-      super.defaults(this.#readFile(sources.defaults));
+      super.defaults(this.encode(this.#readFile(sources.defaults)));
       this.debug('loaded %o default config from %o', sources.defaults);
     }
 

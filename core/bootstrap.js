@@ -35,7 +35,6 @@ class Bootstrapper {
     return keys ? keys : 'all';
   }
 
-
   constructor({
     config = {},
     noCache = false,
