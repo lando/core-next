@@ -1,23 +1,21 @@
-const formats = ['inspect', 'json', 'table'];
+const formats = ['auto', 'inspect', 'json', 'table'];
 
 module.exports = () => ({
   command: 'config',
-  level: 'tasks',
-  describe: 'Displays the lando configuration',
+  describe: 'displays the lando configuration',
   options: {
     field: {
-      describe: 'Show only a specific field',
       hidden: true,
       string: true,
     },
     format: {
-      describe: `Output in given format: ${formats.join(', ')}`,
+      describe: 'output in specified format',
       choices: formats,
       string: true,
-      default: 'table',
+      default: 'auto',
     },
     path: {
-      describe: 'Only return the value at the given path',
+      describe: 'show value at given path',
       string: true,
     },
   },
