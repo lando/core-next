@@ -44,10 +44,9 @@ module.exports = () => ({
       const componentKey = Object.keys(plugins).find(name => name === options.component || name === `@lando/${options.component}`);
       // throw error if cannot find component
       if (!componentKey) {
-        cli.error(`Could not find a component named: "${options.component}"`, {
+        cli.exitError(`Could not find a component named: "${options.component}"`, {
           suggestions: ['Run lando version --all for a full list of components'],
           ref: 'https://docs.lando.dev/cli/version.html',
-          exit: 3,
         });
       }
       // set the data

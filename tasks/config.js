@@ -44,10 +44,9 @@ module.exports = () => ({
 
     // if data is undefined then throw an error
     if (options.path && (data === undefined || Object.keys(data).length === 0)) {
-      cli.error(`No configuration found for path: "${options.path}"`, {
+      cli.exitError(`No configuration found for path: "${options.path}"`, {
         suggestions: ['Run lando config for a full list of keys'],
         ref: 'https://docs.lando.dev/cli/config.html#get',
-        exit: 1,
       });
     }
 
