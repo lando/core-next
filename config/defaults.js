@@ -88,6 +88,7 @@ module.exports = ({options}) => {
       platform: process.platform,
       product: id || 'lando',
       root: path.resolve(__dirname, '..'),
+      runtime: 4,
       server: 'node',
       totalmem: os.totalmem() / 1_073_741_824,
       version: pjson.version,
