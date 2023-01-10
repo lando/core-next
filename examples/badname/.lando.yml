@@ -1,0 +1,14 @@
+name: "XYŹ | AFFAIR"
+services:
+  defaults:
+    type: apache
+
+plugins:
+  "@lando/core": ./../..
+
+# get this app to use the new v4 runtime
+runtime: 4
+config:
+  core:
+    dev-mode: 1
+    telemetry: 0
