@@ -30,7 +30,10 @@ jobs:
           # - examples/services
           # - examples/tooling
         lando-versions:
-          - latest
+        # NOTE: we will want to progressively scale down the "risk" as the 3.x cli runtime 4 handling matures
+          # - edge
+          # - stable
+          - dev
     steps:
 
       # Install deps and cache
@@ -66,11 +69,8 @@ jobs:
 
       - name: Verify lando is set up as expected
         run: |
-          lando version
-          lando config --path system.runtime | grep 4
-          lando config --path core.telemetry | grep 0
-          lando config --path core.dev-mode | grep 1
-          lando plugins
+          LANDO_CORE_RUNTIME=4 lando version
+          LANDO_CORE_RUNTIME=v4 lando config
 
       # This block should eventually become use lando/actions-leia@v2
       - name: Run leia tests

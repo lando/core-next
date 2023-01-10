@@ -37,7 +37,24 @@ Start up tests
 true
 ```
 
-CHANGE THE HEADER BACK WHEN WE ARE READY TO ACTUALLY TEST
+Verification commands
+---------------------
+
+```bash
+# should be using runtime 4
+lando config --path system.runtime | grep 4
+
+# should have telemetry off
+lando config --path core.telemetry | grep 0
+
+# should have dev mode on
+lando config --path core.dev-mode | grep 1
+
+# should be dogfooding the plugin
+lando plugins | grep /home/runner/work/core-next/core-next
+```
+
+THESE TESTS NEED TO END UP BACK IN THE MAIN TESTING BODY
 ---------------------
 
 Run the following commands to verify things work as expected
