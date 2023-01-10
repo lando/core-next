@@ -8,7 +8,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       TERM: xterm
-      # DEBUG: "lando*"
+      DEBUG: "lando*"
+      LANDO_CORE_RUNTIME: 4
+      LANDO_CORE_DEV__MODE: 1
     strategy:
       fail-fast: false
       matrix:
@@ -67,10 +69,19 @@ jobs:
           sudo curl -fsSL -o /usr/local/bin/lando "https://files.lando.dev/cli/lando-linux-x64-${{ matrix.lando-versions }}"
           sudo chmod +x /usr/local/bin/lando
 
-      - name: Verify lando is set up as expected
+      # eventually we should probably use lando itself to dogfood the plugin
+      # either with better linking eg using lando config --path system.data-dir or a testing plugin
+      - name: Globally dogfood the plugin
         run: |
-          LANDO_CORE_RUNTIME=4 lando version --all
-          LANDO_CORE_RUNTIME=v4 lando config
+          mkdir -p ~/.local/share/lando/plugins/@lando
+          ln -sf "$(pwd)" ~/.local/share/lando/plugins/@lando/core-next
+          ls -lsa ~/.local/share/lando/plugins/@lando
+          lando --clear
+      - name: Verify we can run the packaged CLI
+        run: |
+          lando version --all
+          lando config
+          lando
 
       # This block should eventually become use lando/actions-leia@v2
       - name: Run leia tests
