@@ -69,7 +69,7 @@ jobs:
 
       - name: Verify lando is set up as expected
         run: |
-          LANDO_CORE_RUNTIME=4 lando version
+          LANDO_CORE_RUNTIME=4 lando version --all
           LANDO_CORE_RUNTIME=v4 lando config
 
       # This block should eventually become use lando/actions-leia@v2
