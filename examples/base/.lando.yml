@@ -17,5 +17,5 @@ plugins:
 runtime: 4
 config:
   core:
-    dev-mode: true
+    development: true
     telemetry: false

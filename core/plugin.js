@@ -125,6 +125,7 @@ class Plugin {
     config = {},
     id = Plugin.id || 'lando',
     installer = Plugin.installer,
+    loadOpts = [],
     type = 'app',
     version = undefined,
   } = {}) {
@@ -142,7 +143,7 @@ class Plugin {
     this.pjson = require(path.join(this.root, 'package.json'));
 
     // get the manifest
-    this.manifest = {...this.pjson.lando, ...this.#load(config)};
+    this.manifest = {...this.pjson.lando, ...this.#load(...loadOpts)};
 
     // set some key props
     this.name = this.manifest.name || this.pjson.name;

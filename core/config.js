@@ -106,6 +106,10 @@ class Config extends nconf.Provider {
       this.debug('generated %o file %o from template %o', store, options.dest, options.source || options.data);
     }
 
+    // start by adding a simple memory store at the top
+    // this lets us have a store we can use to set/alter config during runtime with this.set
+    super.add('#mem', {type: 'memory', store: {}, logicalSeparator: '.', parseValues: true, readOnly: false});
+
     // if we have a CLI provided config source then assert its dominance
     if (sources.overrides) {
       super.overrides(this.#readFile(sources.overrides));

@@ -27,6 +27,7 @@ module.exports = ({options}) => {
   return {
     core: {
       app: 'app',
+      caching: true,
       debugspace: id || path.basename(process.argv[1]) || 'lando',
       debug: false,
       engine: context === 'local' ? 'docker-desktop' : 'docker-engine',

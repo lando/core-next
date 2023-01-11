@@ -52,7 +52,6 @@ class MinApp {
     landofile,
     config,
     id,
-    noCache = false,
     productCacheDir,
     product,
   } = {}) {
@@ -165,7 +164,7 @@ class MinApp {
     };
     this.config = new Config({id: this.name, cached: path.join(appStuff.cacheDir, 'config.json')});
     this.config.add('app', {type: 'literal', store: {app: appStuff, ...this.appConfig.getUncoded('config')}});
-    this.config.add(product, {type: 'literal', store: config.getUncoded()});
+    this.config.add(this.product, {type: 'literal', store: config.getUncoded()});
     // dump the cache
     this.config.dumpCache();
 
@@ -179,7 +178,7 @@ class MinApp {
 
     // if no-cache is set then lets force a rebuild
     // @TODO: should we nuke the whole cache or just the registry?
-    if (noCache) this.rebuildRegistry();
+    if (!this.config.get('core.caching')) this.rebuildRegistry();
 
     // load plugins and registry stuff
     // @TODO: should we do this every time?
@@ -320,7 +319,12 @@ class MinApp {
     const {plugins, invalids} = require('../utils/get-plugins')(
       sources,
       this.Plugin,
-      {channel: this.config.get('core.release-channel'), ...options, config: this.config.get(), type: 'app'},
+      {
+        channel: this.config.get('core.release-channel'),
+        config: this.config.get(),
+        loadOpts: [this],
+        type: 'app',
+      },
     );
 
     // set things
