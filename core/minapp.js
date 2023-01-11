@@ -287,7 +287,7 @@ class MinApp {
     const appPluginDirs = {app: {type: 'app', dir: this.pluginsDir, depth: 2}};
 
     // if we have additional pluginDirs then lets add them
-    if (this.appConfig.getUncoded('pluginDirs').length > 0) {
+    if (this.appConfig.getUncoded('pluginDirs') && this.appConfig.getUncoded('pluginDirs').length > 0) {
       for (const pluginDir of this.appConfig.getUncoded('pluginDirs')) {
         appPluginDirs[`app_${pluginDir}`] = {
           type: 'app',
@@ -303,7 +303,7 @@ class MinApp {
     const sources = Object.entries(groupBy(dirs, 'type')).map(([store, dirs]) => ({store, dirs}));
 
     // if we have "local" plugins then lets put those in the front
-    if (Object.keys(this.appConfig.getUncoded('plugins').length > 0)) {
+    if (this.appConfig.getUncoded('plugins') && Object.keys(this.appConfig.getUncoded('plugins').length > 0)) {
       const appStore = sources.find(source => source.store === 'app');
       appStore.plugins = Object.entries(this.appConfig.getUncoded('plugins'))
         .filter(plugin => fs.existsSync(path.join(this.root, plugin[1])))
