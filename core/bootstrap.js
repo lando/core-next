@@ -51,6 +51,14 @@ class Bootstrapper {
     // a cache of loaded component classes
     this.registry = registry || {};
 
+    // get the id
+    if (!this.config.get(`${this.config.managed}:system.instance`)) {
+      const data = {system: {instance: require('./../utils/generate-id')()}};
+      this.config.save(data);
+      this.config.defaults(data);
+      this.debug('could not locate instance id, setting to %o', this.config.get('system.instance'));
+    }
+
     // add some helpful things
     Config.id = this.id;
     Plugin.id = this.id;

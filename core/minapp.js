@@ -117,9 +117,7 @@ class MinApp {
     }
     // OMG if we dont have an id at this point then i guess like we should generate one?
     if (!this.id) {
-      const {customAlphabet} = require('nanoid');
-      const nanoid = customAlphabet('1234567890abcdefl', 17);
-      this.id = nanoid();
+      this.id = require('./../utils/generate-id')();
       this.debug('generated id %o for app %o', this.id, this.name);
 
       // @TODO: how should we actually persist the id?
