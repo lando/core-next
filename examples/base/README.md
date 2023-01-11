@@ -47,8 +47,8 @@ lando config --path system.runtime | grep 4
 # should have telemetry off
 lando config --path core.telemetry | grep false
 
-# should have dev mode on
-lando config --path core.dev-mode | grep true
+# should have development mode on
+lando config --path core.development | grep true
 
 # should be dogfooding the plugin
 lando plugins | grep @lando/core | grep /home/runner/work/core-next/core-next

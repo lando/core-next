@@ -37,7 +37,6 @@ class Bootstrapper {
 
   constructor({
     config = {},
-    noCache = false,
     registry = {},
   } = {}) {
     // the id
@@ -75,8 +74,8 @@ class Bootstrapper {
     this.#_cache = new FileStorage(({debugspace: this.id, dir: this.config.get('system.cache-dir')}));
 
     // if no-cache is set then lets force a rebuild
-    // @TODO: should we nuke the whole cache or just the registry?
-    if (noCache) this.rebuildRegistry();
+    // @TODO: should we nuke the whole cache or just the registry? right now its just the registry?
+    if (!this.config.get('core.caching')) this.rebuildRegistry();
 
     // @TODO: should we do this every time?
     // @TODO: maybe a protected non-async #init or #setup?
@@ -186,7 +185,13 @@ class Bootstrapper {
     const {plugins, invalids} = require('../utils/get-plugins')(
       sources,
       this.Plugin,
-      {channel: this.config.get('core.release-channel'), ...options, config: this.config.get(), type: 'global'},
+      {
+        channel: this.config.get('core.release-channel'),
+        config: this.config.get(),
+        loadOpts: [this],
+        type: 'global',
+        ...options,
+      },
     );
 
     // set things
