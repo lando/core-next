@@ -8,7 +8,7 @@ tooling:
     service: log
 pluginDirs:
   - plugins
-  # - ./../../plugins
+  - ./../../plugins
 plugins:
   "@lando/core": ./../..
   "@lando/base-test-plugin-2": ./test-plugin-2
@@ -17,5 +17,5 @@ plugins:
 runtime: 4
 config:
   core:
-    dev-mode: 1
-    telemetry: 0
+    dev-mode: true
+    telemetry: false
