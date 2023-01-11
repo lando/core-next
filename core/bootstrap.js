@@ -182,7 +182,7 @@ class Bootstrapper {
     const sources = Object.entries(groupBy(dirs, 'type')).map(([store, dirs]) => ({store, dirs}));
 
     // do the discovery
-    const {plugins, invalids} = require('../utils/get-plugins')(
+    const {disabled, invalids, plugins} = require('../utils/get-plugins')(
       sources,
       this.Plugin,
       {
@@ -195,8 +195,9 @@ class Bootstrapper {
     );
 
     // set things
-    this.#_cache.set('plugins', plugins);
+    this.#_cache.set('disabled-plugins', disabled);
     this.#_cache.set('invalid-plugins', invalids);
+    this.#_cache.set('plugins', plugins);
     // return
     return plugins;
   }
@@ -222,7 +223,7 @@ class Bootstrapper {
 
   // helper to rebuild the plugin an registry
   rebuildRegistry() {
-    this.#clearInternalCache(['plugins', 'invalid-plugins', 'registry']);
+    this.#clearInternalCache(['disabled', 'invalid-plugins', 'plugins', 'registry']);
     this.getPlugins();
     this.getRegistry();
   }

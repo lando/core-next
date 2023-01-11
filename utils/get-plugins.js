@@ -27,30 +27,36 @@ module.exports = (sources = [], Plugin = DefaultPlugin, options = {}) => {
 
     // then separate out valid and invalid plugins
     if (source.plugins && Array.isArray(source.plugins)) {
+      source.disabled = source.plugins.filter(plugin => plugin.isValid && !plugin.enabled);
       source.invalids = source.plugins.filter(plugin => !plugin.isValid);
-      source.plugins = source.plugins.filter(plugin => plugin.isValid);
+      source.plugins = source.plugins.filter(plugin => plugin.isValid && plugin.enabled);
     }
   }
 
   // stuff
-  const plugins = new Config({env: false, id: 'valid-plugins'});
+  const disabled = new Config({env: false, id: 'disabled-plugins'});
   const invalids = new Config({env: false, id: 'invalid-plugins'});
+  const plugins = new Config({env: false, id: 'valid-plugins'});
 
   // do the priority resolution
   for (const source of sources) {
-    // valid stuff
-    if (source.plugins && source.plugins.length > 0) {
-      debug('added %o plugin(s) to the %o store', source.plugins.length, source.store);
-      plugins.add(source.store, {type: 'literal', store: normalizePlugins(source.plugins)});
+    // valid and disabled
+    if (source.disabled && source.disabled.length > 0) {
+      debug('added %o plugin(s) to the %o store', source.disabled.length, `${source.store}-disabled`);
+      disabled.add(source.store, {type: 'literal', store: normalizePlugins(source.disabled)});
     }
-
     // invalid
     if (source.invalids && source.invalids.length > 0) {
       debug('plugin(s) %o do not appear to be valid plugins, skipping', source.invalids.map(plugin => plugin.name));
       invalids.add(source.store, {type: 'literal', store: normalizePlugins(source.invalids)});
     }
+    // valid and enabled
+    if (source.plugins && source.plugins.length > 0) {
+      debug('added %o plugin(s) to the %o store', source.plugins.length, `${source.store}-enabled`);
+      plugins.add(source.store, {type: 'literal', store: normalizePlugins(source.plugins)});
+    }
   }
 
   // and return
-  return {plugins: plugins.getUncoded(), invalids: invalids.getUncoded()};
+  return {disabled: disabled.getUncoded(), invalids: invalids.getUncoded(), plugins: plugins.getUncoded()};
 };
