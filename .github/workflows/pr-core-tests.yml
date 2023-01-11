@@ -77,7 +77,7 @@ jobs:
           mkdir -p ~/.local/share/lando/plugins/@lando
           ln -sf "$(pwd)" ~/.local/share/lando/plugins/@lando/core-next
           ls -lsa ~/.local/share/lando/plugins/@lando
-          lando --clear
+          lando version --clear
       - name: Verify we can run the packaged CLI
         run: |
           lando version --all

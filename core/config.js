@@ -146,7 +146,7 @@ class Config extends nconf.Provider {
     // set some defaults
     if (sources.defaults) {
       super.defaults(this.encode(this.#readFile(sources.defaults)));
-      this.debug('loaded %o default config from %o', sources.defaults);
+      this.debug('loaded default config from %o', sources.defaults);
     }
 
     // dump the result to file
