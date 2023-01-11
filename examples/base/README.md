@@ -45,13 +45,15 @@ Verification commands
 lando config --path system.runtime | grep 4
 
 # should have telemetry off
-lando config --path core.telemetry | grep 0
+lando config --path core.telemetry | grep false
 
 # should have dev mode on
-lando config --path core.dev-mode | grep 1
+lando config --path core.dev-mode | grep true
 
 # should be dogfooding the plugin
-lando plugins | grep /home/runner/work/core-next/core-next
+lando plugins | grep @lando/core | grep /home/runner/work/core-next/core-next
+lando plugins | grep @lando/dev | grep /home/runner/work/core-next/core-next/plugins/dev
+lando plugins | grep @lando/networking | grep /home/runner/work/core-next/core-next/plugins/networking
 ```
 
 THESE TESTS NEED TO END UP BACK IN THE MAIN TESTING BODY

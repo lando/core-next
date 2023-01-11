@@ -288,8 +288,8 @@ class MinApp {
 
     // if we have additional pluginDirs then lets add them
     if (this.appConfig.getUncoded('pluginDirs') && this.appConfig.getUncoded('pluginDirs').length > 0) {
-      for (const pluginDir of this.appConfig.getUncoded('pluginDirs')) {
-        appPluginDirs[`app_${pluginDir}`] = {
+      for (const [index, pluginDir] of this.appConfig.getUncoded('pluginDirs').entries()) {
+        appPluginDirs[`app_plugin_dir_${index}`] = {
           type: 'app',
           dir: path.resolve(this.root, pluginDir),
           depth: 2,
@@ -310,9 +310,9 @@ class MinApp {
         .map(plugin => new this.Plugin(path.join(this.root, plugin[1]), {type: 'app', ...options}));
     }
 
-    // if we have "global" (we should btw) lando plugins then lets put those in the front
+    // if we have "global" (we should btw) lando plugins then lets put those at the end so the serve as "defaults"
     if (this.#_landoCache.get('plugins')) {
-      sources.unshift({
+      sources.push({
         store: 'global',
         plugins: Object.entries(this.#_landoCache.get('plugins')).map(([name, value]) => value),
       });
