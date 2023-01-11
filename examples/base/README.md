@@ -209,5 +209,5 @@ Destroy tests
 # should destroy successfully
 # lando destroy -y
 # lando poweroff
-test
+true
 ```

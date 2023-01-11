@@ -8,7 +8,7 @@ tooling:
     service: log
 pluginDirs:
   - plugins
-  - ./../../plugins/try
+  # - ./../../plugins
 plugins:
   "@lando/core": ./../..
   "@lando/base-test-plugin-2": ./test-plugin-2

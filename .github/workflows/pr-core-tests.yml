@@ -8,7 +8,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       TERM: xterm
-      DEBUG: "lando*"
+      # DEBUG: "lando*"
       LANDO_CORE_RUNTIME: 4
       LANDO_CORE_DEV__MODE: 1
       LANDO_CORE_TELEMETRY: 0
