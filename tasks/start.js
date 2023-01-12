@@ -9,15 +9,14 @@ module.exports = () => {
     describe: 'Starts your app',
     run: async (options, {cli, context, lando, minapp}) => {
       // @TODO: throw an error if context.app === false
+      // @NOTE: we are assuming
+
       console.log('hi')
+      // 1. lets just use getComponent for now
+      const LegacyApp = minapp.getComponent('app.legacy-app');
+      console.log(LegacyApp)
 
-      // what should we try first?
-      // 1. fetch the old lando object?
-      //  * should we create a LegacyLando component?
 
-
-      // 2. fetch the old app object?
-      //  * should we create a LegacyApp component?
       // {
       //   landofile,
       //   config,

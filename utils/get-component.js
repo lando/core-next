@@ -33,13 +33,13 @@ module.exports = (component, config, registry = {}, {cache = undefined, configDe
   }
 
   // if there is no component or it does not exist then throw an error
-  if (!registry.get(component) ||
-    (!fs.existsSync(registry.get(component) && !fs.existsSync(`${registry.get(component)}.js`)))) {
+  if (!registry.getUncoded(component) ||
+    (!fs.existsSync(registry.getUncoded(component)) && !fs.existsSync(`${registry.getUncoded(component)}.js`))) {
     throw new Error(`could not find component ${originalComponent} (${component})`);
   }
 
   // otherwise try to load the component from the config
-  const loader = require(registry.get(component));
+  const loader = require(registry.getUncoded(component));
   const isDynamic = loader.extends && typeof loader.getComponent === 'function';
 
   // if component is "dynamically extended" then get its parent and run its getComponent function
