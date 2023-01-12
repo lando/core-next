@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const getClass = Parent => {
+const getComponent = Parent => {
   class DockerPluginInstaller extends Parent {
     static name = 'docker-plugin-installer';
     static cspace = 'docker-plugin-installer';
@@ -74,4 +74,4 @@ const getClass = Parent => {
   return DockerPluginInstaller;
 };
 
-module.exports = {extends: 'core.engine', getClass};
+module.exports = {extends: 'core.engine', getComponent};

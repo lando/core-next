@@ -2,6 +2,7 @@ name: "@lando/core"
 registry:
   app:
     app: "./components/app"
+    legacy-app: "./components/legacy-app"
     minapp: "./components/minapp"
   engine:
     # docker-colima: "./components/docker-colima"
