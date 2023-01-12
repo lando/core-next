@@ -193,7 +193,7 @@ class MinApp {
     // attempt to add the plugin
     const plugin = await this.Plugin.fetch(name, dest, {
       channel: this.config.get('core.release-channel'),
-      installer: await this.getComponent('core.plugin-installer'),
+      installer: await this.getComponentInstance('core.plugin-installer'),
       type: 'app',
     });
 
@@ -211,19 +211,19 @@ class MinApp {
   }
 
   // helper to get a class
-  getClass(component, {cache = true, defaults} = {}) {
+  getComponent(component, {cache = true, defaults} = {}) {
     // configigy the registry
     const registry = Config.wrap(this.getRegistry(), {id: `${this.name}-class-cache`, env: false});
     // get the class
-    return require('../utils/get-class')(component, this.config, registry, {cache, defaults});
+    return require('../utils/get-component')(component, this.config, registry, {cache, defaults});
   }
 
   // helper to get a component (and config?) from the registry
-  async getComponent(component, constructor = {}, opts = {}) {
+  async getComponentInstance(component, constructor = {}, opts = {}) {
     // configigy the registry
     const registry = Config.wrap(this.getRegistry(), {id: `${this.name}-class-cache`, env: false});
     // get the component
-    return require('../utils/get-component')(
+    return require('../utils/get-component-instance')(
       component,
       constructor,
       this.config,

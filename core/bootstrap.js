@@ -91,7 +91,7 @@ class Bootstrapper {
     // attempt to add the plugin
     const plugin = await this.Plugin.fetch(name, dest, {
       channel: this.config.get('core.release-channel'),
-      installer: await this.getComponent('core.plugin-installer'),
+      installer: await this.getComponentInstance('core.plugin-installer'),
       type: 'global',
     });
 
@@ -116,19 +116,19 @@ class Bootstrapper {
   }
 
   // helper to get a class
-  getClass(component, {cache = this.registry, defaults} = {}) {
+  getComponent(component, {cache = this.registry, defaults} = {}) {
     // configigy the registry
     const registry = Config.wrap(this.getRegistry(), {id: `${this.id}-class-cache`, env: false});
     // get the class
-    return require('../utils/get-class')(component, this.config, registry, {cache, defaults});
+    return require('../utils/get-component')(component, this.config, registry, {cache, defaults});
   }
 
   // helper to get a component (and config?) from the registry
-  async getComponent(component, constructor = {}, opts = {}) {
+  async getComponentInstance(component, constructor = {}, opts = {}) {
     // configigy the registry
     const registry = Config.wrap(this.getRegistry(), {id: `${this.id}-class-cache`, env: false});
     // get the component
-    return require('../utils/get-component')(
+    return require('../utils/get-component-instance')(
       component,
       constructor,
       this.config,
@@ -182,7 +182,7 @@ class Bootstrapper {
     const sources = Object.entries(groupBy(dirs, 'type')).map(([store, dirs]) => ({store, dirs}));
 
     // do the discovery
-    const {plugins, invalids} = require('../utils/get-plugins')(
+    const {disabled, invalids, plugins} = require('../utils/get-plugins')(
       sources,
       this.Plugin,
       {
@@ -195,8 +195,9 @@ class Bootstrapper {
     );
 
     // set things
-    this.#_cache.set('plugins', plugins);
+    this.#_cache.set('disabled-plugins', disabled);
     this.#_cache.set('invalid-plugins', invalids);
+    this.#_cache.set('plugins', plugins);
     // return
     return plugins;
   }
@@ -222,7 +223,7 @@ class Bootstrapper {
 
   // helper to rebuild the plugin an registry
   rebuildRegistry() {
-    this.#clearInternalCache(['plugins', 'invalid-plugins', 'registry']);
+    this.#clearInternalCache(['disabled', 'invalid-plugins', 'plugins', 'registry']);
     this.getPlugins();
     this.getRegistry();
   }

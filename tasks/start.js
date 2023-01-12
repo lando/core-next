@@ -3,11 +3,30 @@
 const _ = require('lodash');
 const utils = require('./../lib/utils');
 
-module.exports = (lando, cli) => {
+module.exports = () => {
   return {
     command: 'start',
     describe: 'Starts your app',
-    run: options => {
+    run: async (options, {cli, context, lando, minapp}) => {
+      // @TODO: throw an error if context.app === false
+      // @NOTE: we are assuming
+
+      console.log('hi')
+      // 1. lets just use getComponent for now
+      const LegacyApp = minapp.getComponent('app.legacy-app');
+      console.log(LegacyApp)
+
+
+      // {
+      //   landofile,
+      //   config,
+      //   id,
+      //   productCacheDir,
+      //   product,
+      // } = {}
+
+      process.exit(1)
+
       // Try to get our app
       const app = lando.getApp(options._app.root);
       // Start it if we can!

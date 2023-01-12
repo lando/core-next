@@ -1,1 +1,2 @@
 name: "@lando/events"
+enabled: false

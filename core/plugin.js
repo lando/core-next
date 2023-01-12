@@ -1,4 +1,3 @@
-const chalk = require('chalk');
 const debug = require('debug')('static@lando/core:plugin');
 const fs = require('fs-extra');
 const has = require('lodash/has');
@@ -132,6 +131,7 @@ class Plugin {
     // core props
     this.root = location;
     this.channel = channel;
+    this.enabled = true;
     this.installer = installer;
     this.type = type;
 
@@ -144,6 +144,9 @@ class Plugin {
 
     // get the manifest
     this.manifest = {...this.pjson.lando, ...this.#load(...loadOpts)};
+
+    // if the manifest disables the plugin
+    if (this.manifest.enabled === false || this.manifest.enabled === 0) this.enabled = false;
 
     // set some key props
     this.name = this.manifest.name || this.pjson.name;
@@ -190,9 +193,8 @@ class Plugin {
     }
 
     // log result
-    const validStatus = this.isValid ? chalk.green('valid') : chalk.red('invalid');
-    const installStatus = this.isInstalled ? chalk.green('installed') : chalk.yellow('uninstalled');
-    this.debug('instantiated %s and %s plugin from %s', validStatus, installStatus, this.root);
+    const status = {enabled: this.enabled, valid: this.isValid, installed: this.isInstalled};
+    this.debug('instantiated plugin from %s with status %o', this.root, status);
   }
 
   // Internal method to help load config
