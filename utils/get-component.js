@@ -18,7 +18,7 @@ module.exports = (component, config, registry = {}, {cache = undefined, configDe
   // setup debugger
   // @TODO figure app namespace out?
   const id = config.get('system.id') || 'lando';
-  const debug = require('debug')(`${id}:@lando/core:utils:get-class`);
+  const debug = require('debug')(`${id}:@lando/core:utils:get-component`);
 
   // first provide some nice handling around "core" components
   // this lets you do stuff like getComponent('core.engine') and get whatever that is set to
@@ -64,7 +64,7 @@ module.exports = (component, config, registry = {}, {cache = undefined, configDe
 
   // and set in cache if applicable
   if (shouldCache) {
-    debug('adding component %o into %o registry', component, id);
+    debug('adding component %o into %o cache', component, id);
     cache[component] = Component;
   }
 

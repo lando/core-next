@@ -1,11 +1,20 @@
 // Modules
+
+// @TODO: remove lodash usage as much as possible?
+// @TODO: we need a "fast exec" method
 const _ = require('lodash');
+// const bootstrap = require('./../lib/bootstrap');
+const fs = require('fs');
 const hasher = require('object-hash');
 const path = require('path');
-const Promise = require('./promise');
-const utils = require('./utils');
+// const scan = require('./../lib/scan');
+const utils = require('./../lib/utils');
 
+const AsyncEvents = require('./../lib/events');
+const FileStorage = require('./file-storage');
 const MinApp = require('./../core/minapp');
+const Promise = require('./../lib/promise');
+// const Shell = require('./../lib/shell');
 
 /*
  * Helper to init and then report
@@ -41,126 +50,92 @@ const loadPlugins = (app, lando) => Promise.resolve(app.plugins.registry)
  * @return {App} An App instance
  */
 class LegacyApp extends MinApp {
-  constructor(options) {
-    // start by getting the minapp
-    super(options);
+  constructor(minapp) {
+    // @TODO: we need a faster way to extend MinApp, we dont want to run through the entire constructor again
+    // because we already have that stuff. maybe we just need to give minapp more args or maybe if minapp
+    // gets another minapp we can just bind it to this and proceed?
 
-    console.log(this)
-    process.exit(1)
+    // @TODO: throw error is minapp is not a minapp
 
-    const AsyncEvents = require('./events');
-    const bootstrap = require('./bootstrap');
-    const Log = require('./logger');
-    const scan = require('./scan');
-    const Shell = require('./shell');
+    // extract what we need from minapp for SUPER
+    const {_landofile, config, id, productCacheDir, product} = minapp;
+    super({landofile: _landofile, config, id, productCacheDir, product});
 
-    /**
-     * The apps name
-     *
-     * @since 3.0.0
-     * @alias app.name
-     */
-    this.name = utils.appMachineName(name),
-    this.project = utils.dockerComposify(this.name);
-    this._config = lando.config;
-    this._dir = path.join(this._config.userConfRoot, 'compose', this.project);
-    this._lando = lando;
-    this._name = name;
-    /**
-     * The apps logger
-     *
-     * @since 3.0.0
-     * @alias app.log
-     */
-    /**
-     * The apps engine
-     *
-     * @since 3.0.0
-     * @alias app.engine
-     */
-    /**
-     * The apps event emitter
-     *
-     * @since 3.0.0
-     * @alias app.events
-     */
-    /**
-     * The apps metric reporter
-     *
-     * @since 3.0.0
-     * @alias app.metrics
-     */
-    /**
-     * The apps url scanner
-     *
-     * @since 3.0.0
-     * @alias app.scanUrl
-     */
-    /**
-     * The apps shell
-     *
-     * @since 3.0.0
-     * @alias app.shell
-     */
-    this.log = new Log(_.merge({}, lando.config, {logName: this.name}));
-    this.shell = new Shell(this.log);
-    this.engine = bootstrap.setupEngine(
-      lando.config,
-      lando.cache,
-      lando.events,
-      this.log,
-      this.shell,
-      lando.config.instance,
-    );
-    this.metrics = bootstrap.setupMetrics(this.log, lando.config);
-    this.Promise = lando.Promise;
+    // let's also just store the minapp so we have all its stuff
+    this._minapp = minapp;
+
+    // get debug first
+    this.debug = require('debug')(`${this.name}:@lando/core:legacy-app`);
+    this.debug('trying to instantiate legacy app %o', this.name);
+
+    // set some legacy props with our new stuff
+    this.project = this.id;
+    this._config = this.config.get();
+    this._dir = path.join(this.cacheDir, 'legacy-compose', this.project);
+    this._name = this.name;
+    // make sure compose dir exists
+    fs.mkdirSync(this._dir, {recursive: true});
+
+    // @TODO: load in legacy lando here?
+    // this._lando = lando;
+
+    // backwards compat on the logger
+    // @TODO: handlers for error/warn?
+    this.log = require('./../utils/legacy-logger-wrapper')(this.debug);
+    // test logging
+    this.log.error('logging an %s', 'error');
+    this.log.warn('logging a %j', 'warning');
+    this.log.info('logging %o', 'info');
+    this.log.verbose('logging %O', 'verbose');
+    this.log.debug('logging %o', 'debug');
+    this.log.silly('logging %o', 'silly');
+
+    // These should probably remain the same?
+    this.Promise = Promise;
     this.events = new AsyncEvents(this.log);
-    this.scanUrls = scan(this.log);
 
-    /**
-     * The apps configuration
-     *
-     * @since 3.0.0
-     * @alias app.config
-     */
-    this.config = config;
-    this.configFiles = config.files;
-    this.configHash = hasher(this.config);
-    this.ComposeService = lando.factory.get('_compose');
-    this.env = _.cloneDeep(this._config.appEnv);
+    // @TODO: what to do here? do we use this extensively?
+    // probably just have a wrapper that pull it from whatever plugin it ends up in?
+    // this.scanUrls = scan(this.log);
 
-    /**
-     * Information about this app
-     *
-     * @since 3.0.0
-     * @alias app.info
-     */
+    // @TODO: we need to make V3 config loading more consistent eg it doesnt merge arrays like the older one?
+    // best way around that? convert to object on the way in and then back to array on way out?
+    this._appConfig = this.appConfig.get();
+    this.configFiles = this.landofiles.map(file => file.path);
+    this.configHash = hasher(this._appConfig);
+
+    // @TODO: what about lando.factory?
+    this.ComposeService = this.getComponent('legacy.services._compose');
+
+    // setup the cache
+    this.cache = new FileStorage(({debugspace: this.name, dir: this.cacheDir}));
+    // and "metaCache"
+    this.metaCache = 'meta.cache';
+    this.meta = this.cache.get(this.metaCache) || {};
+
+    // for consistency
+    // this.plugins = this.getPlugins();
+
+    // just some other defaults
     this.info = [];
-    this.labels = _.cloneDeep(this._config.appLabels);
-    this.opts = {};
-    this.plugins = lando.plugins;
-    this.metaCache = `${this.name}.meta.cache`;
-    this.meta = _.merge({}, lando.cache.get(this.metaCache));
     this.nonRoot = [];
-
-    /**
-     * The apps root directory
-     *
-     * @since 3.0.0
-     * @alias app.root
-     */
-    this.root = path.dirname(this.configFiles[0]);
-    /**
-     * Tasks and commands the app can run
-     *
-     * @since 3.0.0
-     * @alias app.tasks
-     */
+    this.opts = {};
     this.tasks = [];
-    // A place to collect warnings and errors so we can
-    // do stuff with them later
     this.warnings = [];
-    this.id = hasher(`${this.name}-${this.root}`);
+
+    // @TODO: stuff for init
+    // this.env = _.cloneDeep(this._config.appEnv);
+    // this.labels = _.cloneDeep(this._config.appLabels);
+    // // @TODO can we eventually hide this.engine/this.shell in an init method?
+    // this.shell = new Shell(this.log);
+    // this.engine = bootstrap.setupEngine(
+    //   lando.config,
+    //   lando.cache,
+    //   lando.events,
+    //   this.log,
+    //   this.shell,
+    //   lando.config.instance,
+    // );
   };
 
   /*
@@ -252,6 +227,13 @@ class LegacyApp extends MinApp {
    * @return {Promise} A Promise.
    */
   init() {
+    // @TODO: make this async
+
+    // try out await events?
+    // we need a way to "handle" old array merge config?
+      // composeData
+      // envFiles?
+
     // We should only need to initialize once, if we have just go right to app ready
     if (this.initialized) return this.events.emit('ready', this);
     // Get compose data if we have any, otherwise set to []

@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const bootstrap = require('./bootstrap');
+const bootstrap = require('./../lib/bootstrap');
 const fs = require('fs');
 const glob = require('glob');
 const path = require('path');

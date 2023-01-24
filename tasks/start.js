@@ -8,24 +8,28 @@ module.exports = () => {
     command: 'start',
     describe: 'Starts your app',
     run: async (options, {cli, context, lando, minapp}) => {
-      // @TODO: throw an error if context.app === false
+      // @TODO: throw an error if context.app === false or we dont have a minapp?
       // @NOTE: we are assuming
 
-      console.log('hi')
-      // 1. lets just use getComponent for now
+      // @todo: lando/minapp
+      // lets get a runHook implementation here?
+      // lets add in some basics like start/getInfo/getStatus etc
+      // different status checks?
+        // can build
+
+      // file storage with an update command?
+
+      // get legacy lando? do we really even need one?
+      // does it make more sense to have a "legacify" util?
+      // const LegacyLando = minapp.getComponent('legacy.lando');
+      // console.log(new LegacyLando(lando))
+      // process.exit(1)
+
+      // get the legacy app
       const LegacyApp = minapp.getComponent('app.legacy-app');
-      console.log(LegacyApp)
+      console.log(new LegacyApp(minapp));
+      process.exit(1);
 
-
-      // {
-      //   landofile,
-      //   config,
-      //   id,
-      //   productCacheDir,
-      //   product,
-      // } = {}
-
-      process.exit(1)
 
       // Try to get our app
       const app = lando.getApp(options._app.root);

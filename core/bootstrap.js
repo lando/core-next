@@ -25,14 +25,20 @@ class Bootstrapper {
   #clearInternalCache(keys) {
     // if cache is a string then make into an array
     if (typeof keys === 'string') keys = [keys];
-
     // loop through and remove caches
     for (const key of keys) {
       this.#_cache.remove(key);
     }
-
     // return keys that have been removed
     return keys ? keys : 'all';
+  }
+
+  // an internal way to "reinit" the bootstrap eg remove caches and repopulate them
+  // @NOTE: should this be internal?
+  #_reint() {
+    this.#clearInternalCache(['disabled', 'invalid-plugins', 'plugins', 'registry']);
+    this.getPlugins();
+    this.getRegistry();
   }
 
   constructor({
@@ -73,9 +79,9 @@ class Bootstrapper {
     // want a full-blow async init() method we need to call EVERY time we new Bootstrap()
     this.#_cache = new FileStorage(({debugspace: this.id, dir: this.config.get('system.cache-dir')}));
 
-    // if no-cache is set then lets force a rebuild
+    // if no-cache is set then lets force a cache wipe
     // @TODO: should we nuke the whole cache or just the registry? right now its just the registry?
-    if (!this.config.get('core.caching')) this.rebuildRegistry();
+    if (!this.config.get('core.caching')) this.#_reint();
 
     // @TODO: should we do this every time?
     // @TODO: maybe a protected non-async #init or #setup?
@@ -95,8 +101,8 @@ class Bootstrapper {
       type: 'global',
     });
 
-    // rebuild the registry
-    this.rebuildRegistry();
+    // reinit
+    this.#_reint();
 
     // return the plugin
     return plugin;
@@ -213,19 +219,12 @@ class Bootstrapper {
     // if we get here then we need to do registry discovery
     this.debug('running %o registry discovery...', this.id);
     // build the registry with config and plugins
-    const registry = require('../utils/get-registry')(this.config, plugins);
+    const registry = require('../utils/get-manifest-object')('registry', this.config, plugins);
 
     // set
     this.#_cache.set('registry', registry);
     // return
     return registry;
-  }
-
-  // helper to rebuild the plugin an registry
-  rebuildRegistry() {
-    this.#clearInternalCache(['disabled', 'invalid-plugins', 'plugins', 'registry']);
-    this.getPlugins();
-    this.getRegistry();
   }
 
   // helper to remove a plugin
@@ -241,8 +240,8 @@ class Bootstrapper {
     // if we get here then remove the plugin
     plugin.remove();
 
-    // rebuld registry
-    this.rebuildRegistry();
+    // reinit
+    this.#_reint();
 
     // return the plugin
     return plugin;
@@ -269,7 +268,7 @@ class Bootstrapper {
   }
 
   // setup tasks for oclif
-  async run(config = {}) {
+  async bootstrap(config = {}) {
     // get an id
     config.id = this.config.get('core.id') || this.config.get('core.id') || config.bin || path.basename(process.argv[1]);
     // reconcile debug flag
@@ -280,6 +279,8 @@ class Bootstrapper {
     if (config.debug) require('debug').enable(config.debug === true || config.debug === 1 ? '*' : config.debug);
     // @TODO: this has to be config.id because it will vary based on what is using the bootstrap eg lando/hyperdrive
     config[config.id] = this;
+    // Also just add a generic/reliable key someone can use to get whatever the product is
+    config.product = this;
   }
 }
 
