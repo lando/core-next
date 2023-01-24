@@ -2,7 +2,6 @@ name: "@lando/core"
 registry:
   app:
     app: "./components/app"
-    minapp: "./components/minapp"
   engine:
     # docker-colima: "./components/docker-colima"
     docker-desktop: "./components/docker-desktop"
@@ -12,16 +11,19 @@ registry:
   storage:
     file-storage: "./components/file-storage"
   legacy:
-    tasks:
-      config: "./tasks/config"
-      destroy: "./tasks/destroy"
-      info: "./tasks/info"
-      list: "./tasks/list"
-      logs: "./tasks/logs"
-      poweroff: "./tasks/poweroff"
-      rebuild: "./tasks/rebuild"
-      restart: "./tasks/restart"
-      share: "./tasks/share"
-      start: "./tasks/start"
-      stop: "./tasks/stop"
-      version: "./tasks/version"
+    services:
+      _compose: "./services/compose"
+tasks:
+  legacy-cli:
+    config: "./tasks/config"
+    destroy: "./tasks/destroy"
+    info: "./tasks/info"
+    list: "./tasks/list"
+    logs: "./tasks/logs"
+    poweroff: "./tasks/poweroff"
+    rebuild: "./tasks/rebuild"
+    restart: "./tasks/restart"
+    share: "./tasks/share"
+    start: "./tasks/start"
+    stop: "./tasks/stop"
+    version: "./tasks/version"

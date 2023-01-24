@@ -26,23 +26,24 @@ class MinApp {
   #_landoCache
   #_cache;
 
-  // landofilestuff
-  #landofile
-  #landofiles
-  #landofileExt
-
   // this is designed to specifically remove things from #_cache
   #clearInternalCache(keys) {
     // if cache is a string then make into an array
     if (typeof keys === 'string') keys = [keys];
-
     // loop through and remove caches
     for (const key of keys) {
       this.#_cache.remove(key);
     }
-
     // return keys that have been removed
     return keys ? keys : 'all';
+  }
+
+  // an internal way to "reinit" the bootstrap eg remove caches and repopulate them
+  // @NOTE: should this be internal?
+  #_reint() {
+    this.#clearInternalCache(['disabled', 'invalid-plugins', 'plugins', 'registry']);
+    this.getPlugins();
+    this.getRegistry();
   }
 
   /**
@@ -59,8 +60,11 @@ class MinApp {
     // @TODO: if no name then we should throw an error
     // @TODO: throw error if config is not a Config object?
 
+
     // start by loading in the main landofile
     const mainfile = yaml.parse(fs.readFileSync(landofile, 'utf8'));
+    // save the original landofile parameter
+    this._landofile = landofile;
     // compute some things we need with the mainfile
     this.name = slugify(mainfile.name, {lower: true, strict: true});
     this.root = path.dirname(landofile);
@@ -74,10 +78,10 @@ class MinApp {
 
     // build the app config
     const {landofiles} = config.get('core');
-    this.#landofileExt = landofile.split('.').pop();
-    this.#landofile = path.basename(landofile, `.${this.#landofileExt}`);
+    this.landofileExt = landofile.split('.').pop();
+    this.landofile = path.basename(landofile, `.${this.landofileExt}`);
     // @NOTE: landofiles can only be overridden in the main landofile for, we hope, obvious reasons
-    this.#landofiles = this.getLandofiles(get(mainfile, 'config.core.landofiles', landofiles));
+    this.landofiles = this.getLandofiles(get(mainfile, 'config.core.landofiles', landofiles));
     // build the app config by loading in the apps
     // @NOTE: appConfig merging is currently a breaking change with V3 as it REPLACES arrays
     // instead of combining them. this is "better" behavior and what we want for V4 but maybe we should
@@ -88,7 +92,7 @@ class MinApp {
       managed: 'main',
       env: this.env,
       id: this.name,
-      sources: Object.fromEntries(this.#landofiles.map(landofile => ([landofile.type, landofile.path]))),
+      sources: Object.fromEntries(this.landofiles.map(landofile => ([landofile.type, landofile.path]))),
     });
 
     // some helpful classes to add to this
@@ -141,6 +145,8 @@ class MinApp {
     this.logsDir = path.join(this.dataDir, 'logs');
     this.env = `${this.product}-${this.name}`.toUpperCase().replace(/-/gi, '_');
     this.instance = instance;
+    // @TODO: should this actually be more like a memcache?
+    // @NOTE: are we even using this anymore? seems confusing?
     this.registry = [];
 
     // private props
@@ -176,9 +182,9 @@ class MinApp {
     // get access to, presumably, the lando cache
     this.#_landoCache = new FileStorage(({debugspace: this.product, dir: productCacheDir || config.get('system.cache-dir')}));
 
-    // if no-cache is set then lets force a rebuild
-    // @TODO: should we nuke the whole cache or just the registry?
-    if (!this.config.get('core.caching')) this.rebuildRegistry();
+    // if no-cache is set then lets force a cache wipe
+    // @TODO: should we nuke the whole cache or just the registry? right now its just the registry?
+    if (!this.config.get('core.caching')) this.#_reint();
 
     // load plugins and registry stuff
     // @TODO: should we do this every time?
@@ -193,7 +199,7 @@ class MinApp {
     // attempt to add the plugin
     const plugin = await this.Plugin.fetch(name, dest, {
       channel: this.config.get('core.release-channel'),
-      installer: await this.getComponent('core.plugin-installer'),
+      installer: await this.getComponentInstance('core.plugin-installer'),
       type: 'app',
     });
 
@@ -203,30 +209,30 @@ class MinApp {
     // modify the landofile with the updated plugin
     this.appConfig.save({plugins: {[plugin.name]: source}});
 
-    // rebuild the registry
-    this.rebuildRegistry();
+    // reinit
+    this.#_reint();
 
     // return the plugin
     return plugin;
   }
 
   // helper to get a class
-  getClass(component, {cache = true, defaults} = {}) {
+  getComponent(component, {cache = true, config = this.config, defaults} = {}) {
     // configigy the registry
     const registry = Config.wrap(this.getRegistry(), {id: `${this.name}-class-cache`, env: false});
     // get the class
-    return require('../utils/get-class')(component, this.config, registry, {cache, defaults});
+    return require('../utils/get-component')(component, config, registry, {cache, defaults});
   }
 
   // helper to get a component (and config?) from the registry
-  async getComponent(component, constructor = {}, opts = {}) {
+  async getComponentInstance(component, constructor = {}, config = this.config, opts = {}) {
     // configigy the registry
     const registry = Config.wrap(this.getRegistry(), {id: `${this.name}-class-cache`, env: false});
     // get the component
-    return require('../utils/get-component')(
+    return require('../utils/get-component-instance')(
       component,
       constructor,
-      this.config,
+      config,
       {cache: opts.cache, defaults: opts.defaults, init: opts.init, registry},
     );
   }
@@ -235,7 +241,7 @@ class MinApp {
     return files
     // assemble the filename/type
     .map(type => ({
-      filename: type === '' ? `${this.#landofile}.${this.#landofileExt}` : `${this.#landofile}.${type}.${this.#landofileExt}`,
+      filename: type === '' ? `${this.landofile}.${this.landofileExt}` : `${this.landofile}.${type}.${this.landofileExt}`,
       type: type === '' ? 'main' : type,
     }))
     // get the absolute paths
@@ -346,19 +352,12 @@ class MinApp {
     this.debug('running %o registry discovery...', this.name);
 
     // build the registry with config and plugins
-    const registry = require('../utils/get-registry')(this.config, plugins);
+    const registry = require('../utils/get-manifest-object')('registry', this.config, plugins);
 
     // set
     this.#_cache.set('registry', registry);
     // return
     return registry;
-  }
-
-  // helper to rebuild the plugin an registry
-  rebuildRegistry() {
-    this.#clearInternalCache(['plugins', 'invalid-plugins', 'registry']);
-    this.getPlugins();
-    this.getRegistry();
   }
 
   // helper to remove a plugin
@@ -378,8 +377,8 @@ class MinApp {
     // if we get here then remove the plugin
     plugin.remove();
 
-    // rebuld registry
-    this.rebuildRegistry();
+    // reinit
+    this.#_reint();
 
     // return the plugin
     return plugin;
