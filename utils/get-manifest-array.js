@@ -1,4 +1,4 @@
-const debug = require('debug')('@lando/core:utils:get-manifest-object');
+const debug = require('debug')('@lando/core:utils:get-manifest-array');
 const nmp = require('./normalize-manifest-paths');
 const path = require('path');
 
@@ -7,11 +7,11 @@ const Config = require('../core/config');
 /*
  * TBD
  */
-module.exports = (key, plugins = {}, config) => {
+module.exports = (key, plugins = {}, config = {}) => {
   // spin up a config instance to help us merge it all together
   const data = new Config({env: false, id: key});
 
-  // go through config stores if we can
+  // go through config stores if we have them
   if (Object.keys(config).length > 0) {
     for (const [name, store] of Object.entries(config.stores)) {
       // if a file store then we need to normalize the registry
@@ -37,7 +37,12 @@ module.exports = (key, plugins = {}, config) => {
     }
   }
 
+  // get array of objects but filter out empty values
+  const list = Object.entries(data.stores)
+    .map(([name, store]) => ({name, id: name, data: store.get()}))
+    .filter(item => item.data && Object.keys(item.data).length > 0);
+
   // return
-  debug('found %o things(s) in %o', Config.keys(data.get()).length, `manifest.${key}`);
-  return data.getUncoded();
+  debug('found %o list(s) in %o', list.length, `manifest.${key}`);
+  return list;
 };

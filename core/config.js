@@ -34,6 +34,7 @@ class Config extends nconf.Provider {
     delete data.type;
     delete data.logicalSeparator;
     delete data.parseValues;
+    delete data.store;
     return data;
   }
 

@@ -21,7 +21,7 @@ const Plugin = require('./plugin');
  * @TODO: lots of the config loading makes sense in the constructor EXCEPT for selecting the relevant app component
  * to use, that needs to be done outside of this but how do we do that? probably in the load app util function?
  */
-class MinApp {
+class App {
   // an internal and protected caching mechanism
   #_landoCache
   #_cache;
@@ -60,7 +60,6 @@ class MinApp {
     // @TODO: if no name then we should throw an error
     // @TODO: throw error if config is not a Config object?
 
-
     // start by loading in the main landofile
     const mainfile = yaml.parse(fs.readFileSync(landofile, 'utf8'));
     // save the original landofile parameter
@@ -70,7 +69,7 @@ class MinApp {
     this.root = path.dirname(landofile);
     this.sluggypath = slugify(this.root, {lower: true, strict: true});
     // and its downstreams
-    this.debug = require('debug')(`${this.name}:@lando/core:minapp`);
+    this.debug = require('debug')(`${this.name}:@lando/core:app`);
     this.repoDir = path.join(this.root, '.lando');
     this.pluginsDir = path.join(this.repoDir, 'plugins');
     this.product = product || config.get('system.product') || 'lando';
@@ -352,7 +351,7 @@ class MinApp {
     this.debug('running %o registry discovery...', this.name);
 
     // build the registry with config and plugins
-    const registry = require('../utils/get-manifest-object')('registry', this.config, plugins);
+    const registry = require('../utils/get-manifest-object')('registry', plugins, this.config);
 
     // set
     this.#_cache.set('registry', registry);
@@ -360,11 +359,15 @@ class MinApp {
     return registry;
   }
 
+  // public wrapper for reint
+  reinit() {
+    this.#_reint();
+  };
+
   // helper to remove a plugin
   removePlugin(name) {
     // map plugin name to object
     const plugin = this.getPlugin(name);
-
     // throw error if there is no plugin to remove
     if (!plugin) throw new Error(`could not find a plugin called ${name}`);
     // throw error if plugin is a core plugin
@@ -385,4 +388,4 @@ class MinApp {
   }
 }
 
-module.exports = MinApp;
+module.exports = App;

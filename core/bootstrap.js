@@ -219,13 +219,17 @@ class Bootstrapper {
     // if we get here then we need to do registry discovery
     this.debug('running %o registry discovery...', this.id);
     // build the registry with config and plugins
-    const registry = require('../utils/get-manifest-object')('registry', this.config, plugins);
+    const registry = require('../utils/get-manifest-object')('registry', plugins, this.config);
 
     // set
     this.#_cache.set('registry', registry);
     // return
     return registry;
   }
+
+  reinit() {
+    this.#_reint();
+  };
 
   // helper to remove a plugin
   removePlugin(name) {
