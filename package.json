@@ -29,7 +29,7 @@
     "./file-storage": "./components/file-storage.js",
     "./lando": "./core/bootstrap.js",
     "./plugin": "./core/plugin.js",
-    "./utils/*": "./src/features/utils.js"
+    "./utils/*": "./utils/*.js"
   },
   "nyc": {
     "include": [
