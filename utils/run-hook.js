@@ -6,7 +6,7 @@ const ModuleLoader = require('@oclif/core/lib/module-loader').default;
  */
 module.exports = async (event, data, hooks = [], context = {}, id = 'lando', errorHandler) => {
   // debugger
-  const debug = require('debug')(`${id}:@lando/core:run-hook`);
+  const debug = require('debug')(`${id}:run-hook`);
   // just helpful message to indicate we have started a cli hook
   debug('start %s hook', event);
   // collect successes and failures
