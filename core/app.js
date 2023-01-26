@@ -60,6 +60,9 @@ class App {
     // @TODO: if no name then we should throw an error
     // @TODO: throw error if config is not a Config object?
 
+    // a cache of loaded component classes
+    this._componentsCache = {};
+
     // start by loading in the main landofile
     const mainfile = yaml.parse(fs.readFileSync(landofile, 'utf8'));
     // save the original landofile parameter
@@ -144,11 +147,6 @@ class App {
     this.logsDir = path.join(this.dataDir, 'logs');
     this.env = `${this.product}-${this.name}`.toUpperCase().replace(/-/gi, '_');
     this.instance = instance;
-    // @TODO: should this actually be more like a memcache?
-    // @NOTE: are we even using this anymore? seems confusing?
-    this.registry = [];
-
-    // private props
 
     // created needed dirs
     for (const dir of [this.cacheDir, this.configDir, this.dataDir, this.logsDir]) {
@@ -216,7 +214,7 @@ class App {
   }
 
   // helper to get a class
-  getComponent(component, {cache = true, config = this.config, defaults} = {}) {
+  getComponent(component, {cache = this._componentsCache, config = this.config, defaults} = {}) {
     // configigy the registry
     const registry = Config.wrap(this.getRegistry(), {id: `${this.name}-class-cache`, env: false});
     // get the class
