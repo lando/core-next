@@ -41,10 +41,11 @@ class Bootstrapper {
     this.getRegistry();
   }
 
-  constructor({
-    config = {},
-    registry = {},
-  } = {}) {
+  constructor({config} = {}) {
+    // @TODO: throw error if config is not Config
+
+    // a cache of loaded component classes
+    this._componentsCache = {};
     // the id
     this.id = config.id || 'lando';
     // add our defaults as a source
@@ -53,8 +54,6 @@ class Bootstrapper {
     this.config = new Config(config);
     // debugger
     this.debug = require('debug')(`${this.id}:@lando/core:${this.id}`);
-    // a cache of loaded component classes
-    this.registry = registry || {};
 
     // get the id
     if (!this.config.get(`${this.config.managed}:system.instance`)) {
@@ -122,7 +121,7 @@ class Bootstrapper {
   }
 
   // helper to get a class
-  getComponent(component, {cache = this.registry, defaults} = {}) {
+  getComponent(component, {cache = this._componentsCache, defaults} = {}) {
     // configigy the registry
     const registry = Config.wrap(this.getRegistry(), {id: `${this.id}-class-cache`, env: false});
     // get the class

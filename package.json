@@ -22,7 +22,15 @@
     "/scripts",
     "/utils"
   ],
-  "main": "lib/lando.js",
+  "exports": {
+    "./app": "./core/app.js",
+    "./bootstrap": "./core/bootstrap.js",
+    "./config": "./core/config.js",
+    "./file-storage": "./components/file-storage.js",
+    "./lando": "./core/bootstrap.js",
+    "./plugin": "./core/plugin.js",
+    "./utils/*": "./src/features/utils.js"
+  },
   "nyc": {
     "include": [
       "lib/**/*.js",
