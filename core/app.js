@@ -42,8 +42,8 @@ class App {
   // @NOTE: should this be internal?
   #_reint() {
     this.#clearInternalCache(['disabled', 'invalid-plugins', 'plugins', 'registry']);
-    this.getPlugins();
-    this.getRegistry();
+    this.plugins = this.getPlugins();
+    this.registry = this.getRegistry();
   }
 
   /**
@@ -60,7 +60,7 @@ class App {
     // @TODO: if no name then we should throw an error
     // @TODO: throw error if config is not a Config object?
 
-    // a cache of loaded component classes
+    // "private" but still "by convention" protected properties
     this._componentsCache = {};
 
     // start by loading in the main landofile
@@ -186,8 +186,8 @@ class App {
     // load plugins and registry stuff
     // @TODO: should we do this every time?
     // @TODO: maybe a protected non-async #init or #setup?
-    this.getPlugins();
-    this.getRegistry(this.#_cache.get('plugins'));
+    this.plugins = this.getPlugins();
+    this.registry = this.getRegistry();
   }
 
   // @TODO: the point of this is to have a high level way to "fetch" a certain kind of plugin eg global and
@@ -265,7 +265,7 @@ class App {
     // strip any additional metadata and return just the plugin name
     const data = parsePkgName(name);
     // @TODO: do we want to throw an error if not found?
-    return this.getPlugins()[data.name];
+    return this.plugins[data.name];
   }
 
   // @TODO: we probably will also need dirs for core plugins for lando
@@ -337,7 +337,7 @@ class App {
     return plugins;
   }
 
-  getRegistry(plugins = this.getPlugins()) {
+  getRegistry() {
     // if we have something cached then just return that
     if (this.#_cache.get('registry')) {
       const registry = this.#_cache.get('registry');
@@ -349,7 +349,7 @@ class App {
     this.debug('running %o registry discovery...', this.name);
 
     // build the registry with config and plugins
-    const registry = require('../utils/get-manifest-object')('registry', plugins, this.config);
+    const registry = require('../utils/get-manifest-object')('registry', this);
 
     // set
     this.#_cache.set('registry', registry);

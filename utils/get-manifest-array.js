@@ -7,7 +7,7 @@ const Config = require('../core/config');
 /*
  * TBD
  */
-module.exports = (key, plugins = {}, config = {}) => {
+module.exports = (key, {plugins = {}, config = {}} = {}) => {
   // spin up a config instance to help us merge it all together
   const data = new Config({env: false, id: key});
 
