@@ -17,7 +17,7 @@ module.exports = async (event, data, hooks = [], context = {}, id = 'lando', err
     // @NOTE: i dont think "this" works in async functions?
     const ctx = {...context, debug: require('debug')([id, group.name || group.id, 'hook', event].join(':'))};
     // get all the runner for this group
-    const runners = group.hooks[event] || [];
+    const runners = group.hooks && group.hooks[event] && Array.isArray(group.hooks[event]) ? group.hooks[event] : [];
     // loop through runners and try to get results
     for (const runner of runners) {
       try {

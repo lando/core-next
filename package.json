@@ -23,11 +23,11 @@
     "/utils"
   ],
   "exports": {
-    "./app": "./core/app.js",
-    "./bootstrap": "./core/bootstrap.js",
+    "./app": "./components/app.js",
+    "./bootstrap": "./components/bootstrap.js",
     "./config": "./core/config.js",
     "./file-storage": "./components/file-storage.js",
-    "./lando": "./core/bootstrap.js",
+    "./lando": "./components/bootstrap.js",
     "./plugin": "./core/plugin.js",
     "./utils/*": "./utils/*.js"
   },

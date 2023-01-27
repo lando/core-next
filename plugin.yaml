@@ -1,7 +1,17 @@
 name: "@lando/core"
+hooks:
+  product:
+    init:
+      - "./hooks/test.js"
+  lando:
+    init:
+      - "./hooks/test.js"
+
 registry:
   app:
     app: "./components/app"
+  bootstrap:
+    lando: "./components/lando"
   engine:
     # docker-colima: "./components/docker-colima"
     docker-desktop: "./components/docker-desktop"
