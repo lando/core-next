@@ -14,7 +14,7 @@ const filesystem = require('mock-fs');
 const os = require('os');
 const path = require('path');
 const sinon = require('sinon');
-const Shell = require('./../lib/shell');
+const Shell = require('./../legacy/shell');
 chai.use(require('sinon-chai'));
 chai.use(require('chai-as-promised'));
 chai.should();

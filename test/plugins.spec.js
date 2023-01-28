@@ -16,7 +16,7 @@ chai.use(require('chai-as-promised'));
 chai.should();
 const os = require('os');
 const path = require('path');
-const Plugins = require('./../lib/plugins');
+const Plugins = require('./../legacy/plugins');
 
 const testPlugin = fs.readFileSync(path.resolve(__dirname, '..', 'plugins', 'test', 'index.js'), 'utf8');
 const searchDirs = [

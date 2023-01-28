@@ -12,7 +12,7 @@ const fs = require('fs-extra');
 const hasher = require('object-hash');
 const os = require('os');
 const path = require('path');
-const Yaml = require('./../lib/yaml');
+const Yaml = require('../legacy/yaml');
 
 chai.should();
 

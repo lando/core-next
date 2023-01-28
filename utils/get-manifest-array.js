@@ -2,7 +2,7 @@ const debug = require('debug')('@lando/core:utils:get-manifest-array');
 const nmp = require('./normalize-manifest-paths');
 const path = require('path');
 
-const Config = require('../core/config');
+const Config = require('../lib/config');
 
 /*
  * TBD

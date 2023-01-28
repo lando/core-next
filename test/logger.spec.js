@@ -13,7 +13,7 @@ const fs = require('fs');
 const path = require('path');
 chai.should();
 
-const Log = require('./../lib/logger');
+const Log = require('./../legacy/logger');
 
 describe('logger', () => {
   describe('#Log', () => {

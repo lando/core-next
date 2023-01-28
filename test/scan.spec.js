@@ -9,7 +9,7 @@ const _ = require('lodash');
 const axios = require('axios');
 const chai = require('chai');
 const sinon = require('sinon');
-const Promise = require('./../lib/promise');
+const Promise = require('./../legacy/promise');
 chai.use(require('chai-as-promised'));
 chai.should();
 

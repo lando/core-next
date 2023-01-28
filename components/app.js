@@ -7,9 +7,9 @@ const yaml = require('yaml');
 
 const parsePkgName = require('../utils/parse-package-name');
 
-const Config = require('../core/config');
+const Config = require('../lib/config');
 const FileStorage = require('./file-storage');
-const Plugin = require('../core/plugin');
+const Plugin = require('../lib/plugin');
 
 /**
  * @NOTE: the purpose of the minapp is something we can just new MinApp() without a helper async load/init function
@@ -410,6 +410,10 @@ class App {
     // return the plugin
     return plugin;
   }
+
+  async runHook(event, data) {
+    return require('../utils/run-hook')(event, data, this.hooks, {app: this}, `${this.product}:${this.name}`);
+  };
 }
 
 module.exports = App;

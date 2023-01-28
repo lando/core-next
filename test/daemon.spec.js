@@ -11,9 +11,9 @@ chai.use(require('chai-events'));
 chai.should();
 // const sinon = require('sinon');
 
-const Daemon = require('./../lib/daemon');
-const env = require('./../lib/env');
-const Log = require('./../lib/logger');
+const Daemon = require('./../legacy/daemon');
+const env = require('./../legacy/env');
+const Log = require('./../legacy/logger');
 
 describe('daemon', () => {
   describe('#LandoDaemon', () => {

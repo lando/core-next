@@ -1,9 +1,9 @@
 const groupBy = require('lodash/groupBy');
 const path = require('path');
 
-const Config = require('../core/config');
+const Config = require('../lib/config');
 const FileStorage = require('./file-storage');
-const Plugin = require('../core/plugin');
+const Plugin = require('../lib/plugin');
 
 class Bootstrapper {
   static findApp(files, startFrom) {
@@ -109,6 +109,22 @@ class Bootstrapper {
 
     // return the plugin
     return plugin;
+  }
+
+  // setup tasks for oclif
+  async bootstrap(config = {}) {
+    // get an id
+    config.id = this.config.get('core.id') || this.config.get('core.id') || config.bin || path.basename(process.argv[1]);
+    // reconcile debug flag
+    config.debug = this.config.get('core.debug') || config.debug || false;
+    // enable debugging if the config is set
+    // @NOTE: this is only for core.debug=true set via the configfile, the --debug turns debugging on before this
+    // @TODO: right now you cannot pass in --debug = string and you should be able to
+    if (config.debug) require('debug').enable(config.debug === true || config.debug === 1 ? '*' : config.debug);
+    // @TODO: this has to be config.id because it will vary based on what is using the bootstrap eg lando/hyperdrive
+    config[config.id] = this;
+    // Also just add a generic/reliable key someone can use to get whatever the product is
+    config.product = this;
   }
 
   findApp(files, startFrom) {
@@ -278,41 +294,9 @@ class Bootstrapper {
     return plugin;
   }
 
-  // return some system status information
-  status() {
-    // each check should have a requirement and preferred?
-
-    // packaged status
-
-    // user information, not running as root?
-    // userInfo?
-
-    // os/platform information, release info?
-    // os.release() os.version?
-
-    // arch information
-
-    // hardware information?
-    // os.freemem os.totalmem
-
-    console.log(this.config.get('system'));
-  }
-
-  // setup tasks for oclif
-  async bootstrap(config = {}) {
-    // get an id
-    config.id = this.config.get('core.id') || this.config.get('core.id') || config.bin || path.basename(process.argv[1]);
-    // reconcile debug flag
-    config.debug = this.config.get('core.debug') || config.debug || false;
-    // enable debugging if the config is set
-    // @NOTE: this is only for core.debug=true set via the configfile, the --debug turns debugging on before this
-    // @TODO: right now you cannot pass in --debug = string and you should be able to
-    if (config.debug) require('debug').enable(config.debug === true || config.debug === 1 ? '*' : config.debug);
-    // @TODO: this has to be config.id because it will vary based on what is using the bootstrap eg lando/hyperdrive
-    config[config.id] = this;
-    // Also just add a generic/reliable key someone can use to get whatever the product is
-    config.product = this;
-  }
+  async runHook(event, data) {
+    return require('../utils/run-hook')(event, data, this.hooks, {[this.id]: this, product: this}, `${this.id}:${this.id}`);
+  };
 }
 
 module.exports = Bootstrapper;

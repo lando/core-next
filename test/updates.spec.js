@@ -14,7 +14,7 @@ chai.should();
 const Github = require('github');
 const Promise = require('../lib/promise');
 
-const UpdateManager = require('./../lib/updates');
+const UpdateManager = require('./../legacy/updates');
 const updates = new UpdateManager();
 
 describe('updates', () => {

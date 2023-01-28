@@ -11,7 +11,7 @@ const filesystem = require('mock-fs');
 const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const Lando = require('./../lib/lando');
+const Lando = require('./../legacy/lando');
 chai.use(require('chai-as-promised'));
 chai.should();
 
