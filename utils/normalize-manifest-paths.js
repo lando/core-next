@@ -2,7 +2,7 @@ const get = require('lodash/get');
 const path = require('path');
 const set = require('lodash/set');
 
-const Config = require('../core/config');
+const Config = require('../lib/config');
 
 module.exports = (data = {}, base) => {
   // @TODO: allow this to handle objects and arrays

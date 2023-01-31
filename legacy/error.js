@@ -2,12 +2,10 @@
 
 // Modules
 const Log = require('./logger');
-const Metrics = require('./metrics');
 
 module.exports = class ErrorHandler {
-  constructor(log = new Log(), metrics = new Metrics()) {
+  constructor(log = new Log()) {
     this.log = log;
-    this.metrics = metrics;
   };
 
   /**
@@ -32,9 +30,6 @@ module.exports = class ErrorHandler {
       else this.log.error(message);
     }
     // Report error if we can
-    return Promise.resolve().then(() => {
-      if (report) return this.metrics.report('error', {message: message, stack: stack});
-    })
-    .then(() => code);
+    return Promise.resolve(code);
   };
 };

@@ -24,7 +24,7 @@ const resetPlatform = () => {
   Object.defineProperty(process, 'platform', {value: originalPlatform});
 };
 
-const env = require('./../lib/env');
+const env = require('./../legacy/env');
 
 describe('env', () => {
   describe('#getDockerBinPath', () => {

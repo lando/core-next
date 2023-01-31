@@ -12,10 +12,10 @@ const filesystem = require('mock-fs');
 chai.should();
 chai.use(require('chai-as-promised'));
 const sinon = require('sinon');
-const Landerode = require('./../lib/docker');
+const Landerode = require('./../legacy/docker');
 const landerode = new Landerode();
 const Dockerode = require('dockerode');
-const Promise = require('./../lib/promise');
+const Promise = require('./../legacy/promise');
 const _ = require('lodash');
 
 const dummyContainer = (overrides = {}) => {

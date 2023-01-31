@@ -2,8 +2,8 @@ const debug = require('debug')('@lando/core:utils:get-plugins');
 const findPlugins = require('./find-plugins');
 const normalizePlugins = require('./normalize-plugins');
 
-const Config = require('../core/config');
-const DefaultPlugin = require('../core/plugin');
+const Config = require('../lib/config');
+const DefaultPlugin = require('../lib/plugin');
 
 /*
  * TBD

@@ -1,9 +1,9 @@
 const groupBy = require('lodash/groupBy');
 const path = require('path');
 
-const Config = require('./config');
-const FileStorage = require('./../components/file-storage');
-const Plugin = require('./plugin');
+const Config = require('../lib/config');
+const FileStorage = require('./file-storage');
+const Plugin = require('../lib/plugin');
 
 class Bootstrapper {
   static findApp(files, startFrom) {
@@ -21,6 +21,19 @@ class Bootstrapper {
   // an internal and protected caching mechanism
   #_cache;
 
+  #_init() {
+    this.plugins = this.getPlugins();
+    this.registry = this.getRegistry();
+    this.hooks = this.getHooks();
+  }
+
+  // an internal way to "reinit" the bootstrap eg remove caches and repopulate them
+  // @NOTE: should this be internal?
+  #_reint() {
+    this.#clearInternalCache(['disabled', 'invalid-plugins', 'plugins', 'registry']);
+    this.#_init();
+  }
+
   // this is designed to specifically remove things from #_cache
   #clearInternalCache(keys) {
     // if cache is a string then make into an array
@@ -31,14 +44,6 @@ class Bootstrapper {
     }
     // return keys that have been removed
     return keys ? keys : 'all';
-  }
-
-  // an internal way to "reinit" the bootstrap eg remove caches and repopulate them
-  // @NOTE: should this be internal?
-  #_reint() {
-    this.#clearInternalCache(['disabled', 'invalid-plugins', 'plugins', 'registry']);
-    this.plugins = this.getPlugins();
-    this.registry = this.getRegistry();
   }
 
   constructor({config} = {}) {
@@ -58,7 +63,7 @@ class Bootstrapper {
 
     // get the id
     if (!this.config.get(`${this.config.managed}:system.instance`)) {
-      const data = {system: {instance: require('./../utils/generate-id')()}};
+      const data = {system: {instance: require('../utils/generate-id')()}};
       this.config.save(data);
       this.config.defaults(data);
       this.debug('could not locate instance id, setting to %o', this.config.get('system.instance'));
@@ -83,10 +88,8 @@ class Bootstrapper {
     // @TODO: should we nuke the whole cache or just the registry? right now its just the registry?
     if (!this.config.get('core.caching')) this.#_reint();
 
-    // @TODO: should we do this every time?
-    // @TODO: maybe a protected non-async #init or #setup?
-    this.plugins = this.getPlugins();
-    this.registry = this.getRegistry();
+    // init
+    this.#_init();
   }
 
   // @TODO: the point of this is to have a high level way to "fetch" a certain kind of plugin eg global and
@@ -106,6 +109,22 @@ class Bootstrapper {
 
     // return the plugin
     return plugin;
+  }
+
+  // setup tasks for oclif
+  async bootstrap(config = {}) {
+    // get an id
+    config.id = this.config.get('core.id') || this.config.get('core.id') || config.bin || path.basename(process.argv[1]);
+    // reconcile debug flag
+    config.debug = this.config.get('core.debug') || config.debug || false;
+    // enable debugging if the config is set
+    // @NOTE: this is only for core.debug=true set via the configfile, the --debug turns debugging on before this
+    // @TODO: right now you cannot pass in --debug = string and you should be able to
+    if (config.debug) require('debug').enable(config.debug === true || config.debug === 1 ? '*' : config.debug);
+    // @TODO: this has to be config.id because it will vary based on what is using the bootstrap eg lando/hyperdrive
+    config[config.id] = this;
+    // Also just add a generic/reliable key someone can use to get whatever the product is
+    config.product = this;
   }
 
   findApp(files, startFrom) {
@@ -140,6 +159,30 @@ class Bootstrapper {
       this.config,
       {cache: opts.cache, defaults: opts.defaults, init: opts.init, registry},
     );
+  }
+
+  getHooks() {
+    // if we have something cached then just return that
+    if (this.#_cache.get('hooks')) {
+      const hooks = this.#_cache.get('hooks');
+      this.debug('grabbed %o hooks(s) from hooks cache', hooks.length);
+      return hooks;
+    }
+
+    // if we get here then we need to do task discovery
+    this.debug('running %o hooks discovery...', this.id);
+
+    // get the hooks
+    // NOTE: is this the right logic? both or prefer one over the other?
+    const hooks = [
+      require('../utils/get-manifest-array')('hooks', this).map(group => ({...group, hooks: group.data.product})),
+      require('../utils/get-manifest-array')('hooks', this).map(group => ({...group, hooks: group.data[this.id]})),
+    ].flat();
+
+    // set, debug and return
+    this.#_cache.set('hooks', hooks);
+    this.debug('added %o hook group(s) to the hooks cache', hooks.length);
+    return hooks;
   }
 
   getPlugin(name) {
@@ -251,41 +294,9 @@ class Bootstrapper {
     return plugin;
   }
 
-  // return some system status information
-  status() {
-    // each check should have a requirement and preferred?
-
-    // packaged status
-
-    // user information, not running as root?
-    // userInfo?
-
-    // os/platform information, release info?
-    // os.release() os.version?
-
-    // arch information
-
-    // hardware information?
-    // os.freemem os.totalmem
-
-    console.log(this.config.get('system'));
-  }
-
-  // setup tasks for oclif
-  async bootstrap(config = {}) {
-    // get an id
-    config.id = this.config.get('core.id') || this.config.get('core.id') || config.bin || path.basename(process.argv[1]);
-    // reconcile debug flag
-    config.debug = this.config.get('core.debug') || config.debug || false;
-    // enable debugging if the config is set
-    // @NOTE: this is only for core.debug=true set via the configfile, the --debug turns debugging on before this
-    // @TODO: right now you cannot pass in --debug = string and you should be able to
-    if (config.debug) require('debug').enable(config.debug === true || config.debug === 1 ? '*' : config.debug);
-    // @TODO: this has to be config.id because it will vary based on what is using the bootstrap eg lando/hyperdrive
-    config[config.id] = this;
-    // Also just add a generic/reliable key someone can use to get whatever the product is
-    config.product = this;
-  }
+  async runHook(event, data) {
+    return require('../utils/run-hook')(event, data, this.hooks, {[this.id]: this, product: this}, `${this.id}:${this.id}`);
+  };
 }
 
 module.exports = Bootstrapper;

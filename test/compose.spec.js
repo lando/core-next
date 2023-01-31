@@ -10,7 +10,7 @@ const chai = require('chai');
 const expect = chai.expect;
 chai.should();
 
-const compose = require('./../lib/compose');
+const compose = require('./../legacy/compose');
 
 const myOpts = {
   'id': 'appname_service_1',

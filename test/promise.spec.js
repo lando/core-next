@@ -11,7 +11,7 @@ const sinon = require('sinon');
 chai.use(require('chai-as-promised'));
 chai.should();
 
-const Promise = require('../lib/promise');
+const Promise = require('../legacy/promise');
 
 describe('promise', () => {
   describe('#Promise', () => {

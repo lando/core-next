@@ -14,7 +14,7 @@ const fs = require('fs');
 const NodeCache = require('node-cache');
 chai.should();
 
-const Cache = require('./../lib/cache');
+const Cache = require('./../legacy/cache');
 
 describe('cache', () => {
   describe('#Cache', () => {

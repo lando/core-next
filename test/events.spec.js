@@ -12,7 +12,7 @@ const sinonChai = require('sinon-chai');
 chai.use(sinonChai);
 chai.should();
 
-const AsyncEvents = require('../lib/events');
+const AsyncEvents = require('../legacy/events');
 
 describe('events', () => {
   describe('#AsyncEvents', () => {

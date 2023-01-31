@@ -17,7 +17,7 @@ const resetPlatform = function() {
   Object.defineProperty(process, 'platform', {value: originalPlatform});
 };
 
-const user = require('./../lib/user');
+const user = require('./../legacy/user');
 
 // @todo: we need to actually stub out shell-exec because this relies on OS specific things like `id`
 describe('user', () => {

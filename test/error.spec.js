@@ -6,10 +6,9 @@
 'use strict';
 
 const chai = require('chai');
-const ErrorHandler = require('./../lib/error');
+const ErrorHandler = require('./../legacy/error');
 const EventEmitter = require('events').EventEmitter;
-const Metrics = require('./../lib/metrics');
-const Promise = require('./../lib/promise');
+const Promise = require('./../legacy/promise');
 const sinon = require('sinon');
 chai.should();
 chai.use(require('chai-as-promised'));
@@ -20,7 +19,6 @@ describe('error', () => {
       const error = new ErrorHandler();
       error.should.be.instanceof(ErrorHandler);
       error.log.should.be.instanceof(EventEmitter);
-      error.metrics.should.be.instanceof(Metrics);
     });
   });
 

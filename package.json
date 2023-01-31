@@ -23,11 +23,11 @@
     "/utils"
   ],
   "exports": {
-    "./app": "./core/app.js",
-    "./bootstrap": "./core/bootstrap.js",
+    "./app": "./components/app.js",
+    "./bootstrap": "./components/bootstrap.js",
     "./config": "./core/config.js",
     "./file-storage": "./components/file-storage.js",
-    "./lando": "./core/bootstrap.js",
+    "./lando": "./components/bootstrap.js",
     "./plugin": "./core/plugin.js",
     "./utils/*": "./utils/*.js"
   },
@@ -56,15 +56,14 @@
     "test": "yarn lint && yarn test:unit"
   },
   "dependencies": {
+    "@oclif/core": "^2.0.7",
     "axios": "0.21.4",
     "bluebird": "^3.4.1",
     "camelcase-keys": "^7",
     "chalk": "^4",
-    "clean-stacktrace": "^1.1.0",
     "copy-dir": "^0.4.0",
     "dayjs": "^1.8.25",
     "dockerode": "^2.4.2",
-    "github": "^12.0.0",
     "glob": "^7.1.3",
     "ip": "^1.1.8",
     "is-class": "^0.0.9",

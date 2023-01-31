@@ -188,13 +188,10 @@ module.exports = class Lando {
     const AsyncEvents = require('./events');
     const Log = require('./logger');
     const ErrorHandler = require('./error');
-    const UpdateManager = require('./updates');
     this.cache = bootstrap.setupCache(this.log, this.config);
     this.log = new Log(this.config);
-    this.metrics = bootstrap.setupMetrics(this.log, this.config);
-    this.error = new ErrorHandler(this.log, this.metrics),
+    this.error = new ErrorHandler(this.log),
     this.events = new AsyncEvents(this.log);
-    this.updates = new UpdateManager();
     this.user = require('./user');
   };
 

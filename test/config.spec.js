@@ -12,7 +12,7 @@ const filesystem = require('mock-fs');
 const hasher = require('object-hash');
 chai.should();
 
-const config = require('./../lib/config');
+const config = require('./../legacy/config');
 
 describe('config', () => {
   describe('#tryConvertJson', () => {
