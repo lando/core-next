@@ -1,4 +1,4 @@
-const MinApp = require('../lib/minapp');
+const Bootstrapper = require('../lib/bootstrap');
 
 /**
  * @NOTE: the purpose of the minapp is something we can just new MinApp() without a helper async load/init function
@@ -10,10 +10,10 @@ const MinApp = require('../lib/minapp');
  * @TODO: lots of the config loading makes sense in the constructor EXCEPT for selecting the relevant app component
  * to use, that needs to be done outside of this but how do we do that? probably in the load app util function?
  */
-class App extends MinApp {
+class Lando extends Bootstrapper {
   constructor(options) {
     super(options);
   }
 }
 
-module.exports = App;
+module.exports = Lando;
