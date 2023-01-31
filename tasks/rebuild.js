@@ -1,7 +1,7 @@
 'use strict';
 
 const _ = require('lodash');
-const utils = require('./../lib/utils');
+const utils = require('./../legacy/utils');
 
 module.exports = (lando, cli) => {
   return {

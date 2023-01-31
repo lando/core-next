@@ -8,7 +8,6 @@
 const chai = require('chai');
 const ErrorHandler = require('./../legacy/error');
 const EventEmitter = require('events').EventEmitter;
-const Metrics = require('./../legacy/metrics');
 const Promise = require('./../legacy/promise');
 const sinon = require('sinon');
 chai.should();
@@ -20,7 +19,6 @@ describe('error', () => {
       const error = new ErrorHandler();
       error.should.be.instanceof(ErrorHandler);
       error.log.should.be.instanceof(EventEmitter);
-      error.metrics.should.be.instanceof(Metrics);
     });
   });
 

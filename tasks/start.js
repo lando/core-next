@@ -8,7 +8,7 @@ module.exports = () => {
     command: 'start',
     describe: 'starts your app',
     run: async (options, {cli, context, lando, minapp}) => {
-      console.log(lando);
+      // console.log(lando);
       lando.runHook('init');
 
       // @TODO: throw an error if context.app === false or we dont have a minapp?
