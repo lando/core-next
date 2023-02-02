@@ -1,3 +1,5 @@
+'use strict';
+
 const path = require('path');
 
 // @NOTE: context will be lando if global and a minapp if app

@@ -1,3 +1,5 @@
+'use strict';
+
 const MinApp = require('../lib/minapp');
 
 /**

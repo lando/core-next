@@ -1,3 +1,5 @@
+'use strict';
+
 const debug = require('debug')('@lando/core:utils:get-plugins');
 const findPlugins = require('./find-plugins');
 const normalizePlugins = require('./normalize-plugins');

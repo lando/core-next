@@ -1,3 +1,5 @@
+'use strict';
+
 // @TODO: figure a better default value for legacy-logger?
 module.exports = (debug = require('debug')('legacy-logger')) => ({
   error: (...args) => {

@@ -1,3 +1,5 @@
+'use strict';
+
 // Modules
 
 // @TODO: remove lodash usage as much as possible?
@@ -108,7 +110,7 @@ class LegacyApp extends MinApp {
     this.ComposeService = this.getComponent('legacy.services._compose');
 
     // setup the cache
-    this.cache = new FileStorage(({debugspace: this.name, dir: this.cacheDir}));
+    this.cache = new FileStorage(({dir: this.cacheDir}));
     // and "metaCache"
     this.metaCache = 'meta.cache';
     this.meta = this.cache.get(this.metaCache) || {};

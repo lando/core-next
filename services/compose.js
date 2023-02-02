@@ -1,4 +1,5 @@
 // @TODO: simplify lodash usage to just merge?
+'use strict';
 
 class ComposeService {
   constructor(id, info = {}, ...sources) {

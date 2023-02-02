@@ -1,3 +1,5 @@
+'use strict';
+
 const chalk = require('chalk');
 const debug = require('debug')('static@lando/core:lando-cli');
 const parseStdoutJson = require('../utils/parse-stdout-json');
@@ -33,7 +35,6 @@ class LandoCLI {
   constructor({
     version,
     bin = LandoCLI.config.bin,
-    debugspace = LandoCLI.config.debugspace,
     id = LandoCLI.config.id,
     product = LandoCLI.config.product,
     autoSync = LandoCLI.config.autoSync,
@@ -55,7 +56,6 @@ class LandoCLI {
     // computed props
     this.isInstalled = fs.existsSync(this.bin);
     this.configCommand = `${this.bin} --${this.id}`;
-    this.debug = require('debug')(`${debugspace}:@lando/core:lando-cli`);
 
     // attempt to refresh info if we can
     // NOTE: this will not work if the actual version is less than the required 3.6.5

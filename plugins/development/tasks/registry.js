@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = () => ({
   command: 'registry',
   describe: 'displays the registry for this context',

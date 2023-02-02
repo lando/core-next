@@ -1,3 +1,5 @@
+'use strict';
+
 const ModuleLoader = require('@oclif/core/lib/module-loader').default;
 
 

@@ -1,3 +1,5 @@
+'use strict';
+
 const Bootstrapper = require('../lib/bootstrap');
 
 /**

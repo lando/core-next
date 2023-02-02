@@ -1,3 +1,5 @@
+'use strict';
+
 const fs = require('fs-extra');
 const path = require('path');
 
@@ -9,9 +11,7 @@ class DockerDesktop extends DockerEngine {
   static config = {};
   static supportedPlatforms = ['darwin', 'linux', 'win32', 'wsl'];
 
-  constructor({
-    debugspace = DockerDesktop.config.debugspace,
-  } = {}) {
+  constructor({} = {}) {
     // start by figuring out our dockerode options and passing them upstream
 
     // then set/strip needed ENVVARS
@@ -52,7 +52,6 @@ class DockerDesktop extends DockerEngine {
     // @TODO: options?
     super();
     // @TODO: strip DOCKER ENV? and reset?
-    this.debug = require('debug')(`${debugspace}:@lando/core:docker-desktop`);
     // this.getVersion = this.getVersion();
     // this.isInstalled = this.getInstalled();
   }

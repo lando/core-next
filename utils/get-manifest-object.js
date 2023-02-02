@@ -1,3 +1,5 @@
+'use strict';
+
 const debug = require('debug')('@lando/core:utils:get-manifest-object');
 const nmp = require('./normalize-manifest-paths');
 const path = require('path');

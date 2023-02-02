@@ -1,3 +1,5 @@
+'use strict';
+
 module.exports = () => ({
   command: 'plugins',
   describe: 'displays the plugins for this context',
