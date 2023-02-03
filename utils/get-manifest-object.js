@@ -10,7 +10,7 @@ const Config = require('../lib/config');
  */
 module.exports = (key, {plugins = {}, config, debug = require('../lib/debug')('@lando/core')} = {}) => {
   // spin up a config instance to help us merge it all together
-  const data = new Config({env: false, id: key});
+  const data = new Config({env: false, debug, id: key});
 
   // go through config stores if we can
   if (Object.keys(config).length > 0) {
