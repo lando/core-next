@@ -13,8 +13,13 @@ const Bootstrapper = require('../lib/bootstrap');
  * to use, that needs to be done outside of this but how do we do that? probably in the load app util function?
  */
 class Lando extends Bootstrapper {
-  constructor(options) {
-    super(options);
+  static name = 'lando';
+  static debug = require('../lib/debug')('@lando/core:lando');
+
+  constructor(config) {
+    // provide a debug default if we dont have one?
+    config.debug = config.debug || Lando.debug;
+    super(config);
   }
 }
 

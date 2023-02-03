@@ -13,8 +13,13 @@ const MinApp = require('../lib/minapp');
  * to use, that needs to be done outside of this but how do we do that? probably in the load app util function?
  */
 class App extends MinApp {
-  constructor(options) {
-    super(options);
+  static name = 'app';
+  static debug = require('../lib/debug')('@lando/core:app');
+
+  constructor(config) {
+    // provide a debug default if we dont have one?
+    config.debug = config.debug || App.debug;
+    super(config);
   }
 }
 

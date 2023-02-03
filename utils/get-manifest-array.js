@@ -1,6 +1,5 @@
 'use strict';
 
-const debug = require('debug')('@lando/core:utils:get-manifest-array');
 const nmp = require('./normalize-manifest-paths');
 const path = require('path');
 
@@ -9,7 +8,7 @@ const Config = require('../lib/config');
 /*
  * TBD
  */
-module.exports = (key, {plugins = {}, config = {}} = {}) => {
+module.exports = (key, {plugins = {}, config = {}, debug = require('../lib/debug')('@lando/core')} = {}) => {
   // spin up a config instance to help us merge it all together
   const data = new Config({env: false, id: key});
 
@@ -51,6 +50,6 @@ module.exports = (key, {plugins = {}, config = {}} = {}) => {
     .filter(item => item.data && Object.keys(item.data).length > 0);
 
   // return
-  debug('found %o list(s) in %o', list.length, `manifest.${key}`);
+  debug.extend('get-manifest-array')('found %o list(s) in %o', list.length, `manifest.${key}`);
   return list;
 };

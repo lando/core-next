@@ -1,6 +1,5 @@
 'use strict';
 
-const debug = require('debug')('@lando/core:utils:get-plugins');
 const findPlugins = require('./find-plugins');
 const normalizePlugins = require('./normalize-plugins');
 
@@ -10,7 +9,14 @@ const DefaultPlugin = require('../lib/plugin');
 /*
  * TBD
  */
-module.exports = (sources = [], Plugin = DefaultPlugin, options = {}) => {
+module.exports = (
+  sources = [],
+  options = {},
+  {Plugin = DefaultPlugin, debug = require('../lib/debug')('@lando/core:get-plugins')} = {},
+  ) => {
+  // kick off message
+  debug('looking for plugins in %o', sources.flatMap(source => source.dirs).filter(Boolean).map(dir => dir.dir));
+
   // start by looping through sources and separating all the things
   for (const source of sources) {
     // make sure plugins is at least an empty array

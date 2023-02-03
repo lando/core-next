@@ -5,7 +5,16 @@ const fs = require('fs');
 /*
  * TBD
  */
-module.exports = (component, config, registry = {}, {cache = undefined, configDefaults} = {}) => {
+module.exports = (
+  component,
+  config,
+  registry = {},
+  {
+    configDefaults,
+    cache = undefined,
+    debug = require('../lib/debug')('@lando/core:get-component'),
+  } = {},
+  ) => {
   // save the orignal component before it is mutated
   const originalComponent = component;
   // determine whether we should cache or not
@@ -16,11 +25,6 @@ module.exports = (component, config, registry = {}, {cache = undefined, configDe
   if (!config.constructor || config.constructor.name !== 'Config') {
     throw new Error('get-component requires config be a Config class');
   }
-
-  // setup debugger
-  // @TODO figure app namespace out?
-  const id = config.get('system.id') || 'lando';
-  const debug = require('debug')(`${id}:@lando/core:utils:get-component`);
 
   // first provide some nice handling around "core" components
   // this lets you do stuff like getComponent('core.engine') and get whatever that is set to
@@ -58,15 +62,18 @@ module.exports = (component, config, registry = {}, {cache = undefined, configDe
 
   // set some static config onto the class
   const namespace = Component.cspace || Component.name || component.split('.')[component.split('.').length - 1];
+  // mix in some config
   Component.config = configDefaults || {
     ...config.get('system'),
     ...config.get('core'),
     ...config.get(namespace),
   };
+  // reset the default debug namespace
+  Component.debug = debug.contract(-1).extend(Component.name);
 
   // and set in cache if applicable
   if (shouldCache) {
-    debug('adding component %o into %o cache', component, id);
+    debug('adding component %o into %o cache', component, config.get('app.name') || config.get('system.id'));
     cache[component] = Component;
   }
 

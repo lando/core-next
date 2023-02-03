@@ -1,7 +1,7 @@
 'use strict';
 
 const chalk = require('chalk');
-const debug = require('debug')('static@lando/core:lando-cli');
+const debug = require('../lib/debug')('static@lando/core:lando-cli');
 const parseStdoutJson = require('../utils/parse-stdout-json');
 const fs = require('fs');
 const get = require('lodash/get');
