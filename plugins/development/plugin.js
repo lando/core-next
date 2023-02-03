@@ -17,7 +17,7 @@ module.exports = context => {
     // context.config.debug('%o plugin disables caching, %o set to %o', plugin.name, cacheKey, context.config.get(cacheKey));
 
     // load helper dev tasks
-    plugin.registry.legacy.tasks = {
+    plugin.tasks = {
       'plugins': path.resolve(__dirname, 'tasks', 'plugins'),
       'registry': path.resolve(__dirname, 'tasks', 'registry'),
     };
