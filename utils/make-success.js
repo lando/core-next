@@ -1,3 +1,5 @@
+'use strict';
+
 /*
  * Attempts to produce a standardized error object
  */

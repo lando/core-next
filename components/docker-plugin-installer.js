@@ -1,3 +1,5 @@
+'use strict';
+
 const fs = require('fs');
 const path = require('path');
 
@@ -8,11 +10,8 @@ const getComponent = Parent => {
     static config = {};
     static supportedPlatforms = ['darwin', 'linux', 'win32', 'wsl'];
 
-    constructor({
-      debugspace = DockerPluginInstaller.config.debugspace,
-    } = {}) {
+    constructor({} = {}) {
       super();
-      this.debug = require('debug')(`${debugspace}:@lando/core:docker-plugin-installer`);
     }
 
     /*

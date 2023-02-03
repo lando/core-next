@@ -1,3 +1,5 @@
+'use strict';
+
 const fs = require('fs-extra');
 const path = require('path');
 const merge = require('lodash/merge');
@@ -8,7 +10,6 @@ const slugify = require('slugify');
 const stringArgv = require('string-argv').default;
 
 const Dockerode = require('dockerode');
-
 const {EventEmitter} = require('events');
 const {nanoid} = require('nanoid');
 const {PassThrough} = require('stream');
@@ -20,14 +21,10 @@ class DockerEngine extends Dockerode {
   // @NOTE: is wsl accurate here?
   static supportedPlatforms = ['linux', 'wsl'];
 
-  constructor({
-    debugspace = DockerEngine.config.debugspace,
-  } = {}) {
+  constructor({} = {}) {
     super();
 
     // @TODO: strip DOCKER ENV? and reset?
-
-    this.debug = require('debug')(`${debugspace}:@lando/core:docker-engine`);
   }
 
   /*

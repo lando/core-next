@@ -14,16 +14,17 @@ class FileStorage extends NodeCache {
   static name = 'file-storage';
   static cspace = 'file-storage';
   static config = {};
+  static debug = require('../lib/debug')('@lando/core:file-storage');
 
   constructor({
-    debugspace = FileStorage.config.debugspace,
+    debug = FileStorage.debug,
     dir = FileStorage.config.dir,
   } = {}) {
     // Get the nodecache opts
     super();
 
     // Set some things
-    this.debug = require('debug')(`${debugspace}:@lando/core:file-storage`);
+    this.debug = debug;
     this.dir = dir;
 
     // Ensure the cache dir exists

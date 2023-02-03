@@ -24,11 +24,12 @@
   ],
   "exports": {
     "./app": "./components/app.js",
-    "./bootstrap": "./components/bootstrap.js",
-    "./config": "./core/config.js",
+    "./bootstrap": "./lib/bootstrap.js",
+    "./config": "./lib/config.js",
+    "./debug": "./lib/debug.js",
     "./file-storage": "./components/file-storage.js",
-    "./lando": "./components/bootstrap.js",
-    "./plugin": "./core/plugin.js",
+    "./lando": "./components/lando.js",
+    "./plugin": "./lib/plugin.js",
     "./utils/*": "./utils/*.js"
   },
   "nyc": {

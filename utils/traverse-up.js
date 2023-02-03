@@ -1,3 +1,5 @@
+'use strict';
+
 const dropRight = require('lodash/dropRight');
 const path = require('path');
 const range = require('lodash/range');

@@ -1,3 +1,5 @@
+'use strict';
+
 const nativePromisePrototype = (async () => {})().constructor.prototype;
 const descriptors = ['then', 'catch', 'finally']
 .map(property => [

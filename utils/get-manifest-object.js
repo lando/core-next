@@ -1,4 +1,5 @@
-const debug = require('debug')('@lando/core:utils:get-manifest-object');
+'use strict';
+
 const nmp = require('./normalize-manifest-paths');
 const path = require('path');
 
@@ -7,7 +8,7 @@ const Config = require('../lib/config');
 /*
  * TBD
  */
-module.exports = (key, {plugins = {}, config} = {}) => {
+module.exports = (key, {plugins = {}, config, debug = require('../lib/debug')('@lando/core')} = {}) => {
   // spin up a config instance to help us merge it all together
   const data = new Config({env: false, id: key});
 
@@ -38,6 +39,6 @@ module.exports = (key, {plugins = {}, config} = {}) => {
   }
 
   // return
-  debug('found %o things(s) in %o', Config.keys(data.get()).length, `manifest.${key}`);
+  debug.extend('get-manifest-object')('found %o things(s) in %o', Config.keys(data.get()).length, `manifest.${key}`);
   return data.getUncoded();
 };

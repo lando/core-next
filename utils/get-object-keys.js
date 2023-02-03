@@ -1,3 +1,5 @@
+'use strict';
+
 /*
  * Returns an array of all keys, nested or otherwise, as "." separated paths but does not expand arrays
  */

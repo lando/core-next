@@ -1,3 +1,5 @@
+'use strict';
+
 const os = require('os');
 const path = require('path');
 const getContext = require('./../utils/get-context');
@@ -28,7 +30,6 @@ module.exports = ({options}) => {
     core: {
       app: 'app',
       caching: true,
-      debugspace: id || path.basename(process.argv[1]) || 'lando',
       debug: false,
       engine: context === 'local' ? 'docker-desktop' : 'docker-engine',
       landofile: '.lando',

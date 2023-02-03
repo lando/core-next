@@ -16,6 +16,12 @@ registry:
     # docker-colima: "./components/docker-colima"
     docker-desktop: "./components/docker-desktop"
     docker-engine: "./components/docker-engine"
+    # docker-colima:
+    # podman:
+
+  # orchestrator:
+  #   docker-compose-1:
+  #   docker-compose-2:
   plugin-installer:
     docker-plugin-installer: "./components/docker-plugin-installer"
   storage:
@@ -23,6 +29,7 @@ registry:
   legacy:
     services:
       _compose: "./services/compose"
+
 tasks:
   config: "./tasks/config"
   destroy: "./tasks/destroy"

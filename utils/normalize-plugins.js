@@ -1,3 +1,5 @@
+'use strict';
+
 /*
  * Takes an object or array of plugins and standarizes them for strcuture and content
  */

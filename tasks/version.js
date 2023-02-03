@@ -1,3 +1,5 @@
+'use strict';
+
 const formats = ['auto', 'inspect', 'json', 'table'];
 
 module.exports = () => ({
