@@ -52,8 +52,7 @@ lando config --path core.development | grep true
 
 # should be dogfooding the plugin
 lando plugins | grep @lando/core | grep /home/runner/work/core-next/core-next
-lando plugins | grep @lando/dev | grep /home/runner/work/core-next/core-next/plugins/dev
-lando plugins | grep @lando/networking | grep /home/runner/work/core-next/core-next/plugins/networking
+lando plugins | grep @lando/development | grep /home/runner/work/core-next/core-next/plugins/development
 ```
 
 THESE TESTS NEED TO END UP BACK IN THE MAIN TESTING BODY
