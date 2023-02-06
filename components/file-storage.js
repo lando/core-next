@@ -52,11 +52,20 @@ class FileStorage extends NodeCache {
    * @alias lando.cache.set
    * @param {String} id The name of the key to store the data with.
    * @param {Any} data The data to store in the cache.
+   * @param {Object} [opts] Options to pass into the cache
+   * @param {Boolean} [opts.persist=false] Whether this cache data should persist between processes. Eg in a file instead of memory
+   * @param {Integer} [opts.ttl=0] Seconds the cache should live. 0 mean forever.
    * @example
    * // Add a string to the cache
    * lando.cache.set('mykey', 'mystring');
+   *
+   * // Add an object to persist in the file cache
+   * lando.cache.set('mykey', data, {persist: true});
+   *
+   * // Add an object to the cache for five seconds
+   * lando.cache.set('mykey', data, {ttl: 5});
    */
-  set(id, data) {
+  set(id, data, {persist = true, ttl = 0} = {}) {
     // get key
     const key = FileStorage.getKey(id);
 
