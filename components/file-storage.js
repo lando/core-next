@@ -7,7 +7,6 @@ const merge = require('lodash/merge');
 const path = require('path');
 
 const NodeCache = require('node-cache');
-const { delimiter } = require('path');
 
 /*
  * Creates a new Cache instance.
@@ -25,7 +24,6 @@ class FileStorage extends NodeCache {
   static getKey = (id, delimiter = FileStorage.config.delimiter) => {
     // if array then join and return
     if (Array.isArray(id)) return id.join(delimiter);
-
     // otherwise just return
     return id;
   };
@@ -52,7 +50,7 @@ class FileStorage extends NodeCache {
    *
    * @since 3.0.0
    * @alias lando.cache.set
-   * @param {String} key The name of the key to store the data with.
+   * @param {String} id The name of the key to store the data with.
    * @param {Any} data The data to store in the cache.
    * @param {Object} [opts] Options to pass into the cache
    * @param {Boolean} [opts.persist=false] Whether this cache data should persist between processes. Eg in a file instead of memory
