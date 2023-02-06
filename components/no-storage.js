@@ -1,19 +1,11 @@
 'use strict';
 
 // Modules
-const fs = require('fs');
 
 class NoStorage {
   static name = 'no-storage';
   static cspace = 'no-storage';
   static debug = require('../lib/debug')('@lando/core:no-storage');
-
-  // helper to wipe a storage directory
-  static flush(dir, debug = NoStorage.debug) {
-    // @TODO: error handle dir?
-    fs.rmSync(dir, {recursive: true});
-    debug('flushed file storage at %o', dir);
-  };
 
   constructor({debug = FileStorage.debug} = {}) {
     this.debug = debug;
@@ -35,7 +27,6 @@ class NoStorage {
 
   /*
    * Manually remove an item from the cache.
-   *
    */
   remove(key) {
     this.debug('did not remove key %o', key);
