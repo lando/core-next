@@ -3,6 +3,7 @@
 // Modules
 const fs = require('fs');
 const jsonfile = require('jsonfile');
+const merge = require('lodash/merge');
 const path = require('path');
 
 const NodeCache = require('node-cache');
@@ -61,7 +62,7 @@ class FileStorage extends NodeCache {
       windowsTrailingRe: /[\. ]+$/,
     };
     for (const pattern of Object.values(patterns)) {
-      if (key.match(pattern)) throw new Error(`Invalid cache key: ${key}`);
+      if (key.match(pattern)) throw new Error(`Invalid file-storage key: ${key}`);
     }
 
     // Try to set cache
@@ -97,10 +98,10 @@ class FileStorage extends NodeCache {
     } else {
       try {
         const data = jsonfile.readFileSync(path.join(this.dir, key));
-        this.debug('retrieved data from file cache %o with key %o', this.dir, key);
+        this.debug('retrieved data from file storage %o with key %o', this.dir, key);
         return data;
       } catch (e) {
-        this.debug('file cache miss with key %o', key);
+        this.debug('file storage cache miss with key %o', key);
       }
     }
   };
@@ -126,6 +127,14 @@ class FileStorage extends NodeCache {
     } catch (e) {
       this.debug('no file storage with key %o', key);
     }
+  };
+
+  // @TBD
+  update(key, value) {
+    // if its an object then merge and set, otherwise just replace
+    if (typeof data === 'object') this.set(key, merge({}, this.get(key), value));
+    // otherwise just replace it
+    else this.set(key, value);
   };
 };
 
