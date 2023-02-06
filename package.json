@@ -28,6 +28,7 @@
     "./config": "./lib/config.js",
     "./debug": "./lib/debug.js",
     "./file-storage": "./components/file-storage.js",
+    "./no-storage": "./components/no-storage.js",
     "./lando": "./components/lando.js",
     "./plugin": "./lib/plugin.js",
     "./utils/*": "./utils/*.js"
