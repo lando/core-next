@@ -45,51 +45,13 @@ class FileStorage extends NodeCache {
     fs.mkdirSync(this.dir, {recursive: true});
   };
 
-  /**
-   * Sets an item in the cache
-   *
-   * @since 3.0.0
-   * @alias lando.cache.set
-   * @param {String} id The name of the key to store the data with.
-   * @param {Any} data The data to store in the cache.
-   * @param {Object} [opts] Options to pass into the cache
-   * @param {Boolean} [opts.persist=false] Whether this cache data should persist between processes. Eg in a file instead of memory
-   * @param {Integer} [opts.ttl=0] Seconds the cache should live. 0 mean forever.
-   * @example
-   * // Add a string to the cache
-   * lando.cache.set('mykey', 'mystring');
-   *
-   * // Add an object to persist in the file cache
-   * lando.cache.set('mykey', data, {persist: true});
-   *
-   * // Add an object to the cache for five seconds
-   * lando.cache.set('mykey', data, {ttl: 5});
-   */
-  set(id, data, {persist = true, ttl = 0} = {}) {
-    // get key
-    const key = FileStorage.getKey(id);
-
-    // Unsafe cache key patterns
-    const patterns = {
-      controlRe: /[\x00-\x1f\x80-\x9f]/g,
-      illegalRe: /[\/\?<>\\:\*\|":]/g,
-      reservedRe: /^\.+$/,
-      windowsReservedRe: /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i,
-      windowsTrailingRe: /[\. ]+$/,
-    };
-    for (const pattern of Object.values(patterns)) {
-      if (key.match(pattern)) throw new Error(`Invalid file-storage key: ${key}`);
-    }
-
-    // Try to set cache
-    if (this.__set(key, data, ttl)) {
-      this.debug('stored %j with key %o at %o', data, key, path.join(this.dir, key));
-    } else {
-      this.debug('failed to store %o with key %o', data, key);
-    }
-
-    // And add to file if we have persistence
-    if (persist) jsonfile.writeFileSync(path.join(this.dir, key), data);
+  // wipes all keys
+  flush() {
+    // clear out memcache
+    super.flushAll();
+    // if we
+    fs.rmSync(this.dir, {recursive: true});
+    this.debug('flushed mem and file storage at %o', this.dir);
   };
 
   /**
@@ -149,6 +111,53 @@ class FileStorage extends NodeCache {
     } catch (e) {
       this.debug('no file storage with key %o', key);
     }
+  };
+
+  /**
+   * Sets an item in the cache
+   *
+   * @since 3.0.0
+   * @alias lando.cache.set
+   * @param {String} id The name of the key to store the data with.
+   * @param {Any} data The data to store in the cache.
+   * @param {Object} [opts] Options to pass into the cache
+   * @param {Boolean} [opts.persist=false] Whether this cache data should persist between processes. Eg in a file instead of memory
+   * @param {Integer} [opts.ttl=0] Seconds the cache should live. 0 mean forever.
+   * @example
+   * // Add a string to the cache
+   * lando.cache.set('mykey', 'mystring');
+   *
+   * // Add an object to persist in the file cache
+   * lando.cache.set('mykey', data, {persist: true});
+   *
+   * // Add an object to the cache for five seconds
+   * lando.cache.set('mykey', data, {ttl: 5});
+   */
+  set(id, data, {persist = true, ttl = 0} = {}) {
+    // get key
+    const key = FileStorage.getKey(id);
+
+    // Unsafe cache key patterns
+    const patterns = {
+      controlRe: /[\x00-\x1f\x80-\x9f]/g,
+      illegalRe: /[\/\?<>\\:\*\|":]/g,
+      reservedRe: /^\.+$/,
+      windowsReservedRe: /^(con|prn|aux|nul|com[0-9]|lpt[0-9])(\..*)?$/i,
+      windowsTrailingRe: /[\. ]+$/,
+    };
+    for (const pattern of Object.values(patterns)) {
+      if (key.match(pattern)) throw new Error(`Invalid file-storage key: ${key}`);
+    }
+
+    // Try to set cache
+    if (this.__set(key, data, ttl)) {
+      this.debug('stored %j with key %o at %o', data, key, path.join(this.dir, key));
+    } else {
+      this.debug('failed to store %o with key %o', data, key);
+    }
+
+    // And add to file if we have persistence
+    if (persist) jsonfile.writeFileSync(path.join(this.dir, key), data);
   };
 
   // @TBD

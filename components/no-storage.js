@@ -3,7 +3,6 @@
 class NoStorage {
   static name = 'no-storage';
   static cspace = 'no-storage';
-  static config = {};
   static debug = require('../lib/debug')('@lando/core:no-storage');
 
   constructor({debug = FileStorage.debug} = {}) {
