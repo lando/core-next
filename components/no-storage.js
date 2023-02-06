@@ -1,5 +1,8 @@
 'use strict';
 
+// Modules
+const fs = require('fs');
+
 class NoStorage {
   static name = 'no-storage';
   static cspace = 'no-storage';
