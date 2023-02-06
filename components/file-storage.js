@@ -158,6 +158,7 @@ class FileStorage extends NodeCache {
 
     // if its an object then merge and set, otherwise just replace
     if (typeof data === 'object') this.set(key, merge({}, this.get(key), value));
+
     // otherwise just replace it
     else this.set(key, value);
   };
