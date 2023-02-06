@@ -28,6 +28,13 @@ class FileStorage extends NodeCache {
     return id;
   };
 
+  // helper to wipe a storage directory
+  static flush(dir, debug = FileStorage.debug) {
+    // @TODO: error handle dir?
+    fs.rmSync(dir, {recursive: true});
+    debug('flushed file storage at %o', dir);
+  };
+
   constructor({
     debug = FileStorage.debug,
     delimiter = FileStorage.config.delimiter,
@@ -49,9 +56,11 @@ class FileStorage extends NodeCache {
   flush() {
     // clear out memcache
     super.flushAll();
-    // if we
-    fs.rmSync(this.dir, {recursive: true});
-    this.debug('flushed mem and file storage at %o', this.dir);
+    this.debug('flushed mem storage at');
+
+    // clear out file cache
+    FileStorage.flush(this.dir, this.debug);
+    this.debug('flushed file storage at %o', this.dir);
   };
 
   /**

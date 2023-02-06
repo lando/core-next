@@ -5,6 +5,13 @@ class NoStorage {
   static cspace = 'no-storage';
   static debug = require('../lib/debug')('@lando/core:no-storage');
 
+  // helper to wipe a storage directory
+  static flush(dir, debug = NoStorage.debug) {
+    // @TODO: error handle dir?
+    fs.rmSync(dir, {recursive: true});
+    debug('flushed file storage at %o', dir);
+  };
+
   constructor({debug = FileStorage.debug} = {}) {
     this.debug = debug;
   };
