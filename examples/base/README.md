@@ -53,6 +53,10 @@ lando config --path core.development | grep true
 # should be dogfooding the plugin
 lando plugins | grep @lando/core | grep /home/runner/work/core-next/core-next
 lando plugins | grep @lando/development | grep /home/runner/work/core-next/core-next/plugins/development
+
+# should run tasks provided by local plugins
+lando stuff
+lando stuff2
 ```
 
 THESE TESTS NEED TO END UP BACK IN THE MAIN TESTING BODY

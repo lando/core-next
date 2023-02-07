@@ -1,9 +1,9 @@
 'use strict';
 
-module.exports = () => ({
+module.exports = cli => ({
   command: 'registry',
   describe: 'displays the registry for this context',
-  run: async (options, {cli, context, lando, minapp}) => {
-    cli.log(context.app ? minapp.getRegistry() : lando.getRegistry());
+  run: async (options, {ctx}) => {
+    cli.log(ctx.getRegistry());
   },
 });

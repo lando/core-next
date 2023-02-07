@@ -1,12 +1,12 @@
 'use strict';
 
-module.exports = (lando, cli) => {
+module.exports = cli => {
   return {
     command: 'destroy',
     describe: 'Destroys your app',
-    options: {
-      yes: cli.confirm('Are you sure you want to DESTROY?'),
-    },
+    // options: {
+    //   yes: cli.confirm('Are you sure you want to DESTROY?'),
+    // },
     run: options => {
       // Stop rebuild if user decides its a nogo
       if (!options.yes) {

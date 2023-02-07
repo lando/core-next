@@ -2,7 +2,7 @@
 
 const formats = ['auto', 'inspect', 'json', 'table'];
 
-module.exports = () => ({
+module.exports = cli => ({
   command: 'config',
   describe: 'displays the lando configuration',
   options: {
@@ -21,7 +21,7 @@ module.exports = () => ({
       string: true,
     },
   },
-  run: async (options, {cli, context, lando, minapp}) => {
+  run: async (options, {ctx}) => {
     // mods and deps
     const sortBy = require('lodash/sortBy');
     const util = require('util');
@@ -29,11 +29,8 @@ module.exports = () => ({
     // map over legacy options
     if (options.field) options.path = options.field;
 
-    // get the starting data from the correct context
-    const config = context.app ? minapp.config : lando.config;
-
     // start by just grabbing everything or a single value
-    const data = options.path ? config.getUncoded(options.path) : config.getUncoded();
+    const data = options.path ? ctx.config.getUncoded(options.path) : ctx.config.getUncoded();
 
     // filter out protected config by default
     // if (typeof data === 'object' && !flags.protected) delete data.system;
@@ -65,14 +62,14 @@ module.exports = () => ({
     }
 
     // otherwise construct some rows for tabular display
-    const rows = lando.Config.keys(data, {expandArrays: false}).map(key => {
+    const rows = ctx.Config.keys(data, {expandArrays: false}).map(key => {
       // if we have a path then we need to modify the key
       if (options.path) key = `${options.path}.${key}`;
       // start with the basics
-      const row = {key, value: config.getUncoded(key)};
+      const row = {key, value: ctx.config.getUncoded(key)};
       // also loop through and add the values from each store for use in --extended
-      for (const store of Object.keys(config.stores)) {
-        row[store] = config.getUncoded(`${store}:${key}`);
+      for (const store of Object.keys(ctx.config.stores)) {
+        row[store] = ctx.config.getUncoded(`${store}:${key}`);
       }
 
       return row;
@@ -82,7 +79,7 @@ module.exports = () => ({
     const columns = {key: {}, value: {get: row => cli.prettify(row.value)}};
     // also loop through and add the values from each store for use in --extended
     // @NOTE: this will not add stores with no content
-    for (const [name, store] of Object.entries(config.stores)) {
+    for (const [name, store] of Object.entries(ctx.config.stores)) {
       if (Object.keys(store.store).length > 0) {
         columns[name] = {get: row => cli.prettify(row[name]), extended: true};
       }

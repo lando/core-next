@@ -3,18 +3,18 @@
 const _ = require('lodash');
 const utils = require('./../legacy/utils');
 
-module.exports = (lando, cli) => {
+module.exports = cli => {
   return {
     command: 'rebuild',
     describe: 'Rebuilds your app from scratch, preserving data',
-    options: {
-      service: {
-        describe: 'Rebuild only the specified services',
-        alias: ['s'],
-        array: true,
-      },
-      yes: cli.confirm('Are you sure you want to rebuild?'),
-    },
+    // options: {
+    //   service: {
+    //     describe: 'Rebuild only the specified services',
+    //     alias: ['s'],
+    //     array: true,
+    //   },
+    //   yes: cli.confirm('Are you sure you want to rebuild?'),
+    // },
     run: options => {
       if (!options.yes) {
         console.log(cli.makeArt('appRebuild', {phase: 'abort'}));

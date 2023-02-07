@@ -7,22 +7,22 @@ const filterServices = (service, services = []) => {
   return !_.isEmpty(services) ? _.includes(services, service) : true;
 };
 
-module.exports = (lando, cli) => ({
+module.exports = cli => ({
   command: 'info',
   describe: 'Prints info about your app',
-  options: _.merge({}, cli.formatOptions(), {
-    deep: {
-      describe: 'Get ALL the info',
-      alias: ['d'],
-      default: false,
-      boolean: true,
-    },
-    service: {
-      describe: 'Get info for only the specified services',
-      alias: ['s'],
-      array: true,
-    },
-  }),
+  // options: _.merge({}, cli.formatOptions(), {
+  //   deep: {
+  //     describe: 'Get ALL the info',
+  //     alias: ['d'],
+  //     default: false,
+  //     boolean: true,
+  //   },
+  //   service: {
+  //     describe: 'Get info for only the specified services',
+  //     alias: ['s'],
+  //     array: true,
+  //   },
+  // }),
   run: options => {
     // Try to get our app
     const app = lando.getApp(options._app.root);

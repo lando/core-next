@@ -1,10 +1,10 @@
 'use strict';
 
-module.exports = lando => ({
+module.exports = cli => ({
   command: 'stuff2',
   level: 'tasks',
   describe: 'Tests another app loaded plugin',
   run: () => {
-    console.log('I WORKED!');
+    cli.log('I WORKED!');
   },
 });

@@ -3,11 +3,11 @@
 // const _ = require('lodash');
 // const utils = require('./../lib/utils');
 
-module.exports = () => {
+module.exports = cli => {
   return {
     command: 'start',
     describe: 'starts your app',
-    run: async (options, {cli, context, debug, lando, minapp}) => {
+    run: async (options, {context, debug, lando, minapp}) => {
       // console.log(lando);
       debug('hello');
 

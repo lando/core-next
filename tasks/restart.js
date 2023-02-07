@@ -3,7 +3,7 @@
 const _ = require('lodash');
 const utils = require('./../legacy/utils');
 
-module.exports = (lando, cli) => {
+module.exports = cli => {
   return {
     command: 'restart',
     describe: 'Restarts your app',

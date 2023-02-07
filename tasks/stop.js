@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = (lando, cli) => ({
+module.exports = cli => ({
   command: 'stop',
   describe: 'Stops your app',
   run: options => {

@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = (lando, cli) => {
+module.exports = cli => {
   return {
     command: 'share',
     describe: 'Shares your local site publicly',

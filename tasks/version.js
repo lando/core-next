@@ -2,7 +2,7 @@
 
 const formats = ['auto', 'inspect', 'json', 'table'];
 
-module.exports = () => ({
+module.exports = cli => ({
   command: 'version',
   describe: 'displays lando version information',
   options: {
@@ -31,13 +31,12 @@ module.exports = () => ({
       type: 'boolean',
     },
   },
-  run: async (options, {cli, context, lando, minapp}) => {
+  run: async (options, {ctx}) => {
     const util = require('util');
 
     // lets just start with the CLI version
-    const config = context.app ? minapp.config : lando.config;
-    const plugins = (context.app ? minapp.getPlugins() : lando.getPlugins());
-    let data = {'@lando/cli': `v${config.get('system.version')}`};
+    const plugins = ctx.getPlugins();
+    let data = {'@lando/cli': `v${ctx.config.get('system.version')}`};
 
     // if all then add in all the plugin data
     if (options.all) for (const [name, plugin] of Object.entries(plugins)) data[name] = plugin.version;
