@@ -5,6 +5,7 @@ const fs = require('fs');
 const jsonfile = require('jsonfile');
 const merge = require('lodash/merge');
 const path = require('path');
+const id2key = require('../utils/normalize-id2key');
 
 const NodeCache = require('node-cache');
 
@@ -21,17 +22,13 @@ class FileStorage extends NodeCache {
   };
 
   // @TBD: helper to get key from an id
-  static getKey = (id, delimiter = FileStorage.config.delimiter) => {
-    // if array then join and return
-    if (Array.isArray(id)) return id.join(delimiter);
-    // otherwise just return
-    return id;
-  };
+  static getKey = (id, delimiter = FileStorage.config.delimiter) => id2key(id, delimiter = FileStorage.config.delimiter);
 
   // helper to wipe a storage directory
   static flush(dir, debug = FileStorage.debug) {
     // @TODO: error handle dir?
     fs.rmSync(dir, {recursive: true});
+    fs.mkdirSync(dir, {recursive: true});
     debug('flushed file storage at %o', dir);
   };
 
@@ -83,18 +80,32 @@ class FileStorage extends NodeCache {
 
     // Return result if its in memcache
     if (memResult) {
-      this.debug('retrieved from memcache with key %o', key);
+      this.debug('retrieved %o items from mem at key %o', Object.keys(memResult).length, key);
       return memResult;
     } else {
       try {
         const data = jsonfile.readFileSync(path.join(this.dir, key));
-        this.debug('retrieved data from file storage %o with key %o', this.dir, key);
+        this.debug('retrieved %o items from file storage at %o', Object.keys(data).length, path.join(this.dir, key));
         return data;
       } catch (e) {
         this.debug('file storage cache miss with key %o', key);
       }
     }
   };
+
+  // TBD
+  has(id) {
+    // get key
+    const key = FileStorage.getKey(id);
+    // return true if its in the memcache
+    if (this.__get(key)) return true;
+    // otherwise look for it in file storage
+    try {
+      return jsonfile.readFileSync(path.join(this.dir, key)) ? true : false;
+    } catch (e) {
+      return false;
+    }
+  }
 
   /**
    * Manually remove an item from the cache.
@@ -160,9 +171,9 @@ class FileStorage extends NodeCache {
 
     // Try to set cache
     if (this.__set(key, data, ttl)) {
-      this.debug('stored %j with key %o at %o', data, key, path.join(this.dir, key));
+      this.debug('set %o items into mem and file storage at %o', Object.keys(data).length, path.join(this.dir, key));
     } else {
-      this.debug('failed to store %o with key %o', data, key);
+      this.debug('failed to set %o items at key %o', Object.key(data).length, key);
     }
 
     // And add to file if we have persistence
