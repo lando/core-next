@@ -16,6 +16,8 @@ module.exports = ({options}) => {
   const configDir = path.join(baseDir, 'config');
   const dataDir = path.join(baseDir, 'data');
   const logsDir = path.join(baseDir, 'logs');
+  const syscacheDir = path.join(baseDir, 'syscache');
+
   const errlog = path.join(logsDir, 'error.log');
 
   // get versions
@@ -92,6 +94,7 @@ module.exports = ({options}) => {
       root: path.resolve(__dirname, '..'),
       runtime: 4,
       server: 'node',
+      syscacheDir,
       totalmem: os.totalmem() / 1_073_741_824,
       version: pjson.version,
       windows: process.platform === 'win32',
