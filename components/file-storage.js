@@ -82,10 +82,13 @@ class FileStorage extends NodeCache {
     if (memResult) {
       this.debug('retrieved %o items from mem at key %o', Object.keys(memResult).length, key);
       return memResult;
+
+    // otherwise try to get from file storage
     } else {
       try {
         const data = jsonfile.readFileSync(path.join(this.dir, key));
         this.debug('retrieved %o items from file storage at %o', Object.keys(data).length, path.join(this.dir, key));
+        this.__set(key, data, 0);
         return data;
       } catch (e) {
         this.debug('file storage cache miss with key %o', key);
