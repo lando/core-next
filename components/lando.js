@@ -1,6 +1,6 @@
 'use strict';
 
-const Bootstrapper = require('../lib/bootstrap');
+const Product = require('../lib/product');
 
 /**
  * @NOTE: the purpose of the minapp is something we can just new MinApp() without a helper async load/init function
@@ -12,7 +12,7 @@ const Bootstrapper = require('../lib/bootstrap');
  * @TODO: lots of the config loading makes sense in the constructor EXCEPT for selecting the relevant app component
  * to use, that needs to be done outside of this but how do we do that? probably in the load app util function?
  */
-class Lando extends Bootstrapper {
+class Lando extends Product {
   static name = 'lando';
   static debug = require('../lib/debug')('@lando/core:lando');
 
