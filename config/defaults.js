@@ -34,8 +34,6 @@ module.exports = ({options}) => {
       caching: true,
       debug: false,
       engine: context === 'local' ? 'docker-desktop' : 'docker-engine',
-      landofile: '.lando',
-      landofiles: ['base', 'dist', 'recipe', 'upstream', '', 'local', 'user'],
       pluginInstaller: 'docker-plugin-installer',
       releaseChannel: 'stable',
       storage: 'file-storage',

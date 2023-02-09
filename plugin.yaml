@@ -9,9 +9,8 @@ hooks:
 
 registry:
   app:
-    app: "./components/app"
-  bootstrap:
-    lando: "./components/lando"
+    app: "./lib/app"
+    cli-app: "./components/cli-app"
   engine:
     # docker-colima: "./components/docker-colima"
     docker-desktop: "./components/docker-desktop"
@@ -22,13 +21,16 @@ registry:
   # orchestrator:
   #   docker-compose-1:
   #   docker-compose-2:
-  plugin-installer:
-    docker-plugin-installer: "./components/docker-plugin-installer"
-  storage:
-    file-storage: "./components/file-storage"
   legacy:
     services:
       _compose: "./services/compose"
+  plugin-installer:
+    docker-plugin-installer: "./components/docker-plugin-installer"
+  product:
+    lando: "./components/lando"
+  storage:
+    file-storage: "./components/file-storage"
+    no-storage: "./components/no-storage"
 
 tasks:
   config: "./tasks/config"
