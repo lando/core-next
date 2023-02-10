@@ -106,8 +106,9 @@ class CliApp extends App {
       sources: Object.fromEntries(appfiles.map(appfile => ([appfile.type, appfile.path]))),
     });
 
-    // ensure pluginDirs is at least an empty array
+    // ensure some default appConfig values
     if (!appConfig.get('pluginDirs')) appConfig.set('pluginDirs', []);
+    if (!appConfig.get('plugins')) appConfig.set('plugins', {});
 
     // frontload a standard plugin directory for a cli api and normalize all to root
     appConfig.set('pluginDirs', [...appConfig.get('pluginDirs').map(dir => path.resolve(root, dir)), path.join(repoDir, 'plugins')]);
