@@ -40,38 +40,51 @@ module.exports = ({options}) => {
       telemetry: true,
     },
     plugin: {
-      showCore: true,
-      // these are "additional" directories to scan for plugins on top of the "core/internal" that are loaded no
-      // matter what
-      dirs: {
-        system: {
-          type: 'global',
+      dirs: [
+        // these are internal plugins
+        {
+          id: 'core',
+          dir: path.join(__dirname, '..'),
+          depth: 0,
+        },
+        {
+          id: 'core-plugins',
+          dir: path.join(__dirname, '..', 'plugins'),
+          depth: 2,
+        },
+
+        // these should be globally loaded and avialable to all users
+        {
+          id: 'system',
           dir: path.join(getSysDataPath(id), 'system', 'plugins'),
           depth: 2,
         },
-        global: {
-          type: 'global',
+        {
+          id: 'global',
           dir: path.join(getSysDataPath(id), 'global', 'plugins'),
           depth: 2,
         },
-        userCore: {
-          type: 'user',
+
+        // these are to handle "updates" to @lando/core
+        {
+          id: 'core-updates',
           dir: path.join(dataDir, 'plugins', '@lando', 'core-next'),
           depth: 0,
         },
-        userCorePlugins: {
-          type: 'user',
+        {
+          id: 'core-plugins-updates',
           dir: path.join(dataDir, 'plugins', '@lando', 'core-next', 'plugins'),
           depth: 2,
         },
-        user: {
-          type: 'user',
+
+        // this is the users global plugins directory
+        {
+          id: 'user',
           dir: path.join(dataDir, 'plugins'),
           depth: 2,
         },
-      },
+      ],
     },
-    registry: {},
     system: {
       arch: os.arch(),
       cacheDir,
