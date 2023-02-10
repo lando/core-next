@@ -10,7 +10,8 @@ hooks:
 registry:
   app:
     app: "./lib/app"
-    cli-app: "./components/cli-app"
+    app-v3: "./components/landofile-v3-app"
+    landofile-v3-app: "./components/landofile-v3-app"
   engine:
     # docker-colima: "./components/docker-colima"
     docker-desktop: "./components/docker-desktop"

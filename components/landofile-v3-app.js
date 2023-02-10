@@ -7,11 +7,11 @@ const slugify = require('slugify');
 const yaml = require('yaml');
 
 const App = require('../lib/app');
-const Config = require('./../lib/config');
+const Config = require('../lib/config');
 
 class CliApp extends App {
-  static debug = require('../lib/debug')('@lando/core:cli-app');
-  static name = 'cli-app';
+  static debug = require('../lib/debug')('@lando/core:landofile-v3-app');
+  static name = 'landofile-v3-app';
 
   static getAppfiles(files = [], {
     base = process.cwd(),
@@ -103,15 +103,14 @@ class CliApp extends App {
       managed: 'main',
       env: `${prod}-${name}`.toUpperCase().replace(/-/gi, '_'),
       id: name,
-      sources: Object.fromEntries(appfiles.map(appfile => ([appfile.type, appfile.path]))),
+      sources: {
+        defaults: path.resolve(__dirname, '..', 'config', 'landofile-v3-app-defaults.js'),
+        ...Object.fromEntries(appfiles.map(appfile => ([appfile.type, appfile.path]))),
+      },
     });
 
-    // ensure some default appConfig values
-    if (!appConfig.get('pluginDirs')) appConfig.set('pluginDirs', []);
-    if (!appConfig.get('plugins')) appConfig.set('plugins', {});
-
     // frontload a standard plugin directory for a cli api and normalize all to root
-    appConfig.set('pluginDirs', [...appConfig.get('pluginDirs').map(dir => path.resolve(root, dir)), path.join(repoDir, 'plugins')]);
+    appConfig.set('plugin-dirs', [...appConfig.get('plugin-dirs').map(dir => path.resolve(root, dir)), path.join(repoDir, 'plugins')]);
 
     // similarly path normalize any plugins in appconfig that are local
     appConfig.set('plugins', Object.fromEntries(Object.entries(appConfig.getUncoded('plugins'))
