@@ -3,7 +3,7 @@
 const os = require('os');
 const path = require('path');
 const getContext = require('../utils/get-context');
-const getSysDataPath= require('../utils/get-system-data-dir');
+const getSysDataPath = require('../utils/get-system-data-dir');
 
 module.exports = ({options}) => {
   // get stuff we need from options
