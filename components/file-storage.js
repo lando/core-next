@@ -2,10 +2,11 @@
 
 // Modules
 const fs = require('fs');
-const jsonfile = require('jsonfile');
+const id2key = require('../utils/normalize-id2key');
 const merge = require('lodash/merge');
 const path = require('path');
-const id2key = require('../utils/normalize-id2key');
+const read = require('../utils/read-file');
+const write = require('../utils/write-file');
 
 const NodeCache = require('node-cache');
 
@@ -86,7 +87,7 @@ class FileStorage extends NodeCache {
     // otherwise try to get from file storage
     } else {
       try {
-        const data = jsonfile.readFileSync(path.join(this.dir, key));
+        const data = read(path.join(this.dir, key), 'json');
         this.debug('retrieved %o items from file storage at %o', Object.keys(data).length, path.join(this.dir, key));
         this.__set(key, data, 0);
         return data;
@@ -104,7 +105,7 @@ class FileStorage extends NodeCache {
     if (this.__get(key)) return true;
     // otherwise look for it in file storage
     try {
-      return jsonfile.readFileSync(path.join(this.dir, key)) ? true : false;
+      return read(path.join(this.dir, key), 'json') ? true : false;
     } catch (e) {
       return false;
     }
@@ -180,7 +181,7 @@ class FileStorage extends NodeCache {
     }
 
     // And add to file if we have persistence
-    if (persist) jsonfile.writeFileSync(path.join(this.dir, key), data);
+    if (persist) write(path.join(this.dir, key), data, 'json');
   };
 
   // @TBD
