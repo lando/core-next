@@ -5,7 +5,7 @@ const path = require('path');
 const getContext = require('../utils/get-context');
 const getSysDataPath = require('../utils/get-system-data-dir');
 
-module.exports = ({options}) => {
+module.exports = options => {
   // get stuff we need from options
   const {id, env} = options;
 
@@ -29,6 +29,7 @@ module.exports = ({options}) => {
 
   // return the system config
   return {
+    test: ['one', 'two'],
     core: {
       app: 'app',
       caching: true,
@@ -51,6 +52,9 @@ module.exports = ({options}) => {
           id: 'core-plugins',
           dir: path.join(__dirname, '..', 'plugins'),
           depth: 2,
+        },
+        {
+          thing: 'ok',
         },
 
         // these should be globally loaded and avialable to all users
