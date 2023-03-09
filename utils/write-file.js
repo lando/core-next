@@ -5,10 +5,8 @@ const jsonfile = require('jsonfile');
 const path = require('path');
 const yaml = require('yaml');
 
-
-// @TODO: error handling, defaults etc?
-
 module.exports = (file, data, extension) => {
+  // @TODO: error handling, defaults etc?
   // create dir for file?
 
   // set extension if not set
