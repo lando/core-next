@@ -1,5 +1,8 @@
 name: "@lando/core"
 hooks:
+  cli:
+    init:
+      - "./hooks/test.js"
   product:
     init:
       - "./hooks/test.js"
@@ -10,8 +13,8 @@ hooks:
 registry:
   app:
     app: "./lib/app"
-    app-v3: "./components/landofile-v3-app"
-    landofile-v3-app: "./components/landofile-v3-app"
+    appfile-app: "./components/appfile-app"
+    landofile-legacy-app: "./components/legacy-app"
   engine:
     # docker-colima: "./components/docker-colima"
     docker-desktop: "./components/docker-desktop"
@@ -28,6 +31,7 @@ registry:
   plugin-installer:
     docker-plugin-installer: "./components/docker-plugin-installer"
   product:
+    product: "./lib/product"
     lando: "./components/lando"
   storage:
     file-storage: "./components/file-storage"

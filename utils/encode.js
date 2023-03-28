@@ -8,6 +8,6 @@ module.exports = data => {
   if (typeof data === 'string') return data.split('.').map(part => require('lodash/kebabCase')(part)).join('.');
   // if array then map and return
   if (Array.isArray(data)) return data.map(prop => prop.split('.').map(part => require('lodash/kebabCase')(part)).join('.'));
-  // else assume object and return
-  return require('kebabcase-keys')(data, {deep: true});
+  // else assume object and return, ignore keys in plugin format
+  return require('./encode-keys')(data);
 };

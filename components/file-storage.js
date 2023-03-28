@@ -6,6 +6,7 @@ const id2key = require('../utils/normalize-id2key');
 const merge = require('lodash/merge');
 const path = require('path');
 const read = require('../utils/read-file');
+const size = require('../utils/get-size');
 const write = require('../utils/write-file');
 
 const NodeCache = require('node-cache');
@@ -81,14 +82,14 @@ class FileStorage extends NodeCache {
 
     // Return result if its in memcache
     if (memResult) {
-      this.debug('retrieved %o items from mem at key %o', Object.keys(memResult).length, key);
+      this.debug('retrieved %o items from mem at key %o', size(memResult), key);
       return memResult;
 
     // otherwise try to get from file storage
     } else {
       try {
         const data = read(path.join(this.dir, key), 'json');
-        this.debug('retrieved %o items from file storage at %o', Object.keys(data).length, path.join(this.dir, key));
+        this.debug('retrieved %o items from file storage at %o', size(data), path.join(this.dir, key));
         this.__set(key, data, 0);
         return data;
       } catch (e) {
@@ -175,9 +176,9 @@ class FileStorage extends NodeCache {
 
     // Try to set cache
     if (this.__set(key, data, ttl)) {
-      this.debug('set %o items into mem and file storage at %o', Object.keys(data).length, path.join(this.dir, key));
+      this.debug('set %o items into mem and file storage at %o', size(data), path.join(this.dir, key));
     } else {
-      this.debug('failed to set %o items at key %o', Object.key(data).length, key);
+      this.debug('failed to set %o items at key %o', size(data), key);
     }
 
     // And add to file if we have persistence

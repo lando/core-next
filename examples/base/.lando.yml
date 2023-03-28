@@ -6,13 +6,13 @@ compose:
 tooling:
   php:
     service: log
-# pluginDirs:
-#   - plugins
-#   - ./../../plugins
-# plugins:
-#   "@lando/core": ./../..
-#   "@lando/base-test-plugin-2": ./test-plugin-2
-  # "@something/this": "^4"
+pluginDirs:
+  - plugins
+  - ./../../plugins
+plugins:
+  "@lando/core": ./../..
+  "@lando/base-test-plugin-2": ./test-plugin-2
+  "@something/this": "^4"
 
 # get this app to use the new v4 runtime
 runtime: 4
@@ -20,3 +20,4 @@ config:
   core:
     development: true
     telemetry: false
+  pirog: hi

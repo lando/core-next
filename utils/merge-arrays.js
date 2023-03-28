@@ -9,6 +9,8 @@ module.exports = (a, b, ams = 'replace') => {
   const by = ams.split(':')[1] || 'id';
 
   switch (strategy) {
+    case 'aoa':
+      return (a.length === 1) ? [a, b] : [...a, b];
     case 'concat':
       return a.concat(b);
     case 'first':
