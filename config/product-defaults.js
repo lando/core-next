@@ -29,7 +29,6 @@ module.exports = options => {
 
   // return the system config
   return {
-    test: ['one', 'two'],
     core: {
       app: 'app',
       caching: true,
@@ -53,19 +52,12 @@ module.exports = options => {
           dir: path.join(__dirname, '..', 'plugins'),
           depth: 2,
         },
-        {
-          thing: 'ok',
-        },
+        path.join(__dirname, '..', 'plugins-test'),
 
         // these should be globally loaded and avialable to all users
         {
           id: 'system',
-          dir: path.join(getSysDataPath(id), 'system', 'plugins'),
-          depth: 2,
-        },
-        {
-          id: 'global',
-          dir: path.join(getSysDataPath(id), 'global', 'plugins'),
+          dir: path.join(getSysDataPath(id), 'plugins'),
           depth: 2,
         },
 

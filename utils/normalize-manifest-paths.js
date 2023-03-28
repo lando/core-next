@@ -6,12 +6,18 @@ const set = require('lodash/set');
 
 const Config = require('../lib/config');
 
-module.exports = (data = {}, base) => {
-  // @TODO: allow this to handle objects and arrays
-  // go through the keys and try to normalize on base
-  for (const component of Config.keys(data)) {
-    if (component && typeof get(data, component) === 'string' && !path.isAbsolute(get(data, component))) {
-      set(data, component, path.resolve(base, get(data, component)));
+const defaultPathyKeys = ['hooks', 'registry', 'tasks'];
+
+module.exports = (data = {}, base, pathyKeys = defaultPathyKeys) => {
+  // @TODO: error handling?
+
+  for (const key of Config.keys(data)) {
+    // skip if not a pathy key
+    if (!defaultPathyKeys.includes(key.split('.')[0])) continue;
+    // reset data to be an absolute path
+    // @TODO: should we test if abolute path exists?
+    if (key && typeof get(data, key) === 'string' && !path.isAbsolute(get(data, key))) {
+      set(data, key, path.resolve(base, get(data, key)));
     }
   }
 

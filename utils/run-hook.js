@@ -1,6 +1,6 @@
 'use strict';
 
-const ModuleLoader = require('@oclif/core/lib/module-loader').default;
+const ModuleLoader = require('../lib/module-loader');
 
 /*
  * TBD
@@ -8,21 +8,24 @@ const ModuleLoader = require('@oclif/core/lib/module-loader').default;
 module.exports = async (event, data, hooks = [], context = {}, debug = require('../lib/debug')('@lando/core'), errorHandler) => {
   // debugger
   debug = debug.extend(`run-hook:${event}`);
-  // just helpful message to indicate we have started a cli hook
-  debug('start %o hook', event);
   // collect successes and failures
   const final = {successes: [], failures: []};
-
+  // just helpful message to indicate we have started a cli hook
+  debug('start %o hook', event);
+  // get hooks
+  const groups = hooks[event] || [];
   // generate promises from hooks
-  const promises = hooks.map(async group => {
+  const promises = groups.map(async group => {
+    // if this is not a group then make it a group of one
+    if (typeof group === 'string') group = [group];
+
     // @NOTE: i dont think "this" works in async functions?
-    const ctx = {...context, debug: debug.contract(-2).extend(`plugin:${group.name || group.id}`)};
-    // get all the runner for this group
-    const runners = group.hooks && group.hooks[event] && Array.isArray(group.hooks[event]) ? group.hooks[event] : [];
-    // loop through runners and try to get results
-    for (const runner of runners) {
+    const ctx = {...context, debug: debug.contract(-2).extend(`hook:${event}`)};
+
+    // loop through stringy existy runners and try to get results
+    for (const runner of group.filter(runner => runner && typeof runner === 'string')) {
       try {
-        const {isESM, module, filePath} = await ModuleLoader.loadWithData(group, runner);
+        const {isESM, module, filePath} = await ModuleLoader.load(runner);
         debug('start %s %o', isESM ? '(import)' : '(require)', filePath);
         // try to get result
         // @TODO: eventually cli/config are specific to this implementation so they need to be

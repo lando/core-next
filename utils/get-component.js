@@ -39,13 +39,13 @@ module.exports = (
   }
 
   // if there is no component or it does not exist then throw an error
-  if (!registry.getUncoded(component) ||
-    (!fs.existsSync(registry.getUncoded(component)) && !fs.existsSync(`${registry.getUncoded(component)}.js`))) {
+  if (!registry.get(component) ||
+    (!fs.existsSync(registry.get(component)) && !fs.existsSync(`${registry.get(component)}.js`))) {
     throw new Error(`could not find component ${originalComponent} (${component})`);
   }
 
   // otherwise try to load the component from the config
-  const loader = require(registry.getUncoded(component));
+  const loader = require(registry.get(component));
   const isDynamic = loader.extends && typeof loader.getComponent === 'function';
 
   // if component is "dynamically extended" then get its parent and run its getComponent function
@@ -73,7 +73,7 @@ module.exports = (
 
   // and set in cache if applicable
   if (shouldCache) {
-    debug('adding component %o into %o cache', component, config.get('app.name') || config.get('system.id'));
+    debug('adding component %o into %o component cache', component, config.get('app.name') || config.get('system.id'));
     cache[component] = Component;
   }
 

@@ -9,9 +9,9 @@ const yaml = require('yaml');
 const App = require('../lib/app');
 const Config = require('../lib/config');
 
-class CliApp extends App {
-  static debug = require('../lib/debug')('@lando/core:landofile-v3-app');
-  static name = 'landofile-v3-app';
+class AppfileApp extends App {
+  static debug = require('../lib/debug')('@lando/core:appfile-app');
+  static name = 'appfile-app';
 
   static getAppfiles(files = [], {
     base = process.cwd(),
@@ -33,7 +33,7 @@ class CliApp extends App {
       // see if we have any includes
       const includes = get(yaml.parse(fs.readFileSync(appfile.path, 'utf8')), 'includes');
       if (includes) {
-        const appfiles = CliApp.getLandofiles((typeof includes === 'string') ? [includes] : includes, {base, ext, file});
+        const appfiles = AppfileApp.getAppfiles((typeof includes === 'string') ? [includes] : includes, {base, ext, file});
         return [...appfiles, appfile];
       }
       // otherwise arrify and return
@@ -43,7 +43,7 @@ class CliApp extends App {
     .flat(Number.POSITIVE_INFINITY);
   }
 
-  static getId(idFile, {debug = CliApp.debug} = {}) {
+  static getId(idFile, {debug = AppfileApp.debug} = {}) {
     // first try the idFile
     if (fs.existsSync(idFile)) {
       debug('trying to get id from %o', idFile);
@@ -73,7 +73,7 @@ class CliApp extends App {
     config,
     product,
     plugins = {},
-    debug = CliApp.debug,
+    debug = AppfileApp.debug,
   } = {}) {
     // @TODO:
     // throw error if no name?
@@ -91,27 +91,24 @@ class CliApp extends App {
     const repoDir = path.join(root, `.${prod}`);
 
     // get resolved list of appfiles to load
-    // @NOTE: appfiles can only be overridden in the main appfile for, we hope, obvious reasons
-    const appfiles = CliApp.getAppfiles(get(mainfileData, 'config.core.appfiles', config.get('core.appfiles') || ['']), {
+    const appfiles = AppfileApp.getAppfiles(get(mainfileData, 'config.core.appfiles', config.get('core.appfiles') || ['']), {
       base: path.dirname(appfile),
       ext: appfile.split('.').pop(),
       file: path.basename(appfile, `.${appfile.split('.').pop()}`),
     });
 
     // build the app config
-    const appConfig = new Config({
-      managed: 'main',
-      env: `${prod}-${name}`.toUpperCase().replace(/-/gi, '_'),
-      id: name,
-      sources: {
-        defaults: path.resolve(__dirname, '..', 'config', 'landofile-v3-app-defaults.js'),
-        ...Object.fromEntries(appfiles.map(appfile => ([appfile.type, appfile.path]))),
-      },
-    });
+    const appConfig = new Config({managed: 'main', id: name, debug: debug.extend('config')});
+    // then load in app envvars
+    appConfig.env(`${prod}-${name}`.toUpperCase().replace(/-/gi, '_'));
+    // then load in all appfiles in reverse order
+    appfiles.reverse().forEach(appfile => appConfig.file(appfile.type, appfile.path));
+    // and then finally the defaults
+    appConfig.defaults('defaults', require('../config/appfile-app-defaults')());
 
-    // frontload a standard plugin directory for a cli api and normalize all to root
+    // add standard plugin directory for a cli api and normalize all to root
+    // @TODO: should this be something else? pluginDirs is a "legacy" key
     appConfig.set('plugin-dirs', [...appConfig.get('plugin-dirs').map(dir => path.resolve(root, dir)), path.join(repoDir, 'plugins')]);
-
     // similarly path normalize any plugins in appconfig that are local
     appConfig.set('plugins', Object.fromEntries(Object.entries(appConfig.getUncoded('plugins'))
       .map(plugin => ([
@@ -121,12 +118,12 @@ class CliApp extends App {
 
     // figure out the id
     // @NOTE: should we allow this to be passed in?
-    let id = appConfig.get('id') || CliApp.getId(path.join(repoDir, 'id'), {debug});
-
+    let id = appConfig.get('id') || AppfileApp.getId(path.join(repoDir, 'id'), {debug});
     // we shoud be able to invoke super now
     super({name, appConfig, config, debug: debug.contract(-1), id, plugins, product: prod});
 
     // now we can do this thang
+    // add things to config?
     this._appfile = appfile;
     this._appfiles = appfiles;
     this.root = root;
@@ -134,4 +131,4 @@ class CliApp extends App {
   }
 };
 
-module.exports = CliApp;
+module.exports = AppfileApp;
