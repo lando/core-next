@@ -138,7 +138,7 @@ class LegacyApp extends MinApp {
     //   this.shell,
     //   lando.config.instance,
     // );
-  };
+  }
 
   /*
    * @TODO, add compose data to the add
@@ -213,7 +213,7 @@ class LegacyApp extends MinApp {
      */
     .then(() => this.events.emit('post-destroy'))
     .then(() => this.log.info('destroyed app.'));
-  };
+  }
 
   /**
    * Initializes the app
@@ -301,7 +301,7 @@ class LegacyApp extends MinApp {
      * @property {App} app The app instance.
      */
     .then(() => this.events.emit('ready', this));
-  };
+  }
 
   /**
    * Rebuilds an app.
@@ -351,14 +351,14 @@ class LegacyApp extends MinApp {
      */
     .then(() => this.events.emit('post-rebuild'))
     .then(() => this.log.info('rebuilt app.'));
-  };
+  }
 
  /*
   * @TODO
   */
   reset() {
     this.initialized = false;
-  };
+  }
 
  /**
    * Stops and then starts an app.
@@ -381,7 +381,7 @@ class LegacyApp extends MinApp {
     return this.stop()
     .then(() => this.start())
     .then(() => this.log.info('restarted app.'));
-  };
+  }
 
   /**
    * Starts an app.
@@ -427,7 +427,7 @@ class LegacyApp extends MinApp {
      */
     .then(() => this.events.emit('post-start'))
     .then(() => this.log.info('started app.'));
-  };
+  }
 
   /**
    * Stops an app.
@@ -466,7 +466,7 @@ class LegacyApp extends MinApp {
      */
     .then(() => this.events.emit('post-stop'))
     .then(() => this.log.info('stopped app.'));
-  };
+  }
 
   /**
    * Soft removes the apps services but maintains persistent data like app volumes.
@@ -514,7 +514,7 @@ class LegacyApp extends MinApp {
      */
     .then(() => this.events.emit('post-uninstall'))
     .then(() => this.log.info('uninstalled app.'));
-  };
-};
+  }
+}
 
 module.exports = LegacyApp;

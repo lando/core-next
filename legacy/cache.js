@@ -22,7 +22,7 @@ class Cache extends NodeCache {
     this.cacheDir = cacheDir;
     // Ensure the cache dir exists
     mkdirp.sync(this.cacheDir);
-  };
+  }
 
   /**
    * Sets an item in the cache
@@ -66,7 +66,7 @@ class Cache extends NodeCache {
 
     // And add to file if we have persistence
     if (persist) jsonfile.writeFileSync(path.join(this.cacheDir, key), data);
-  };
+  }
 
   /**
    * Gets an item in the cache
@@ -95,7 +95,7 @@ class Cache extends NodeCache {
         this.log.debug('File cache miss with key %s', key);
       }
     }
-  };
+  }
 
   /**
    * Manually remove an item from the cache.
@@ -118,8 +118,8 @@ class Cache extends NodeCache {
     } catch (e) {
       this.log.debug('No file cache with key %s', key);
     }
-  };
-};
+  }
+}
 
 /*
  * Stores the old get method.

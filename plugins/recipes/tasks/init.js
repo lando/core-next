@@ -39,7 +39,7 @@ const runBuild = (lando, options = {}, steps = []) => lando.Promise.each(steps, 
   } else {
     step.cmd = (_.isFunction(step.cmd)) ? step.cmd(options) : step.cmd;
     return build.run(lando, build.buildRun(_.merge({}, build.runDefaults(lando, options), step)));
-  };
+  }
 });
 
 module.exports = (lando, cli) => {

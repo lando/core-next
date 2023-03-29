@@ -32,7 +32,7 @@ class FileStorage extends NodeCache {
     fs.rmSync(dir, {recursive: true});
     fs.mkdirSync(dir, {recursive: true});
     debug('flushed file storage at %o', dir);
-  };
+  }
 
   constructor({
     debug = FileStorage.debug,
@@ -49,7 +49,7 @@ class FileStorage extends NodeCache {
 
     // Ensure the cache dir exists
     fs.mkdirSync(this.dir, {recursive: true});
-  };
+  }
 
   // wipes all keys
   flush() {
@@ -60,7 +60,7 @@ class FileStorage extends NodeCache {
     // clear out file cache
     FileStorage.flush(this.dir, this.debug);
     this.debug('flushed file storage at %o', this.dir);
-  };
+  }
 
   /**
    * Gets an item in the cache
@@ -96,7 +96,7 @@ class FileStorage extends NodeCache {
         this.debug('file storage cache miss with key %o', key);
       }
     }
-  };
+  }
 
   // TBD
   has(id) {
@@ -136,7 +136,7 @@ class FileStorage extends NodeCache {
     } catch (e) {
       this.debug('no file storage with key %o', key);
     }
-  };
+  }
 
   /**
    * Sets an item in the cache
@@ -183,7 +183,7 @@ class FileStorage extends NodeCache {
 
     // And add to file if we have persistence
     if (persist) write(path.join(this.dir, key), data, 'json');
-  };
+  }
 
   // @TBD
   update(id, value) {
@@ -195,8 +195,8 @@ class FileStorage extends NodeCache {
 
     // otherwise just replace it
     else this.set(key, value);
-  };
-};
+  }
+}
 
 /*
  * Stores the old get method.

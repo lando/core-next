@@ -56,7 +56,7 @@ module.exports = class LandoDaemon {
     this.docker = docker;
     this.events = events;
     this.log = log;
-  };
+  }
 
   /*
    * Tries to active the docker engine/daemon.
@@ -106,7 +106,7 @@ module.exports = class LandoDaemon {
      * @event post_engine_up
      */
     .then(() => this.events.emit('post-engine-up'));
-  };
+  }
 
   down() {
     /*
@@ -169,7 +169,7 @@ module.exports = class LandoDaemon {
       log.debug('engine is down with error', error);
       return Promise.resolve(false);
     });
-  };
+  }
 
   /*
    * Helper to get the versions of the things we need
@@ -224,5 +224,5 @@ module.exports = class LandoDaemon {
         }
         return Promise.resolve(versions);
     }
-  };
+  }
 };

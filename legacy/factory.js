@@ -14,7 +14,7 @@ const dockerCompose = class ComposeService {
     this.id = id;
     this.info = info;
     this.data = _(sources).map(source => _.merge({}, source, {version: '3.6'})).value();
-  };
+  }
 };
 
 /*
@@ -34,7 +34,7 @@ const landoRecipe = class LandoRecipe {
       services: config.services,
       tooling: config.tooling,
     };
-  };
+  }
 };
 
 /*
@@ -47,7 +47,7 @@ module.exports = class Factory {
     {name: '_recipe', builder: landoRecipe},
   ]) {
     this.registry = classes;
-  };
+  }
 
   /*
    * Add things
@@ -56,7 +56,7 @@ module.exports = class Factory {
   add({name, builder, config = {}, parent = null}) {
     this.registry.push({name, builder: builder(this.get(parent), config)});
     return this.get(name);
-  };
+  }
 
   /*
    * Retrieve one or all the builders
@@ -64,5 +64,5 @@ module.exports = class Factory {
    */
   get(name = '') {
     return (!_.isEmpty(name)) ? _.find(this.registry, {name}).builder : this.registry;
-  };
+  }
 };

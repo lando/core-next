@@ -26,5 +26,5 @@ module.exports = (file, data, extension) => {
     case 'json':
       jsonfile.writeFileSync(file, data);
     default:
-  };
+  }
 };

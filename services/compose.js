@@ -6,7 +6,7 @@ class ComposeService {
     this.id = id;
     this.info = info;
     this.data = _(sources).map(source => _.merge({}, source, {version: '3.6'})).value();
-  };
-};
+  }
+}
 
 module.exports = ComposeService;

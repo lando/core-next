@@ -159,6 +159,6 @@ module.exports = {
 
       // Pass it down
       super(id, info, ...sources);
-    };
+    }
   },
 };

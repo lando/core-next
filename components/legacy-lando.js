@@ -196,7 +196,7 @@ module.exports = class Lando {
     this.events = new AsyncEvents(this.log);
     this.updates = new UpdateManager();
     this.user = require('./user');
-  };
+  }
 
   /**
    * Bootstraps Lando, this should
@@ -361,7 +361,7 @@ module.exports = class Lando {
     .then(() => this.log.verbose('bootstrap completed.'))
     .then(() => this.events.emit(`post-bootstrap`, this))
     .then(() => this);
-  };
+  }
 
   /**
    * Gets a fully instantiated App instance.
@@ -399,5 +399,5 @@ module.exports = class Lando {
     // Return us some app!
     const App = require('./app');
     return new App(config.name, _.merge({}, config, {files: landoFiles}), this);
-  };
+  }
 };

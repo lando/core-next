@@ -21,7 +21,7 @@ module.exports = context => {
       'plugins': path.resolve(__dirname, 'tasks', 'plugins'),
       'registry': path.resolve(__dirname, 'tasks', 'registry'),
     };
-  };
+  }
 
   // return plugin
   return plugin;

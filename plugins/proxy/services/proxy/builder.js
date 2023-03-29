@@ -77,6 +77,6 @@ module.exports = {
         userConfRoot: options.userConfRoot,
       };
       super('proxy', _.merge({}, config, augment), proxy, ports);
-    };
+    }
   },
 };

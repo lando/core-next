@@ -20,7 +20,7 @@ class LandoLegacyApp extends AppFileApp {
 
     // invoke super
     super({appfile, config, product, plugins, debug});
-  };
-};
+  }
+}
 
 module.exports = LandoLegacyApp;

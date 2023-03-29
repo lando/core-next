@@ -35,5 +35,5 @@ module.exports = (a, b, ams = 'replace') => {
     case 'replace':
     default:
       return merge(a, b);
-  };
+  }
 };

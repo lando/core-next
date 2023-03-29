@@ -129,6 +129,6 @@ class AppfileApp extends App {
     this.root = root;
     this.sluggypath = slugify(this.root, {lower: true, strict: true});
   }
-};
+}
 
 module.exports = AppfileApp;
