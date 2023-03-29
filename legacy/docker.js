@@ -27,7 +27,7 @@ module.exports = class Landerode extends Dockerode {
     opts.Promise = promise;
     super(opts);
     this.id = id;
-  };
+  }
 
   /*
    * Creates a network
@@ -38,14 +38,14 @@ module.exports = class Landerode extends Dockerode {
     .catch(err => {
       throw new Error(err, 'Error creating network.');
     });
-  };
+  }
 
   /*
    * Inspects a container.
    */
   scan(cid) {
     return containerOpt(this.getContainer(cid), 'inspect', 'Error inspecting container: %j');
-  };
+  }
 
   /*
    * Return true if the container is running otherwise false.
@@ -65,7 +65,7 @@ module.exports = class Landerode extends Dockerode {
       // Otherwise throw
       else throw err;
     });
-  };
+  }
 
   /*
    * Returns a list of Lando containers
@@ -104,7 +104,7 @@ module.exports = class Landerode extends Dockerode {
         return containers;
       }
     });
-  };
+  }
 
   /*
    * Remove a container.
@@ -112,12 +112,12 @@ module.exports = class Landerode extends Dockerode {
    */
   remove(cid, opts = {v: true, force: false}) {
     return containerOpt(this.getContainer(cid), 'remove', 'Error removing container: %j', opts);
-  };
+  }
 
   /*
    * Do a docker stop
    */
   stop(cid, opts = {}) {
     return containerOpt(this.getContainer(cid), 'stop', 'Error stopping container: %j', opts);
-  };
+  }
 };

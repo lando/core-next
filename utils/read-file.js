@@ -27,5 +27,5 @@ module.exports = (file, extension) => {
       return jsonfile.readFileSync(file);
     default:
       // throw error
-  };
+  }
 };

@@ -13,7 +13,7 @@ const yaml = require('js-yaml');
 module.exports = class Yaml {
   constructor(log = new Log()) {
     this.log = log;
-  };
+  }
 
   /**
    * Loads a yaml object from a file.
@@ -32,7 +32,7 @@ module.exports = class Yaml {
     } catch (e) {
       this.log.error('Problem parsing %s with %s', file, e.message);
     }
-  };
+  }
 
   /**
    * Dumps an object to a YAML file
@@ -52,5 +52,5 @@ module.exports = class Yaml {
     fs.writeFileSync(file, yaml.safeDump(data));
     // Log and return filename
     return file;
-  };
+  }
 };

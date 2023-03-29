@@ -172,7 +172,7 @@ exports.moveConfig = (src, dest = os.tmpdir()) => {
       .filter(file => path.extname(file) === '.sh')
       .value()
     , dest);
-  };
+  }
 
   // Return the new scripts directory
   return dest;

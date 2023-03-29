@@ -155,7 +155,7 @@ module.exports = class App {
     // do stuff with them later
     this.warnings = [];
     this.id = hasher(`${this.name}-${this.root}`);
-  };
+  }
 
   /*
    * @TODO, add compose data to the add
@@ -230,7 +230,7 @@ module.exports = class App {
      */
     .then(() => this.events.emit('post-destroy'))
     .then(() => this.log.info('destroyed app.'));
-  };
+  }
 
   /**
    * Initializes the app
@@ -311,7 +311,7 @@ module.exports = class App {
      * @property {App} app The app instance.
      */
     .then(() => this.events.emit('ready', this));
-  };
+  }
 
   /**
    * Rebuilds an app.
@@ -361,14 +361,14 @@ module.exports = class App {
      */
     .then(() => this.events.emit('post-rebuild'))
     .then(() => this.log.info('rebuilt app.'));
-  };
+  }
 
  /*
   * @TODO
   */
   reset() {
     this.initialized = false;
-  };
+  }
 
  /**
    * Stops and then starts an app.
@@ -391,7 +391,7 @@ module.exports = class App {
     return this.stop()
     .then(() => this.start())
     .then(() => this.log.info('restarted app.'));
-  };
+  }
 
   /**
    * Starts an app.
@@ -437,7 +437,7 @@ module.exports = class App {
      */
     .then(() => this.events.emit('post-start'))
     .then(() => this.log.info('started app.'));
-  };
+  }
 
   /**
    * Stops an app.
@@ -476,7 +476,7 @@ module.exports = class App {
      */
     .then(() => this.events.emit('post-stop'))
     .then(() => this.log.info('stopped app.'));
-  };
+  }
 
   /**
    * Soft removes the apps services but maintains persistent data like app volumes.
@@ -524,5 +524,5 @@ module.exports = class App {
      */
     .then(() => this.events.emit('post-uninstall'))
     .then(() => this.log.info('uninstalled app.'));
-  };
+  }
 };

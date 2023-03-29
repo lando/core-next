@@ -38,6 +38,6 @@ module.exports = {
         },
       };
       super('ca', _.merge({}, config, {env, labels, userConfRoot}), caService);
-    };
+    }
   },
 };

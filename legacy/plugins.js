@@ -45,7 +45,7 @@ module.exports = class Plugins {
   constructor(log = new Log()) {
     this.registry = [];
     this.log = log;
-  };
+  }
 
   /**
    * Finds plugins
@@ -99,7 +99,7 @@ module.exports = class Plugins {
       .map(plugins => _.last(plugins))
       .map(plugin => _.merge({}, plugin, discoverPlugin(plugin)))
       .value();
-  };
+  }
 
   /**
    * Loads a plugin.
@@ -123,5 +123,5 @@ module.exports = class Plugins {
     this.log.debug('plugin %s loaded from %s', plugin.name, file);
     this.log.silly('plugin %s has', plugin.name, plugin.data);
     return plugin;
-  };
+  }
 };

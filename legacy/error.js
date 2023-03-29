@@ -6,7 +6,7 @@ const Log = require('./logger');
 module.exports = class ErrorHandler {
   constructor(log = new Log()) {
     this.log = log;
-  };
+  }
 
   /**
    * Returns the lando options
@@ -31,5 +31,5 @@ module.exports = class ErrorHandler {
     }
     // Report error if we can
     return Promise.resolve(code);
-  };
+  }
 };

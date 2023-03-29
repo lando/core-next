@@ -146,6 +146,6 @@ module.exports = {
       options.proxy = _.set(options.proxy, options.proxyService, [`${options.app}.${options._app._config.domain}`]);
       // Downstream
       super(id, options);
-    };
+    }
   },
 };

@@ -16,7 +16,7 @@ class AsyncEvents extends EventEmitter {
     // Set things
     this.log = log;
     this._listeners = [];
-  };
+  }
 
   /**
    * Our overridden event on method.
@@ -54,7 +54,7 @@ class AsyncEvents extends EventEmitter {
     this.log.silly('loading event %s priority %s', name, priority);
     // Call originl on method.
     return this.__on(name, fn);
-  };
+  }
 
   /**
    * Reimplements event emit method.
@@ -122,8 +122,8 @@ class AsyncEvents extends EventEmitter {
 
     // Return true if event had listeners just like the original emit function.
     .return(!!fns.length);
-  };
-};
+  }
+}
 
 /*
  * Stores the original event on method.

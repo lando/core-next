@@ -73,7 +73,7 @@ module.exports = class Shell {
     this.running = [];
     this.stdout = stdoutStream();
     this.stderr = stderrStream();
-  };
+  }
 
   /**
    * Gets running processes.
@@ -84,7 +84,7 @@ module.exports = class Shell {
    */
    get() {
     return this.running;
-   };
+   }
 
   /**
    * Runs a command.
@@ -157,7 +157,7 @@ module.exports = class Shell {
       _.remove(this.running, proc => proc.id === id);
       return (code !== 0) ? Promise.reject(new Error(stderr)) : Promise.resolve(stdout);
     });
-  };
+  }
 
   /**
    * Returns the path of a specific command or binary.
@@ -173,5 +173,5 @@ module.exports = class Shell {
    */
   which(cmd) {
     return _shell.which(cmd);
-  };
+  }
 };

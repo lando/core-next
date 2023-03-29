@@ -27,7 +27,7 @@ module.exports = class Engine {
     this.dockerInstalled = this.daemon.docker !== false;
     // Grab the supported ranges for our things
     this.supportedVersions = config.dockerSupportedVersions;
-  };
+  }
 
   /**
    * Event that allows you to do some things before a `compose` object's containers are
@@ -68,7 +68,7 @@ module.exports = class Engine {
    */
   build(data) {
     return this.engineCmd('build', data, data => router.build(data, this.compose));
-  };
+  }
 
   /**
    * Creates a Docker network
@@ -84,7 +84,7 @@ module.exports = class Engine {
    */
   createNetwork(name) {
     return this.docker.createNet(name);
-  };
+  }
 
   /**
    * Event that allows you to do some things before some containers are destroyed.
@@ -132,7 +132,7 @@ module.exports = class Engine {
    */
   destroy(data) {
     return this.engineCmd('destroy', data);
-  };
+  }
 
   /**
    * Checks whether a specific service exists or not.
@@ -160,7 +160,7 @@ module.exports = class Engine {
    */
   exists(data) {
     return this.engineCmd('exists', data);
-  };
+  }
 
   /*
    * @TODO: Need to docblock this correctly so it shows up in the API docs
@@ -206,7 +206,7 @@ module.exports = class Engine {
         }))
         .value();
     });
-  };
+  }
 
   /**
    * Gets a Docker network
@@ -221,7 +221,7 @@ module.exports = class Engine {
    */
   getNetwork(id) {
     return this.docker.getNetwork(id);
-  };
+  }
 
   /**
    * Gets the docker networks.
@@ -236,7 +236,7 @@ module.exports = class Engine {
    */
   getNetworks(opts) {
     return this.docker.listNetworks(opts);
-  };
+  }
 
   /**
    * Determines whether a container is running or not
@@ -254,7 +254,7 @@ module.exports = class Engine {
    */
   isRunning(data) {
     return this.engineCmd('isRunning', data, data => this.docker.isRunning(data));
-  };
+  }
 
   /**
    * Lists all the Lando containers. Optionally filter by app name.
@@ -273,7 +273,7 @@ module.exports = class Engine {
    */
   list(options = {}) {
     return this.engineCmd('list', options, options => this.docker.list(options));
-  };
+  }
 
   /**
    * Returns logs for a given `compose` object
@@ -296,7 +296,7 @@ module.exports = class Engine {
    */
   logs(data) {
     return this.engineCmd('logs', data, data => router.logs(data, this.compose));
-  };
+  }
 
   /**
    * Event that allows you to do some things before a command is run on a particular
@@ -352,7 +352,7 @@ module.exports = class Engine {
    */
   run(data) {
     return this.engineCmd('run', data);
-  };
+  }
 
   /**
    * Returns comprehensive service metadata. This is a wrapper around `docker inspect`.
@@ -383,7 +383,7 @@ module.exports = class Engine {
    */
   scan(data) {
     return this.engineCmd('scan', data);
-  };
+  }
 
   /**
    * Event that allows you to do some things before a `compose` Objects containers are
@@ -424,7 +424,7 @@ module.exports = class Engine {
    */
   start(data) {
     return this.engineCmd('start', data, data => router.start(data, this.compose));
-  };
+  }
 
   /**
    * Event that allows you to do some things before some containers are stopped.
@@ -468,6 +468,6 @@ module.exports = class Engine {
    */
   stop(data) {
     return this.engineCmd('stop', data);
-  };
+  }
 };
 
