@@ -1,5 +1,8 @@
 name: "@lando/core"
 hooks:
+  app:
+    init:
+      - "./hooks/test.js"
   cli:
     init:
       - "./hooks/test.js"
