@@ -16,8 +16,8 @@ class Lando extends Product {
   static name = 'lando';
   static debug = require('../lib/debug')('@lando/core:lando');
 
-  constructor(config, debug = Lando.debug) {
-    super(config, debug);
+  constructor(config, {debug = Lando.debug} = {}) {
+    super(config, {debug});
   }
 }
 
