@@ -16,8 +16,8 @@ const NodeCache = require('node-cache');
  */
 class FileStorage extends NodeCache {
   static name = 'file-storage';
-  static debug = require('../lib/debug')('@lando/core:file-storage');
   static cspace = 'file-storage';
+  static debug = require('../lib/debug')('@lando/core:file-storage');
   static config = {
     dir: require('os').tmpdir(),
     delimiter: '.',

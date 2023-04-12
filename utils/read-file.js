@@ -1,9 +1,7 @@
 'use strict';
 
 const fs = require('fs');
-const jsonfile = require('jsonfile');
 const path = require('path');
-const yaml = require('yaml');
 
 module.exports = (file, extension) => {
   // @TODO: file does nto exist?
@@ -17,14 +15,13 @@ module.exports = (file, extension) => {
     case '.yml':
     case 'yaml':
     case 'yml':
-      return yaml.parse(fs.readFileSync(file, 'utf8'));
+      return require('yaml').parse(fs.readFileSync(file, 'utf8'));
     case '.js':
     case 'js':
       return require(file);
-
     case '.json':
     case 'json':
-      return jsonfile.readFileSync(file);
+      return require('jsonfile').readFileSync(file);
     default:
       // throw error
   }

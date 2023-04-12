@@ -1,7 +1,5 @@
 'use strict';
 
-const Config = require('../lib/config');
-
 /*
  * TBD
  */
@@ -11,7 +9,7 @@ module.exports = async (component, constructor, {
   debug = require('../lib/debug')('@lando/core:get-component-instance'),
   config = {},
   init = true,
-  registry = new Config({id: 'component-registry'}),
+  registry = new require('../lib/config')({id: 'component-registry'}), // eslint-disable-line new-cap
 } = {}) => {
   // get class component and instantiate
   const Component = require('./get-component')(

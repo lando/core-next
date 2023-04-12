@@ -3,15 +3,14 @@
 const fs = require('fs');
 const has = require('lodash/has');
 const isObject = require('lodash/isPlainObject');
-
-const Config = require('../lib/config');
+const merge = require('./merge');
 
 /*
  * TBD
  */
 module.exports = (
   component,
-  registry = new Config({id: 'component-registry'}),
+  registry = registry = new require('../lib/config')({id: 'component-registry'}), // eslint-disable-line new-cap
   {
     aliases = {},
     config = {},
@@ -63,7 +62,7 @@ module.exports = (
   if (!require('is-class')(Component)) throw new Error(`component ${component} needs to be a class`);
 
   // mix in some config
-  Config.merge(Component.config, [config]);
+  Component.config = merge({}, [Component.config, config]);
 
   // reset the default debug namespace
   Component.debug = debug.contract(-1).extend(Component.name);

@@ -7,8 +7,17 @@ class NoStorage {
   static name = 'no-storage';
   static cspace = 'no-storage';
   static debug = require('../lib/debug')('@lando/core:no-storage');
+  static config = {
+    delimiter: '.',
+  };
 
-  constructor({debug = FileStorage.debug} = {}) {
+  // @TBD: helper to get key from an id
+  static getKey = (id, delimiter = NoStorage.config.delimiter) => id2key(id, delimiter = NoStorage.config.delimiter);
+
+  // helper to wipe a storage directory
+  static flush(dir, debug = NoStorage.debug) {}
+
+  constructor({debug = NoStorage.debug} = {}) {
     this.debug = debug;
   }
 
