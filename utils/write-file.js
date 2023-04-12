@@ -1,9 +1,7 @@
 'use strict';
 
 const fs = require('fs');
-const jsonfile = require('jsonfile');
 const path = require('path');
-const yaml = require('yaml');
 
 module.exports = (file, data, extension) => {
   // @TODO: error handling, defaults etc?
@@ -18,13 +16,13 @@ module.exports = (file, data, extension) => {
     case 'yaml':
     case 'yml':
       try {
-        return fs.writeFileSync(file, yaml.stringify(data));
+        return fs.writeFileSync(file, require('yaml').stringify(data));
       } catch (error) {
         throw new Error(error);
       }
     case '.json':
     case 'json':
-      jsonfile.writeFileSync(file, data);
+      require('jsonfile').writeFileSync(file, data);
     default:
   }
 };

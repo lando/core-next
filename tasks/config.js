@@ -22,6 +22,8 @@ module.exports = cli => ({
     },
   },
   run: async (options, {ctx}) => {
+    console.log('FIN');
+    process.exit(1);
     // mods and deps
     const sortBy = require('lodash/sortBy');
     const util = require('util');

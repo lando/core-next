@@ -31,6 +31,12 @@ registry:
   legacy:
     services:
       _compose: "./services/compose"
+  library:
+    config: "./lib/config"
+    debug: "./lib/debug"
+    module-loader: "./lib/module-loader"
+    plugin: "./lib/plugin"
+    templator: "./lib/templator"
   plugin-installer:
     docker-plugin-installer: "./components/docker-plugin-installer"
   product:

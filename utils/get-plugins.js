@@ -4,16 +4,17 @@ const findPlugins = require('./find-plugins');
 const getSize = require('./get-size');
 const normalizePlugins = require('./normalize-plugins');
 
-const Config = require('../lib/config');
-const DefaultPlugin = require('../lib/plugin');
-
 /*
  * TBD
  */
 module.exports = (
   sources = [],
   options = {},
-  {Plugin = DefaultPlugin, debug = require('../lib/debug')('@lando/core:get-plugins')} = {},
+  {
+    debug = require('../lib/debug')('@lando/core:get-plugins'),
+    Config = require('../lib/config'),
+    Plugin = require('../lib/plugin'),
+  } = {},
   ) => {
   // @TODO: error handling?
   // normalize plugins and sort by weight if applicable?
