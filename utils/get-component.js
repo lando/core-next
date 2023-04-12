@@ -72,5 +72,6 @@ module.exports = (
 
   // and return
   debug('retrieved component %o from %o', component, registry.id);
+
   return Component;
 };

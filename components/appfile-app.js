@@ -4,14 +4,20 @@ const fs = require('fs');
 const get = require('lodash/get');
 const path = require('path');
 const slugify = require('slugify');
-const yaml = require('yaml');
 
 const App = require('../lib/app');
-const Config = require('../lib/config');
 
 class AppfileApp extends App {
   static debug = require('../lib/debug')('@lando/core:appfile-app');
   static name = 'appfile-app';
+
+  static read(file, extension) {
+    return require('../utils/read-file')(file, extension);
+  }
+
+  static write(file, data, extension) {
+    return require('../utils/write-file')(file, data, extension);
+  }
 
   static getAppfiles(files = [], {
     base = process.cwd(),
@@ -31,7 +37,7 @@ class AppfileApp extends App {
     // merge in includes
     .map(appfile => {
       // see if we have any includes
-      const includes = get(yaml.parse(fs.readFileSync(appfile.path, 'utf8')), 'includes');
+      const includes = get(AppfileApp.read(appfile.path), 'includes');
       if (includes) {
         const appfiles = AppfileApp.getAppfiles((typeof includes === 'string') ? [includes] : includes, {base, ext, file});
         return [...appfiles, appfile];
@@ -75,13 +81,18 @@ class AppfileApp extends App {
     plugins = {},
     debug = AppfileApp.debug,
   } = {}) {
-    // @TODO:
-    // throw error if no name?
-    // throw error if config is no good
-    // do we need an appfiles prop? throw error if we do?
+    // @TODO: throw error if no name?
+    // @TODO: throw error if config is no good
+
+    // extract read/write from config and set it statically
+    // @NOTE: we do this because it saves time
+    const {read, write} = config.constructor;
+    AppfileApp.read = read;
+    AppfileApp.write = write;
 
     // immediately do what we can do invoke super
-    const mainfileData = yaml.parse(fs.readFileSync(appfile, 'utf8'));
+    const mainfileData = AppfileApp.read(appfile);
+
     const name = slugify(mainfileData.name, {lower: true, strict: true});
     const prod = product || config.get('system.product') || 'lando';
     debug = debug.extend(name);
@@ -98,7 +109,7 @@ class AppfileApp extends App {
     });
 
     // build the app config
-    const appConfig = new Config({managed: 'main', id: name, debug: debug.extend('config')});
+    const appConfig = config.newConfig({managed: 'main', id: name, debug: debug.extend('config')});
     // then load in app envvars
     appConfig.env(`${prod}-${name}`.toUpperCase().replace(/-/gi, '_'));
     // then load in all appfiles in reverse order
