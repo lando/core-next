@@ -21,9 +21,12 @@
     "./debug": "./lib/debug.js",
     "./file-storage": "./components/file-storage.js",
     "./no-storage": "./components/no-storage.js",
+    "./lando": "./lib/product.js",
     "./product": "./lib/product.js",
     "./plugin": "./lib/plugin.js",
     "./templator": "./lib/templator.js",
+    "./components/*": "./components/*.js",
+    "./lib/*": "./lib/*.js",
     "./utils/*": "./utils/*.js"
   },
   "nyc": {

@@ -22,8 +22,6 @@ module.exports = cli => ({
     },
   },
   run: async (options, {ctx}) => {
-    console.log('FIN');
-    process.exit(1);
     // mods and deps
     const sortBy = require('lodash/sortBy');
     const util = require('util');
@@ -64,7 +62,7 @@ module.exports = cli => ({
     }
 
     // otherwise construct some rows for tabular display
-    const rows = ctx.Config.keys(data, {expandArrays: false}).map(key => {
+    const rows = ctx.config.keys(data, {expandArrays: false}).map(key => {
       // if we have a path then we need to modify the key
       if (options.path) key = `${options.path}.${key}`;
       // start with the basics
