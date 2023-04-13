@@ -3,26 +3,37 @@
 const fs = require('fs');
 const path = require('path');
 
-module.exports = (file, data, extension) => {
+// @TODO: maybe extension should be in {options}?
+module.exports = (file, data, options = {}) => {
   // @TODO: error handling, defaults etc?
-  // create dir for file?
 
   // set extension if not set
-  if (!extension) extension = path.extname(file);
+  const extension = options.extension || path.extname(file);
 
   switch (extension) {
     case '.yaml':
     case '.yml':
     case 'yaml':
     case 'yml':
-      try {
-        return fs.writeFileSync(file, require('yaml').stringify(data));
-      } catch (error) {
-        throw new Error(error);
+      // if this is a YAML DOC then use yaml module
+      if (data.constructor && data.constructor.name === 'Document') {
+        try {
+          fs.writeFileSync(file, data.toString());
+        } catch (error) {
+          throw new Error(error);
+        }
+
+      // otherwise use the normal js-yaml dump
+      } else {
+        try {
+          return fs.writeFileSync(file, require('js-yaml').dump(data, options));
+        } catch (error) {
+          throw new Error(error);
+        }
       }
     case '.json':
     case 'json':
-      require('jsonfile').writeFileSync(file, data);
+      require('jsonfile').writeFileSync(file, data, options);
     default:
   }
 };

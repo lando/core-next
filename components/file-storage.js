@@ -88,7 +88,7 @@ class FileStorage extends NodeCache {
     // otherwise try to get from file storage
     } else {
       try {
-        const data = read(path.join(this.dir, key), 'json');
+        const data = read(path.join(this.dir, key), {extension: 'json'});
         this.debug('retrieved %o items from file storage at %o', size(data), path.join(this.dir, key));
         this.__set(key, data, 0);
         return data;
@@ -106,7 +106,7 @@ class FileStorage extends NodeCache {
     if (this.__get(key)) return true;
     // otherwise look for it in file storage
     try {
-      return read(path.join(this.dir, key), 'json') ? true : false;
+      return read(path.join(this.dir, key), {extension: 'json'}) ? true : false;
     } catch (e) {
       return false;
     }
@@ -182,7 +182,7 @@ class FileStorage extends NodeCache {
     }
 
     // And add to file if we have persistence
-    if (persist) write(path.join(this.dir, key), data, 'json');
+    if (persist) write(path.join(this.dir, key), data, {extension: 'json'});
   }
 
   // @TBD

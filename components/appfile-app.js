@@ -11,12 +11,12 @@ class AppfileApp extends App {
   static debug = require('../lib/debug')('@lando/core:appfile-app');
   static name = 'appfile-app';
 
-  static read(file, extension) {
-    return require('../utils/read-file')(file, extension);
+  static read(file, options) {
+    return require('../utils/read-file')(file, options);
   }
 
-  static write(file, data, extension) {
-    return require('../utils/write-file')(file, data, extension);
+  static write(file, data, options) {
+    return require('../utils/write-file')(file, data, options);
   }
 
   static getAppfiles(files = [], {
