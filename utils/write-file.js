@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('fs');
+const get = require('lodash/get');
 const path = require('path');
 
 // @TODO: maybe extension should be in {options}?
@@ -16,7 +17,7 @@ module.exports = (file, data, options = {}) => {
     case 'yaml':
     case 'yml':
       // if this is a YAML DOC then use yaml module
-      if (data.constructor && data.constructor.name === 'Document') {
+      if (get(data, 'constructor.name') === 'Document') {
         try {
           fs.writeFileSync(file, data.toString());
         } catch (error) {
