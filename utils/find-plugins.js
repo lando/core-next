@@ -10,6 +10,7 @@ const readdirSyncAbsDir = require('./readdir-absolute');
  * NOTE: we are using something like this mostly just for bootstrapping eg
  * we want it to have minimal deps eg no LODASH or GLOB
  */
+// @TODO: make pConfigFiles configurable?
 module.exports = (dir, depth = 1) => {
   // if dir doesnt exist then return []
   if (!fs.existsSync(dir)) return [];
