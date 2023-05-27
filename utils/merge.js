@@ -7,7 +7,7 @@ const mergeArrays = require('./merge-arrays');
 // @TODO: error handling
 module.exports = (object, sources, ams = ['merge:id', 'replace']) => {
   // if sources is not an array then make it so
-  if (!Array.isArray) sources = [sources];
+  if (!Array.isArray(sources)) sources = [sources];
 
   // normalize ams into array
   ams = Array.isArray(ams) ? ams : [ams];
