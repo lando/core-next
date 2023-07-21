@@ -28,7 +28,7 @@ module.exports = class Yaml {
    */
   load(file) {
     try {
-      return yaml.safeLoad(fs.readFileSync(file));
+      return yaml.load(fs.readFileSync(file));
     } catch (e) {
       this.log.error('Problem parsing %s with %s', file, e.message);
     }
