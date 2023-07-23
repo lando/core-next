@@ -49,7 +49,7 @@ module.exports = class Yaml {
     // Remove any properties that might be bad and dump
     data = JSON.parse(JSON.stringify(data));
     // And dump
-    fs.writeFileSync(file, yaml.safeDump(data));
+    fs.writeFileSync(file, yaml.dump(data));
     // Log and return filename
     return file;
   }
