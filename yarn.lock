@@ -496,10 +496,10 @@
     mocha "^5.2.0"
     object-hash "^2.2.0"
 
-"@lando/vuepress-theme-default-plus@1.0.0-beta.45":
-  version "1.0.0-beta.45"
-  resolved "https://registry.yarnpkg.com/@lando/vuepress-theme-default-plus/-/vuepress-theme-default-plus-1.0.0-beta.45.tgz#c7baa338304a2dd717f3f5d28e195d2faa292cd6"
-  integrity sha512-6dSimwhcd8WIYpG4S7dfQLdgbPYG6y3swkhIxpLQrsoKguOdI69M2fN5s7reBIh15ys/XHXglSZ+l6AlsFBMqw==
+"@lando/vuepress-theme-default-plus@1.0.0-beta.47":
+  version "1.0.0-beta.47"
+  resolved "https://registry.yarnpkg.com/@lando/vuepress-theme-default-plus/-/vuepress-theme-default-plus-1.0.0-beta.47.tgz#dfd6f906a1ef33aff529b827e2c7140652cabe2f"
+  integrity sha512-wyvQBur25qcFUaWjQzmd7ePoKWi0Y5FrCe3xIzGnMAtaVh47HOViiDJAwOIrJCyQBMBakbv3SwLu7JRSeVlNtQ==
   dependencies:
     "@octokit/core" "^3.5.1"
     "@octokit/plugin-paginate-rest" "^2.17.0"
@@ -6452,6 +6452,7 @@ workerpool@6.2.0:
   integrity sha512-Rsk5qQHJ9eowMH28Jwhe8HEbmdYDX4lwoMWshiCXugjtHqMD9ZbiqSDLxcsfdqsETPzVUtX5s1Z5kStiIM6l4A==
 
 "wrap-ansi-cjs@npm:wrap-ansi@^7.0.0", wrap-ansi@^7.0.0:
+  name wrap-ansi-cjs
   version "7.0.0"
   resolved "https://registry.yarnpkg.com/wrap-ansi/-/wrap-ansi-7.0.0.tgz#67e145cff510a6a6984bdf1152911d69d2eb9e43"
   integrity sha512-YVGIj2kamLSTxw6NsZjoBxfSwsn0ycdesmc4p+Q21c5zPuZ1pl+NfxVdxPtdHvmNVOQ6XSYG4AUtyt/Fi7D16Q==
