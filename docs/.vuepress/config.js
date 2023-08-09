@@ -20,6 +20,7 @@ export default defineUserConfig({
     docsDir: 'docs',
     docsBranch: 'main',
     repo: 'lando/core-next',
+    sharedNavbar: false,
     sidebarHeader: {
       enabled: true,
       title: 'Core',
