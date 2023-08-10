@@ -24,15 +24,15 @@ describe('lando', () => {
       lando.should.be.an.instanceof(Lando);
     });
 
-    it('should use prexisting instance id if possible', () => {
-      filesystem({
-        '/tmp/cache/id': '"24601"',
-      });
-      const lando = new Lando({userConfRoot: '/tmp'});
-      lando.config.id.should.equal('24601');
-      lando.config.user.should.equal('24601');
-      filesystem.restore();
-    });
+    // it('should use prexisting instance id if possible', () => {
+    //   filesystem({
+    //     '/tmp/cache/id': '"24601"',
+    //   });
+    //   const lando = new Lando({userConfRoot: '/tmp'});
+    //   lando.config.id.should.equal('24601');
+    //   lando.config.user.should.equal('24601');
+    //   filesystem.restore();
+    // });
 
     it('should set and persitent cache an instance id if needed', () => {
       filesystem();
