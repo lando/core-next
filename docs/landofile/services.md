@@ -356,15 +356,62 @@ Since this can easily get confusing it's best to be careful when defining your g
 
 ### Lando stuff?
 
-By design most of the typical _Lando-y_ features originate in the [`lando`](#lando-service) service and thus are available in that service and the services that build on it. Since the `lando` service is built on top of this one those features are not available here.
+By design most of the typical _Lando-y_ features originate in the [`lando`](#lando-service) service and thus are available in that service and the services built on it. Since the `lando` service is built on top of this one those features are not available here.
 
 Said another way, you should really only use this service directly if you are _intentionally_ looking to avoid normal Lando features or want to use something that is more-or-less like Docker Compose.
 
-That said we still are capable of providing a few quality of life hookups in this service.
+That said we still are capable of providing a few quality of life hookups for this service.
 
 #### Auto app mount discovery
 
+If you `volume` mount your app root directory then Lando will assume its mount destination as the app mount for tooling purposes. Consider the following example:
+
+**Landofile**
+```yaml
+name: my-app
+services:
+  my-service:
+    api: 4
+    image: php:8.2-cli
+    volumes:
+      - ./:/home
+tooling:
+  pwd:
+    service: my-service
+```
+
+```bash
+lando pwd
+# /home
+cd subdir && lando pwd
+# /home/subdir
+```
+
 #### Working dir support
+
+If you do not mount your app root directory as above then Lando will use `working_dir` to set the default tooling `dir` for that service.
+
+**Landofile**
+```yaml
+name: my-app
+services:
+  my-service:
+    api: 4
+    image: php:8.2-cli
+    working_dir: /var/www
+tooling:
+  pwd:
+    service: my-service
+```
+
+```bash
+lando pwd
+# /var/www
+cd subdir && lando pwd
+# /var/www
+```
+
+ Note that `dir` does not track your host dir as the app mount above does.
 
 ### Examples
 
