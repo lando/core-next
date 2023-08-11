@@ -51,7 +51,11 @@ The **L**ando Docker Compose **3** **E**ngineering **T**erminology or **L337** s
 
 You can use it directly in your Landofile by setting `api: 4` in any service and omitting its `type` key.
 
-In high level terms it combines service orchestration and image specification into a single format. Specifically it is a light super set around the [Docker Compose Version 3](https://docs.docker.com/compose/compose-file/compose-file-v3/) format that also uses the [Dockerfile](https://docs.docker.com/engine/reference/builder/) specification.
+::: warning You're low, go high
+The L337 Service is the lowest-level abstraction in Lando; typically you'll want to use the [Lando Service](#lando-service) to construct your services.
+:::
+
+In high level terms it combines service orchestration and image specification into a single format. Specifically, it is a light superset around the [Docker Compose Version 3](https://docs.docker.com/compose/compose-file/compose-file-v3/) format that also uses the [Dockerfile](https://docs.docker.com/engine/reference/builder/) specification.
 
 This means that you _should_ be able to paste Docker Compose content into your Landofile, add `api: 4` to each service and have it "just work".
 
