@@ -102,7 +102,7 @@ Good questions. Answer: `image`.
 
 ### Image
 
-The `image` key is the biggest change and main event of the L337 spec. However, the original DC3 usage of both the `image` and `build` keys are still both supported.
+The `image` key is the biggest change and main focus of the L337 spec. However, the original Docker Compose usage of both the `image` and `build` keys are still both supported.
 
 In short form eg string notation `image` looks like this:
 
@@ -128,7 +128,7 @@ services:
       FROM nginx:1.21
       ENV HELLO there
       ...
-      COMMAND run-stuff
+      CMD run-stuff
 
 ```
 
@@ -140,7 +140,7 @@ You can expand `image` into object notation to get access to the _**REAL POWER**
 
 #### Imagefile
 
-The `image` string notation format above actually populates the `imagefile` key behind the scenes. For that reason the usage is  the same as above but with a different key.
+The `image` string notation format above actually populates the `imagefile` key behind the scenes. For that reason, this usage is the same as above but with a different key.
 
 **Landofile**
 ```yaml
@@ -167,7 +167,7 @@ services:
         FROM nginx:1.21
         ENV HELLO there
         ...
-        COMMAND run-stuff
+        CMD run-stuff
 ```
 
 Note that you can also use `dockerfile` instead of `imagefile` if you prefer that usage. If you use both `imagefile` will win.
@@ -231,7 +231,7 @@ services:
 
 `groups` allow you to organize [`steps`](#steps).
 
-By default every L337 service has two groups `default` and `context` with the following values:
+By default every L337 service has two groups, `default` and `context`, with the following values:
 
 ```yaml
 context:
@@ -277,7 +277,7 @@ services:
 
 While you _can_ specify an entire Imagefile's contents directly in `image.imagefile` it's often better to use `steps` which are ordered and partial Dockerfile-compatible instructions.
 
-Because `steps` are wrapped in a standardized and ordered layer Lando and any of its plugins can insert `instructions` into the resulting `imagefile` whereever they make the most sense. This allows for great flexibility.
+Because `steps` are wrapped in a standardized and ordered layer, Lando and any of its plugins can insert `instructions` into the resulting `imagefile` wherever they make the most sense. This allows for great flexibility.
 
 However, we are mostly interested here in how `steps` can be used directly in a Landofile.
 
@@ -360,11 +360,11 @@ Since this can easily get confusing it's best to be careful when defining your g
 
 ### Lando stuff?
 
-By design most of the typical _Lando-y_ features originate in the [`lando`](#lando-service) service and thus are available in that service and the services built on it. Since the `lando` service is built on top of this one those features are not available here.
+By design most of the typical _Lando-y_ features originate in the [`lando`](#lando-service) service and thus are available in that service and the services built on it. Since the `lando` service is built on top of this one, those features are not available here.
 
 Said another way, you should really only use this service directly if you are _intentionally_ looking to avoid normal Lando features or want to use something that is more-or-less like Docker Compose.
 
-That said we still are capable of providing a few quality of life hookups for this service.
+That said, tihs service still has a few quality of life improvements over stock Docker Compose v3 syntax.
 
 #### Auto app mount discovery
 
