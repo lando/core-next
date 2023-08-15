@@ -384,6 +384,8 @@ tooling:
     service: my-service
 ```
 
+Note that changing the directory on the host also changes the location at which `lando pwd` is executed within the container:
+
 ```bash
 lando pwd
 # /home
@@ -408,6 +410,8 @@ tooling:
     service: my-service
 ```
 
+ Note that `lando pwd` still executes in the `working_dir` location, even though we change directories on the host machine:
+
 ```bash
 lando pwd
 # /var/www
@@ -415,7 +419,6 @@ cd subdir && lando pwd
 # /var/www
 ```
 
- Note that `dir` does not track your host dir as the app mount above does.
 
 ### Examples
 
