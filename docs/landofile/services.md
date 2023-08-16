@@ -102,16 +102,16 @@ Good questions. Answer: `image`.
 
 ### Image
 
-The `image` key is the biggest change and main focus of the L337 spec. However, the original Docker Compose usage of both the `image` and `build` keys are still both supported.
+The L337 spec is identical to the Docker Compose spec with the exception of the `image` key which now handles different string inputs and has an extended object input.
 
-In short form eg string notation `image` looks like this:
+The string input now allows the below:
 
 **Landofile**
 ```yaml
 name: my-app
 services:
 
-  # a valid registry image
+  # a valid registry image, eg the original Docker Compose usage
   example-1:
     api: 4
     image: nginx:1.21
@@ -132,11 +132,7 @@ services:
 
 ```
 
-::: tip INTERCHANGEBLE KEYS
-Note that you can use `build` interchangebly with `image` and `build|image.dockerfile` interchangebly with `build|image.imagefile`.
-:::
-
-You can expand `image` into object notation to get access to the _**REAL POWER**_: `imagefile`, `context`, `groups` and `steps`.
+That's cool but you can expand `image` from a string and into object notation to get access to the _**REAL POWER**_: eg the `imagefile`, `context`, `groups` and `steps` keys.
 
 #### Imagefile
 
