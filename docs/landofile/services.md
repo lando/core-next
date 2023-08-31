@@ -7,7 +7,7 @@ description: The core services configuration for Lando 4 core
 
 Lando 4 `services` describe the infrastructure required to develop your site or application.
 
-In abstract terms you can think of them as the development versions of the images and containers needed to run your app in production.
+In abstract terms you can think of them as the containers needed to run, test, develop and build your project.
 
 In concrete terms that _could_ mean something like `nginx:1.16` serving a `php:8.2` application with a few extensions and a custom `php.ini` connecting to `mariadb:11` with a custom `stuff` database as in the case of a _very_ basic Drupal site.
 
@@ -31,13 +31,14 @@ services:
 We highly recommend you explicitly set the service `api` version for each service and not let the `runtime` determine the `api`. This will be especially true until Lando 4 reaches feature parity with Lando 3.
 :::
 
-By default core provides two types of services: `lando` and `_compose`.
 
-The `lando` service allows you to easily _Landoify_ some preexisting image eg make it useful for development. It _generally_ is what all other services are built on top of. You can read more [here](#lando-service)
+_Most_ Lando services are provided by plugins. You can find a good list of officially supported and maintained services and their docs [over here](./../services.md).
 
-The `_compose` service is what is used if `type` is ommitted. It is the lowest level Lando service and it implements our **L**ando Docker Compose **3** **E**ngineering **T**erminology or **L337**. Generally, users and Lando developers will not need to tread into such deep waters but it exists and we've [documented](#l337-service) it. :)
+Generally, users will want to use officially supported or third party plugins. However, if those do not satisfy your use case Lando 4 provides two lower level core services: `lando` and `l337`. These are documented below in greater detail.
 
-Other service types such as `php`, `mariadb` and `node` extend Lando core with plugins and you should consult those docs for relevant config, usage, etc.
+The `lando` service allows you to easily _Landoify_ some preexisting image so you can make it useful for development. It is the lowest level `typed` service and _generally_ is what all other services are built on top of. You can read more [here](#lando-service)
+
+The `l337` service is what is used if `type` is ommitted. It is the lowest level service and it implements our **L**ando Docker Compose **3** **E**ngineering **T**erminology or **L337**. Generally, users and Lando developers will not need to tread into such deep waters but it exists and we've [documented](#l337-service) it. :)
 
 ## Lando Service
 
@@ -52,7 +53,7 @@ The **L**ando Docker Compose **3** **E**ngineering **T**erminology or **L337** s
 You can use it directly in your Landofile by setting `api: 4` in any service and omitting its `type` key.
 
 ::: warning You're low, go high
-The L337 Service is the lowest-level abstraction in Lando; typically you'll want to use the [Lando Service](#lando-service) to construct your services.
+The L337 Service is the lowest-level abstraction in Lando; we do not recommend using it directly. If you are looking to build your own service or just need a generic service type you'll want to use the [Lando Service](#lando-service).
 :::
 
 In high level terms it combines service orchestration and image specification into a single format. Specifically, it is a light superset around the [Docker Compose Version 3](https://docs.docker.com/compose/compose-file/compose-file-v3/) format that also uses the [Dockerfile](https://docs.docker.com/engine/reference/builder/) specification.
@@ -60,7 +61,7 @@ In high level terms it combines service orchestration and image specification in
 This means that you _should_ be able to paste Docker Compose content into your Landofile, add `api: 4` to each service and have it "just work".
 
 ::: tip WORKS WITH MORE THAN JUST DOCKER!
-The adoption of the Docker Compose and Dockerfile formats is purely for specification purposes and does not mean Lando 4 can _only_ be used with Docker.
+The adoption of the Docker Compose and Dockerfile formats is purely for specification/meta purposes and does not mean Lando 4 can _only_ be used with Docker.
 
 That said Docker and Docker Compose are the default Lando 4 build engine and orchestrator, respectively.
 :::
@@ -76,7 +77,7 @@ services:
     api: 3
     type: php:7.4
 
-  # these are Lando 4 "lando compose" services
+  # these are Lando 4 "l337" services
   web:
     api: 4
     image: nginx:1.15
@@ -98,11 +99,11 @@ volumes:
 OK cool, got it, but how does Dockerfile stuff factor in?
 <br>What is actually different in the spec besides `api`?
 
-Good questions. Answer: `image`.
+Many questions. One Answer: `image`... and that's it.
 
 ### Image
 
-The L337 spec is identical to the Docker Compose spec with the exception of the `image` key which now handles different string inputs and has an extended object input.
+The L337 spec is identical to the Docker Compose spec with the exception of the `image` key which now handles different string inputs and has an extended object format for **MOAR POWAH**.
 
 The string input now allows the below:
 
@@ -132,7 +133,7 @@ services:
 
 ```
 
-That's cool but you can expand `image` from a string and into object notation to get access to the _**REAL POWER**_: eg the `imagefile`, `context`, `groups` and `steps` keys.
+That's cool but you can expand `image` from a string and into object notation to get access to the _**REAL POWER**_: eg the `imagefile`, `context`, `groups`, `steps` and `tag` keys.
 
 #### Imagefile
 
@@ -354,13 +355,31 @@ Also note that it is totally possible to have defined two `groups` like `system`
 
 Since this can easily get confusing it's best to be careful when defining your group names.
 
-### Lando stuff?
+#### Tag
 
-By design most of the typical _Lando-y_ features originate in the [`lando`](#lando-service) service and thus are available in that service and the services built on it. Since the `lando` service is built on top of this one, those features are not available here.
+If you wish to force Lando to use a particular tag on successful image creation, you can.
+
+**Landofile**
+```yaml
+name: my-app
+services:
+  tag-me-bro:
+    api: 4
+    image:
+      imagefile: |
+        FROM nginx:1.21
+        ENV SERVER=apache
+        ENV CONFUSED=true
+      tag: loki/apache:1.21
+```
+
+### Caveats
+
+As you may have already suspected because the `L337` service sits _below_ the main [`lando`](#lando-service) it lacks **_ALL_** Lando features. Using it is pretty equivalent to just using Docker Compose/Dockerfile straight up.
 
 Said another way, you should really only use this service directly if you are _intentionally_ looking to avoid normal Lando features or want to use something that is more-or-less like Docker Compose.
 
-That said, tihs service still has a few quality of life improvements over stock Docker Compose v3 syntax.
+That said, this service does still offer a few quality of life improvements.
 
 #### Auto app mount discovery
 
