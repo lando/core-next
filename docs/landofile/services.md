@@ -38,7 +38,7 @@ Generally, users will want to use officially supported or third party plugins. H
 
 The `lando` service allows you to easily _Landoify_ some preexisting image so you can make it useful for development. It is the lowest level `typed` service and _generally_ is what all other services are built on top of. You can read more [here](#lando-service)
 
-The `l337` service is what is used if `type` is ommitted. It is the lowest level service and it implements our **L**ando Docker Compose **3** **E**ngineering **T**erminology or **L337**. Generally, users and Lando developers will not need to tread into such deep waters but it exists and we've [documented](#l337-service) it. :)
+The `l337` service is what is used if `type` is ommitted. It is the lowest level service and it implements **L**ando Specification **337**. Generally, users and Lando developers will not need to tread into such deep waters but it exists and we've [documented](#l-337-service) it. :)
 
 ## Lando Service
 
@@ -46,17 +46,19 @@ TBD
 
 * note comparison to lando 3 compose service
 
-## L337 Service
+## L-337 Service
 
-The **L**ando Docker Compose **3** **E**ngineering **T**erminology or **L337** spec is our lowest level service configuration format meaning [at the end of the day](https://www.youtube.com/watch?v=i-DZa5cuFyk) all higher level services end up expressed in this format.
+The `l337` service, which implements **L**ando Specification **337**, is our lowest level service configuration format meaning [at the end of the day](https://www.youtube.com/watch?v=i-DZa5cuFyk) all higher level services end up expressed in this format.
 
 You can use it directly in your Landofile by setting `api: 4` in any service and omitting its `type` key.
 
 ::: warning You're low, go high
-The L337 Service is the lowest-level abstraction in Lando; we do not recommend using it directly. If you are looking to build your own service or just need a generic service type you'll want to use the [Lando Service](#lando-service).
+The `l337` service is the lowest-level abstraction in Lando; we do not recommend using it directly. If you are looking to build your own service or just need a generic service type you'll want to use the [Lando Service](#lando-service).
 :::
 
-In high level terms it combines service orchestration and image specification into a single format. Specifically, it is a light superset around the [Docker Compose Version 3](https://docs.docker.com/compose/compose-file/compose-file-v3/) format that also uses the [Dockerfile](https://docs.docker.com/engine/reference/builder/) specification.
+In high level terms it combines service orchestration and image specification into a single format.
+
+Specifically, it is a light superset around the [Docker Compose Version 3](https://docs.docker.com/compose/compose-file/compose-file-v3/) format that also uses the [Dockerfile](https://docs.docker.com/engine/reference/builder/) specification.
 
 This means that you _should_ be able to paste Docker Compose content into your Landofile, add `api: 4` to each service and have it "just work".
 
@@ -66,7 +68,7 @@ The adoption of the Docker Compose and Dockerfile formats is purely for specific
 That said Docker and Docker Compose are the default Lando 4 build engine and orchestrator, respectively.
 :::
 
-As noted above L337 extends the Docker Compose 3 spec with Dockerfile stuff. That means that everything in both of those specs is supported by default. So this is a valid Landofile:
+As noted above **L**ando Specification **337** extends the Docker Compose 3 spec with Dockerfile stuff. That means that everything in both of those specs is supported by default. So this is a valid Landofile:
 
 ***Landofile***
 ```yaml
@@ -103,7 +105,7 @@ Many questions. One Answer: `image`... and that's it.
 
 ### Image
 
-The L337 spec is identical to the Docker Compose spec with the exception of the `image` key which now handles different string inputs and has an extended object format for **MOAR POWAH**.
+Lando Specification 337 is identical to the Docker Compose spec with the exception of the `image` key which now handles different string inputs and has an extended object format for **MOAR POWAH**.
 
 The string input now allows the below:
 
@@ -228,7 +230,7 @@ services:
 
 `groups` allow you to organize [`steps`](#steps).
 
-By default every L337 service has two groups, `default` and `context`, with the following values:
+By default every `l337` service has two groups, `default` and `context`, with the following values:
 
 ```yaml
 context:
@@ -375,7 +377,7 @@ services:
 
 ### Caveats
 
-As you may have already suspected because the `L337` service sits _below_ the main [`lando`](#lando-service) it lacks **_ALL_** Lando features. Using it is pretty equivalent to just using Docker Compose/Dockerfile straight up.
+As you may have already suspected because the `l337` service sits _below_ the main [`lando`](#lando-service) it lacks **_ALL_** Lando features. Using it is pretty equivalent to just using Docker Compose/Dockerfile straight up.
 
 Said another way, you should really only use this service directly if you are _intentionally_ looking to avoid normal Lando features or want to use something that is more-or-less like Docker Compose.
 
@@ -439,4 +441,4 @@ cd subdir && lando pwd
 
 If you would like to look at concrete and tested examples you can check out the below:
 
-* [Lando 3 Service API 4 Examples](https://github.com/lando/core/tree/main/examples/L337)
+* [Lando 3 Service API 4 Examples](https://github.com/lando/core/tree/main/examples/l337)
