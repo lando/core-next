@@ -5,42 +5,92 @@ description: The core services configuration for Lando 4 core
 
 # Services
 
-Lando 4 `services` describe the infrastructure required to develop your site or application.
+Lando 4 `services` describe the infrastructure required to develop your project.
 
 In abstract terms you can think of them as the containers needed to run, test, develop and build your project.
 
-In concrete terms that _could_ mean something like `nginx:1.16` serving a `php:8.2` application with a few extensions and a custom `php.ini` connecting to `mariadb:11` with a custom `stuff` database as in the case of a _very_ basic Drupal site.
+In concrete terms that _could_ mean something like `nginx:1.16` serving a `php:8.2` application with the `gd` php extension and a custom `php.ini` connecting to `mariadb:11` with a custom `stuff` database as in the case of a _very_ basic Drupal site.
 
-A service will generally take the below form:
+Or it _could_ mean a `node:16` runtime to work on a simple node module.
+
+Or it _could_ mean serving up an enterprise grade microservices application stack.
+
+## Configuration
+
+Services will generally take the below form:
 
 ***Landofile***
 ```yaml
 services:
   my-service:
+    type: "my-type"
     api: 4
-    type: my-type
+    primary: false
     ...
 ```
 
-* `my-service` is the name of the service.
-* `api` is the service api version. If ommitted it will default to the `runtime`.
-* `type` is the kind of service. It can be something like `php:8.2` or `postgres:12`.
-* `...` just means any additional configuration options depending on the `type`.
+#### name
 
-::: tip EXPLICITLY SET API
-We highly recommend you explicitly set the service `api` version for each service and not let the `runtime` determine the `api`. This will be especially true until Lando 4 reaches feature parity with Lando 3.
-:::
+`my-service` is the `name` of the service and you can generally name the service whatever you want. We like short and kabob-cased names though.
 
+#### api
 
-_Most_ Lando services are provided by plugins. You can find a good list of officially supported and maintained services and their docs [over here](./../services.md).
+`api` is the Service API version. If ommitted it will default to the app `runtime`.
 
-Generally, users will want to use officially supported or third party plugins. However, if those do not satisfy your use case Lando 4 provides two lower level core services: `lando` and `l337`. These are documented below in greater detail.
+However we **highly recommend** you **do not** omit it! :)
+
+#### type
+
+`type` is the kind of service. By default Lando 4 has two types: `l337` and `lando`.
+
+However, you can install plugins to get more `types` such as `php:8.2` or `postgres:12`.
+
+#### primary
+
+`primary` is generally ommitted which sets it to `false`. If you set it to `true` it will flag that service as the `primary` service.
+
+This is purely a meta setting, meaning it "does nothing" by itself, however it is often used as the "default service" in other plugins.
+
+If you set _multiple_ `primary` services to `true` Lando will use the first one.
+
+#### ...
+
+`...` denotes additional configuration options that can vary based on the `type` of service you are using and other plugins you may have installed.
+
+For these options you will want to consult the documentation for the specific service `type` or `plugin`.
+
+## Available Services
+
+As noted above, most Lando services are provided by plugins that implement a specific service `type` with its own set of configuration options.
+
+For example the `@lando/php` plugin implements a `php` service that looks something like this:
+
+***Landofile***
+```yaml
+services:
+  runtime:
+    type: "php:8.2"
+    api: 4
+    extensions:
+      - "curl"
+      - "gd"
+      - "imap"
+      - "json"
+      - "xdebug"
+    config:
+      memory_limit: "512M"
+```
+Generally, users will want to use officially supported or third party plugins. You can find a good list of officially supported and maintained services and their docs [over here](./../services.md).
+
+However, if those do not satisfy your use case Lando 4 provides two lower level core services:
+
+* [Lando Service](#lando-service)
+* [L-337 Service](#l-337-service)
+
+## Lando Service
 
 The `lando` service allows you to easily _Landoify_ some preexisting image so you can make it useful for development. It is the lowest level `typed` service and _generally_ is what all other services are built on top of. You can read more [here](#lando-service)
 
-The `l337` service is what is used if `type` is ommitted. It is the lowest level service and it implements **L**ando Specification **337**. Generally, users and Lando developers will not need to tread into such deep waters but it exists and we've [documented](#l-337-service) it. :)
-
-## Lando Service
 
 TBD
 
@@ -48,12 +98,10 @@ TBD
 
 ## L-337 Service
 
-The `l337` service, which implements **L**ando Specification **337**, is our lowest level service configuration format meaning [at the end of the day](https://www.youtube.com/watch?v=i-DZa5cuFyk) all higher level services end up expressed in this format.
-
-You can use it directly in your Landofile by setting `api: 4` in any service and omitting its `type` key.
+The `l337` service is the lowest level `api: 4` service and it implements **L**ando Specification **337**. You can use it directly in your Landofile by setting `api: 4` in any service and omitting its `type` key.
 
 ::: warning You're low, go high
-The `l337` service is the lowest-level abstraction in Lando; we do not recommend using it directly. If you are looking to build your own service or just need a generic service type you'll want to use the [Lando Service](#lando-service).
+This is the lowest-level abstraction in Lando; we do not recommend using it directly. If you are looking to build your own service or just need a generic service type you'll want to start with the [Lando Service](#lando-service).
 :::
 
 In high level terms it combines service orchestration and image specification into a single format.
@@ -72,26 +120,26 @@ As noted above **L**ando Specification **337** extends the Docker Compose 3 spec
 
 ***Landofile***
 ```yaml
-name: my-app
+name: "my-app"
 services:
   # this is a Lando 3 php service
   php:
+    type: "php:7.4"
     api: 3
-    type: php:7.4
 
   # these are Lando 4 "l337" services
   web:
     api: 4
-    image: nginx:1.15
+    image: "nginx:1.15"
     networks:
       my-network:
     volumes:
-      - ./:/app
-      - my-data:/data
+      - "./:/app"
+      - "my-data:/data"
   db:
     api: 4
     build:
-      dockerfile: ./Dockerfile
+      dockerfile: "./Dockerfile"
 networks:
   my-network:
 volumes:
@@ -111,18 +159,17 @@ The string input now allows the below:
 
 **Landofile**
 ```yaml
-name: my-app
+name: "my-app"
 services:
-
   # a valid registry image, eg the original Docker Compose usage
   example-1:
     api: 4
-    image: nginx:1.21
+    image: "nginx:1.21"
 
   # a path to a Dockerfile compatible file
   example-2:
     api: 4
-    image: ./images/nginx/Dockerfile
+    image: "./images/nginx/Dockerfile"
 
   # raw Dockerfile compatible instructions
   example-3:
@@ -143,9 +190,8 @@ The `image` string notation format above actually populates the `imagefile` key 
 
 **Landofile**
 ```yaml
-name: my-app
+name: "my-app"
 services:
-
   # a valid registry image
   example-1:
     api: 4
@@ -177,53 +223,53 @@ If you would like to `COPY` and/or `ADD` files into your build context and image
 
 **Landofile**
 ```yaml
-name: my-app
+name: "my-app"
 services:
   example-1:
     api: 4
     image:
-      imagefile: nginx:1.21
+      imagefile: "nginx:1.21"
       context:
         # COPY ./folder to /folder
-        - ./folder
+        - "./folder"
 
         # COPY ./folder to /thing
-        - ./folder:thing
+        - "./folder:thing"
 
         # COPY file1 to /file2
-        - file1:/file2
+        - "file1:/file2"
 
         # COPY file1 to /file3
-        - src: file1
-          dest: file3
+        - src: "file1"
+          dest: "file3"
 
         # COPY file1 to /file4
-        - source: file1
-          destination: file4
+        - source: "file1"
+          destination: "file4"
 
         # COPY ./images/Dockerfile to /images/Dockerfile
-        - source: ./images/Dockerfile
+        - source: "./images/Dockerfile"
 
         # COPY file1 to /file6 and set ownership to nginx:nginx
-        - source: file1
-          destination: file6
-          owner: nginx:nginx
+        - source: "file1"
+          destination: "file6"
+          owner: "nginx:nginx"
 
         # COPY file1 to /file7 and set ownership to nginx:nginx
-        - source: file1
-          destination: file7
-          user: nginx
-          group: nginx
+        - source: "file1"
+          destination: "file7"
+          user: "nginx"
+          group: "nginx"
 
         # ADD HeresAHealthToTheCompany.json
         # to /SeaShanties/lyrics/main/shanties/HeresAHealthToTheCompany.json
-        - source: https://raw.githubusercontent.com/SeaShanties/lyrics/main/shanties/HeresAHealthToTheCompany.json
+        - source: "https://raw.githubusercontent.com/SeaShanties/lyrics/main/shanties/HeresAHealthToTheCompany.json"
 
         # ADD available-shanties.json
         # to /etc/config/available-shanties.json and set ownership to blackbeard
-        - source: https://raw.githubusercontent.com/SeaShanties/lyrics/main/available-shanties.json
-          dest: /etc/config/available-shanties.json
-          owner: eddie-teach
+        - source: "https://raw.githubusercontent.com/SeaShanties/lyrics/main/available-shanties.json"
+          dest: "/etc/config/available-shanties.json"
+          owner: "eddie-teach"
 ```
 
 #### Groups
@@ -234,41 +280,41 @@ By default every `l337` service has two groups, `default` and `context`, with th
 
 ```yaml
 context:
-  description: A group for adding and copying sources to the image
+  description: "A group for adding and copying sources to the image"
   weight: 0
-  user: root
+  user: "root"
 default:
-  description: A default general purpose build group around which other groups can be added
+  description: "A default general purpose build group around which other groups can be added"
   weight: 1000
-  user: root
+  user: "root"
 ```
 
 You can add additional groups into your Landofile and then use them in your `steps`.
 
 **Landofile**
 ```yaml
-name: my-app
+name: "my-app"
 services:
   example-1:
     api: 4
     image:
-      imagefile: nginx:1.21
+      imagefile: "nginx:1.21"
       groups:
         # adds a group called "val-jean" with weight "24601"
         # uses root user by default
         - val-jean: 24601
 
         # adds a root user group called "system" that runs first
-        - name: system
-          description: Install system packages and stuff
+        - name: "system"
+          description: "Install system packages and stuff"
           weight: -10000
-          user: root
+          user: "root"
 
         # adds a nginx user group called "user" that runs last
-        - name: user
-          description: Allows for user run commands after other groups
+        - name: "user"
+          description: "Allows for user run commands after other groups"
           weight: 10000
-          user: nginx
+          user: "nginx"
 
 ```
 
@@ -282,12 +328,12 @@ However, we are mostly interested here in how `steps` can be used directly in a 
 
 **Landofile**
 ```yaml
-name: my-app
+name: "my-app"
 services:
   example-1:
     api: 4
     image:
-      imagefile: nginx:1.21
+      imagefile: "nginx:1.21"
       groups:
         ... # as defined [above](#groups) and omitted here for brevity
       steps:
@@ -301,16 +347,16 @@ services:
         # See: https://www.npmjs.com/package/dockerfile-generator for syntax
         - instructions:
           - env:
-              KIRK: wesley
-              SPOCK: peck
-          - run: env
+              KIRK: "wesley"
+              SPOCK: "peck"
+          - run: "env"
           - run:
-            - 'stat'
-            - '/tmp'
+            - "stat"
+            - "/tmp"
 
         # insert group detached, one-off, singleton, instructions
         # at arbitrary weight
-        - instructions: ENV PIKE mount
+        - instructions: "ENV PIKE mount"
           weight: 1001
         - instructions: |
             RUN echo "last" >> /stuff
@@ -324,21 +370,21 @@ services:
             ENV KIRK pine
             ENV SPOCK quinto
             RUN id > /system-user
-          group: system
-        - instructions: RUN id > /tmp/user
-          group: user
+          group: "system"
+        - instructions: "RUN id > /tmp/user"
+          group: "user"
 
         # insert instructions using group-override format
         # runs -4 weight units before the system group
         - instructions: |
             ENV KIRK shatner
             ENV SPOCK nimoy
-          group: system-4-before
+          group: "system-4-before"
         # run 10 weight units after the user group but uses the root user
         - instructions: |
             ENV KIRK shatner
             ENV SPOCK nimoy
-          group: user-10-root
+          group: "user-10-root"
 ```
 
 Note that the group override syntax is flexible as long as the parent group is first. For example the following overrides are equivalent:
@@ -363,7 +409,7 @@ If you wish to force Lando to use a particular tag on successful image creation,
 
 **Landofile**
 ```yaml
-name: my-app
+name: "my-app"
 services:
   tag-me-bro:
     api: 4
@@ -372,7 +418,7 @@ services:
         FROM nginx:1.21
         ENV SERVER=apache
         ENV CONFUSED=true
-      tag: loki/apache:1.21
+      tag: "loki/apache:1.21"
 ```
 
 ### Caveats
@@ -389,16 +435,16 @@ If you `volume` mount your app root directory then Lando will assume its mount d
 
 **Landofile**
 ```yaml
-name: my-app
+name: "my-app"
 services:
   my-service:
     api: 4
-    image: php:8.2-cli
+    image: "php:8.2-cli"
     volumes:
-      - ./:/home
+      - "./:/home"
 tooling:
   pwd:
-    service: my-service
+    service: "my-service"
 ```
 
 Note that changing the directory on the host also changes the location at which `lando pwd` is executed within the container:
@@ -416,15 +462,15 @@ If you do not mount your app root directory as above then Lando will use `workin
 
 **Landofile**
 ```yaml
-name: my-app
+name: "my-app"
 services:
   my-service:
     api: 4
-    image: php:8.2-cli
-    working_dir: /var/www
+    image: "php:8.2-cli"
+    working_dir: "/var/www"
 tooling:
   pwd:
-    service: my-service
+    service: "my-service"
 ```
 
  Note that `lando pwd` still executes in the `working_dir` location, even though we change directories on the host machine:
@@ -436,9 +482,8 @@ cd subdir && lando pwd
 # /var/www
 ```
 
-
 ### Examples
 
 If you would like to look at concrete and tested examples you can check out the below:
 
-* [Lando 3 Service API 4 Examples](https://github.com/lando/core/tree/main/examples/l337)
+* [Lando 3 implementation of L-337](https://github.com/lando/core/tree/main/examples/l337)
