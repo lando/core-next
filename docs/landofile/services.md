@@ -149,13 +149,15 @@ volumes:
 OK cool, got it, but how does Dockerfile stuff factor in?
 <br>What is actually different in the spec besides `api`?
 
-Many questions. One Answer: `image`... and that's it.
+Two questions. One Answer: `image`
+
+... and that's it.
 
 ### Image
 
 Lando Specification 337 is identical to the Docker Compose spec with the exception of the `image` key which now handles different string inputs and has an extended object format for **MOAR POWAH**.
 
-The string input now allows the below:
+The string input for `image` has been extended and now allows the below:
 
 **Landofile**
 ```yaml
@@ -182,7 +184,29 @@ services:
 
 ```
 
-That's cool but you can expand `image` from a string and into object notation to get access to the _**REAL POWER**_: eg the `imagefile`, `context`, `groups`, `steps` and `tag` keys.
+You can extend `image` into object format to get access to more features. Here is an example that implements all the keys available in object format.
+
+**Landofile**
+```yaml
+name: "my-app"
+services:
+  example-1:
+    api: 4
+    image:
+      imagefile: "nginx:1.21"
+      tag: "pirog/nginx:1.21"
+      context:
+        - "./nginx.conf:/etc/nginx/conf.d/default.conf"
+      groups:
+        - reallllllearly: -8675309
+      steps:
+        - instructions: "RUN id > /tmp/user"
+          group: "reallllllearly"
+        - instructions: |
+            ENV VIBES rising
+            RUN echo "hello" id > /var/ww/index.html
+          group: "reallllllearly-10-before-root"
+```
 
 #### Imagefile
 
@@ -216,6 +240,24 @@ services:
 ```
 
 Note that you can also use `dockerfile` instead of `imagefile` if you prefer that usage. If you use both `imagefile` will win.
+
+#### Tag
+
+If you wish to force Lando to use a particular tag on successful image creation, you can.
+
+**Landofile**
+```yaml
+name: "my-app"
+services:
+  tag-me-bro:
+    api: 4
+    image:
+      imagefile: |
+        FROM nginx:1.21
+        ENV SERVER=apache
+        ENV CONFUSED=true
+      tag: "loki/apache:1.21"
+```
 
 #### Context
 
@@ -403,27 +445,9 @@ Also note that it is totally possible to have defined two `groups` like `system`
 
 Since this can easily get confusing it's best to be careful when defining your group names.
 
-#### Tag
-
-If you wish to force Lando to use a particular tag on successful image creation, you can.
-
-**Landofile**
-```yaml
-name: "my-app"
-services:
-  tag-me-bro:
-    api: 4
-    image:
-      imagefile: |
-        FROM nginx:1.21
-        ENV SERVER=apache
-        ENV CONFUSED=true
-      tag: "loki/apache:1.21"
-```
-
 ### Caveats
 
-As you may have already suspected because the `l337` service sits _below_ the main [`lando`](#lando-service) it lacks **_ALL_** Lando features. Using it is pretty equivalent to just using Docker Compose/Dockerfile straight up.
+As you may have already suspected because the `l337` service sits _below_ the main [`lando`](#lando-service) service it lacks **_ALL_** Lando features. Using it is pretty equivalent to just using Docker Compose/Dockerfile straight up.
 
 Said another way, you should really only use this service directly if you are _intentionally_ looking to avoid normal Lando features or want to use something that is more-or-less like Docker Compose.
 
