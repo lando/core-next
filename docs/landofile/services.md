@@ -429,7 +429,9 @@ services:
           group: "user-10-root"
 ```
 
-Note that the group override syntax is flexible as long as the parent group is first. For example the following overrides are equivalent:
+Note that if you specify both a `group` and a `weight` the step will run at the `weight` regardless of the weight of the group. Generally, it's a good idea to not use both `group` and `weight`.
+
+Also note that the group override syntax is flexible as long as the parent group is first. For example the following overrides are equivalent:
 
 ```bash
 system-2
