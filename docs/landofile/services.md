@@ -212,6 +212,10 @@ services:
 
 The `image` string notation format above actually populates the `imagefile` key behind the scenes. For that reason, this usage is the same as above but with a different key.
 
+::: tip Use context instead of COPY/ADD
+While you _can_ use `COPY` and `ADD` instructions here we recommend you use [`context`](#context) instead. See [this](#copy-add-considerations) for more information.
+:::
+
 **Landofile**
 ```yaml
 name: "my-app"
@@ -431,7 +435,15 @@ services:
 
 Note that if you specify both a `group` and a `weight` the step will run at the `weight` regardless of the weight of the group. Generally it's a good idea to not use both `group` and `weight` in the same step.
 
-Also note that the group override syntax is flexible as long as the parent group is first. For example the following overrides are equivalent:
+If you reference a `group` that does not exist then the `default` group will be used.
+
+##### COPY/ADD
+
+While you _can_ use `COPY` and `ADD` instructions here we recommend you use [`context`](#context) instead. See [this](#copy-add-considerations) for more information.
+
+##### Override syntax
+
+The group override syntax is flexible as long as the parent group is first. For example the following overrides are equivalent:
 
 ```bash
 system-2
@@ -449,13 +461,13 @@ Since this can easily get confusing it's best to be careful when defining your g
 
 ### Caveats
 
-As you may have already suspected because the `l337` service sits _below_ the main [`lando`](#lando-service) service it lacks **_ALL_** Lando features. Using it is pretty equivalent to just using Docker Compose/Dockerfile straight up.
+As you may have already suspected because the `l337` service sits _below_ the main [`lando`](#lando-service) service it lacks **_ALL_** the features in that service. Using it is _pretty close_ to just using Docker Compose/Dockerfiles straight up.
 
 Said another way, you should really only use this service directly if you are _intentionally_ looking to avoid normal Lando features or want to use something that is more-or-less like Docker Compose.
 
-That said, this service does still offer a few quality of life improvements.
+That said, here are the things that make it _pretty close_ but identical to Docker Compose/Dockerfiles:
 
-#### Auto app mount discovery
+#### 1. Auto app mount discovery
 
 If you `volume` mount your app root directory then Lando will assume its mount destination as the app mount for tooling purposes. Consider the following example:
 
@@ -482,7 +494,7 @@ cd subdir && lando pwd
 # /home/subdir
 ```
 
-#### Working dir support
+#### 2. Working dir support
 
 If you do not mount your app root directory as above then Lando will use `working_dir` to set the default tooling `dir` for that service.
 
@@ -507,6 +519,14 @@ lando pwd
 cd subdir && lando pwd
 # /var/www
 ```
+
+#### COPY & ADD considerations
+
+While you _can_ use the `COPY` and `ADD` instructions in various places in the `l337` service we recommend you use our [`context`](#context)convention instead. The `tl;dr` there is it will be more performant.
+
+The full explanation is that if Lando detects a `COPY` or `ADD` instruction it will automatically copy the _entire_ application root into the build context. So if you have a **BIG** app this can drastically slow build performance.
+
+If for some reason you need `COPY/ADD` to work eg you are basing your service on some preexisting Dockerfile with some build assets then we recommend you copy the build assets and Dockerfile into a subfolder and build from there. In this case only the files in that subfolder will be used and not the entire application.
 
 ### Examples
 
