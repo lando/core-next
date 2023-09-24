@@ -60,6 +60,14 @@ export default defineUserConfig({
             columns: 3,
             children: [],
           },
+          {
+            text: 'Services',
+            columns: 2,
+            children: [
+              {text: 'Lando', link: 'https://docs.lando.dev/core/v4/services/lando.html'},
+              {text: 'L-337', link: 'https://docs.lando.dev/core/v4/services/l337.html'},
+            ],
+          },
         ],
       },
     ],
@@ -67,9 +75,17 @@ export default defineUserConfig({
       '/index.html',
       {
         text: 'Landofile',
-        collapsible: false,
+        collapsible: true,
         children: [
           {text: 'Services', link: '/landofile/services.html'},
+        ],
+      },
+      {
+        text: 'Services',
+        collapsible: true,
+        children: [
+          {text: 'Lando', link: '/services/lando.html'},
+          {text: 'L-337', link: '/services/l337.html'},
         ],
       },
       '/support.html',
