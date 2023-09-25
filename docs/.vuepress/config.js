@@ -20,7 +20,6 @@ export default defineUserConfig({
     docsDir: 'docs',
     docsBranch: 'main',
     repo: 'lando/core-next',
-    sharedNavbar: false,
     sidebarHeader: {
       enabled: true,
       title: 'Core',
@@ -36,41 +35,6 @@ export default defineUserConfig({
       scheme: 'neutral',
       closeable: true,
     },
-    navbar: [
-      {
-        text: 'Core',
-        children: [
-          {
-            text: 'Landofile',
-            columns: 4,
-            children: [
-              {
-                text: 'Services',
-                link: 'https://docs.lando.dev/core/v4/landofile/services.html',
-              },
-            ],
-          },
-          {
-            text: 'Configuration',
-            columns: 3,
-            children: [],
-          },
-          {
-            text: 'Plugins',
-            columns: 3,
-            children: [],
-          },
-          {
-            text: 'Services',
-            columns: 2,
-            children: [
-              {text: 'Lando', link: 'https://docs.lando.dev/core/v4/services/lando.html'},
-              {text: 'L-337', link: 'https://docs.lando.dev/core/v4/services/l337.html'},
-            ],
-          },
-        ],
-      },
-    ],
     sidebar: [
       '/index.html',
       {
@@ -84,7 +48,6 @@ export default defineUserConfig({
         text: 'Services',
         collapsible: true,
         children: [
-          {text: 'Lando', link: '/services/lando.html'},
           {text: 'L-337', link: '/services/l337.html'},
         ],
       },
