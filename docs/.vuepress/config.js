@@ -30,23 +30,28 @@ export default defineUserConfig({
       trimLatest: true,
       showEdge: true,
     },
+    alert: {
+      content: 'These docs are for highly experimental features. Are you looking for the Lando 3 docs? You can go to them <a href="https://docs.lando.dev/core/v3/">here</a>.',
+      scheme: 'neutral',
+      closeable: true,
+    },
     sidebar: [
+      '/index.html',
       {
-        text: 'Config',
-        collapsible: false,
+        text: 'Landofile',
+        collapsible: true,
         children: [
-          '/index.html',
+          {text: 'Services', link: '/landofile/services.html'},
         ],
       },
       {
-        text: 'Plugins',
-        collapsible: false,
+        text: 'Services',
+        collapsible: true,
         children: [
-          '/index.html',
+          {text: 'L-337', link: '/services/l337.html'},
         ],
       },
       '/support.html',
-      '/development.html',
     ],
   }),
 });

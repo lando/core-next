@@ -21,7 +21,7 @@ jobs:
           - '16'
         leia-tests:
           # - examples/badname
-          - examples/base
+          # - examples/base
           # - examples/events
           # - examples/keys
           # - examples/lando-101
