@@ -1,7 +1,7 @@
 {
   "name": "@lando/core",
   "description": "The libraries that power all of Lando.",
-  "version": "4.0.0-unstable.3",
+  "version": "4.0.0-unstable.4",
   "author": "Mike Pirog @pirog",
   "license": "GPL-3.0",
   "repository": "lando/core-next",
