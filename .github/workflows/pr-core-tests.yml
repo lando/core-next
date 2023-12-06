@@ -15,19 +15,19 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        leia-test:
-          # - examples/badname
-          # - examples/base
-          # - examples/events
-          # - examples/keys
-          # - examples/lando-101
-          # - examples/landofile-custom
-          # - examples/long-name
-          # - examples/networking
-          # - examples/proxy
-          # - examples/scanner
-          # - examples/services
-          # - examples/tooling
+        # leia-test:
+        #   - examples/badname
+        #   - examples/base
+        #   - examples/events
+        #   - examples/keys
+        #   - examples/lando-101
+        #   - examples/landofile-custom
+        #   - examples/long-name
+        #   - examples/networking
+        #   - examples/proxy
+        #   - examples/scanner
+        #   - examples/services
+        #   - examples/tooling
         lando-versions:
         # NOTE: we will want to progressively scale down the "risk" as the 3.x cli runtime 4 handling matures
           # - edge
@@ -72,10 +72,11 @@ jobs:
           lando config
           lando plugins
           lando registry
-      - name: Run Leia Tests
-        uses: lando/run-leia-action@v2
-        with:
-          leia-test: "./${{ matrix.leia-test }}/README.md"
-          cleanup-header: "Destroy tests"
-          shell: bash
-          stdin: true
+
+      # - name: Run Leia Tests
+      #   uses: lando/run-leia-action@v2
+      #   with:
+      #     leia-test: "./${{ matrix.leia-test }}/README.md"
+      #     cleanup-header: "Destroy tests"
+      #     shell: bash
+      #     stdin: true
