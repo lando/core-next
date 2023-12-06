@@ -15,55 +15,60 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - ubuntu-22.04
-        node-version:
-          - '16'
-        leia-tests:
-          # - examples/badname
-          # - examples/base
-          # - examples/events
-          # - examples/keys
-          # - examples/lando-101
-          # - examples/landofile-custom
-          # - examples/long-name
-          # - examples/networking
-          # - examples/proxy
-          # - examples/scanner
-          # - examples/services
-          # - examples/tooling
-        lando-versions:
+        # leia-test:
+        #   - examples/badname
+        #   - examples/base
+        #   - examples/events
+        #   - examples/keys
+        #   - examples/lando-101
+        #   - examples/landofile-custom
+        #   - examples/long-name
+        #   - examples/networking
+        #   - examples/proxy
+        #   - examples/scanner
+        #   - examples/services
+        #   - examples/tooling
+        lando-version:
         # NOTE: we will want to progressively scale down the "risk" as the 3.x cli runtime 4 handling matures
           # - edge
           # - stable
-          - dev
+          - 3-dev
+        node-version:
+          - '18'
+        os:
+          - ubuntu-22.04
+
     steps:
 
       # Install deps and cache
       # Eventually it would be great if these steps could live in a separate YAML file
       # that could be included in line to avoid code duplication
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Install node ${{ matrix.node-version }}
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: yarn
-      - name: Install Yarn dependencies
-        run: yarn install --prefer-offline --frozen-lockfile
+          registry-url: https://registry.npmjs.org
+          cache: npm
+      - name: Install dependencies
+        run: npm clean-install --prefer-offline --frozen-lockfile
+      - name: Bundle Deps
+        uses: lando/prepare-release-action@v3
+        with:
+          lando-plugin: true
+          version: dev
+          sync: false
+      - name: Setup lando ${{ matrix.lando-version }}
+        uses: lando/setup-lando@v2
+        with:
+          lando-version: ${{ matrix.lando-version }}
+          telemetry: false
+          config: |
+            setup.skipCommonPlugins=true
+            setup.plugins.@lando/core-next=/home/runner/work/core-next/core-next
 
-      # This block should eventually become use lando/actions-hyperdrive@v2
-      - name: Verify Docker dependencies
-        run: |
-          docker --version | grep "20.10."
-          docker-compose --version | grep "1.29."
-      - name: Grab Lando CLI
-        run: |
-          sudo curl -fsSL -o /usr/local/bin/lando "https://files.lando.dev/cli/lando-linux-x64-${{ matrix.lando-versions }}?${{ github.sha }}${{ github.run_number }}"
-          sudo chmod +x /usr/local/bin/lando
-
-      # eventually we should probably use lando itself to dogfood the plugin
-      # either with better linking eg using lando config --path system.data-dir or a testing plugin
+      # @TODO: swtich to @lando/setup-lando action?
       - name: Globally dogfood the plugin
         run: |
           mkdir -p ~/.local/share/lando/plugins/@lando
@@ -77,7 +82,10 @@ jobs:
           lando plugins
           lando registry
 
-      # This block should eventually become use lando/actions-leia@v2
-      - name: Run leia tests
-        shell: bash
-        run: yarn leia "./${{ matrix.leia-tests }}/README.md" -c 'Destroy tests' --stdin --shell bash
+      # - name: Run Leia Tests
+      #   uses: lando/run-leia-action@v2
+      #   with:
+      #     leia-test: "./${{ matrix.leia-test }}/README.md"
+      #     cleanup-header: "Destroy tests"
+      #     shell: bash
+      #     stdin: true

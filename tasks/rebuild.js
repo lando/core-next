@@ -1,7 +1,6 @@
 'use strict';
 
 const _ = require('lodash');
-const utils = require('./../legacy/utils');
 
 module.exports = cli => {
   return {
@@ -32,7 +31,6 @@ module.exports = cli => {
         return app.rebuild().then(() => {
           const type = !_.isEmpty(app.warnings) ? 'report' : 'post';
           console.log(cli.makeArt('appRebuild', {name: app.name, phase: type, warnings: app.warnings}));
-          console.log(cli.formatData(utils.startTable(app), {format: 'table'}, {border: false}));
           console.log('');
         });
       }
