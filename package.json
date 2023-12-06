@@ -9,6 +9,7 @@
   "homepage": "https://github.com/lando/core-next",
   "keywords": [
     "lando",
+    "lando-plugin",
     "core"
   ],
   "engines": {
