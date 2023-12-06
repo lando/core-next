@@ -28,7 +28,7 @@ jobs:
         #   - examples/scanner
         #   - examples/services
         #   - examples/tooling
-        lando-versions:
+        lando-version:
         # NOTE: we will want to progressively scale down the "risk" as the 3.x cli runtime 4 handling matures
           # - edge
           # - stable
