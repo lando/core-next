@@ -34,7 +34,7 @@ module.exports = (file, data, options = {}) => {
       }
     case '.json':
     case 'json':
-      require('jsonfile').writeFileSync(file, data, options);
+      require('jsonfile').writeFileSync(file, data, {spaces: 2, ...options});
     default:
   }
 };
