@@ -80,7 +80,8 @@ services:
     config:
       memory_limit: "512M"
 ```
-Generally, users will want to use officially supported or third party plugins. You can find a good list of officially supported and maintained services and their docs [over here](./../services.md). **@TODO: <- that page**
+
+Generally, users will want to use officially supported or third party plugins. You can find a good list of officially supported and maintained services and their docs [over here](/). **@TODO: <- that page**
 
 However, if those do not satisfy your use case Lando 4 provides two lower level core services:
 
