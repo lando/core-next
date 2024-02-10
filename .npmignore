@@ -1,7 +1,7 @@
 .github
 .nyc_output
+coverage
 docs
 examples
 guides
 test
-coverage
