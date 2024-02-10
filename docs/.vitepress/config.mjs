@@ -20,6 +20,14 @@ export default defineConfig({
     ['link', {rel: 'icon', href: '/core/favicon.svg', type: 'image/svg+xml'}],
   ],
   themeConfig: {
+    sidebarEnder: {
+      text: `${landoPlugin}@v${version}`,
+      collapsed: true,
+      items: [
+        {text: 'Release Notes', link: `https://github.com/lando/core-next/releases/tag/v${version}`},
+        {text: 'Older Versions', link: `https://github.com/lando/core-next/releases`},
+      ],
+    },
     sidebar: [
       {
         text: 'Landofile',
