@@ -35,7 +35,27 @@ export default defineConfig({
           {text: 'L-337', link: '/services/l337.html'},
         ],
       },
-      '/support.html',
+      {
+        text: 'Contribution',
+        collapsed: false,
+        items: [
+          {text: 'Development', link: '/development'},
+          {text: 'Team', link: '/team'},
+        ],
+      },
+      {
+        text: 'Help & Support',
+        collapsed: false,
+        items: [
+          {text: 'GitHub', link: 'https://github.com/lando/core-next/issues/new/choose'},
+          {text: 'Slack', link: 'https://www.launchpass.com/devwithlando'},
+          {text: 'Contact Us', link: '/support'},
+        ],
+      },
+      {
+        text: 'Examples',
+        link: 'https://github.com/lando/core-next/tree/main/examples',
+      },
     ],
   },
 });
