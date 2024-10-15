@@ -4,8 +4,17 @@ hooks:
     init:
       - "./hooks/test.js"
   cli:
+    done:
+      - "./hooks/cache-rebuild.js"
     init:
-      - "./hooks/test.js"
+      - "./hooks/init.js"
+    init-preflight:
+      - "./hooks/checks.js"
+    prerun:
+      - "./hooks/prerun.js"
+    postrun:
+      - "./hooks/postrun.js"
+
   product:
     init:
       - "./hooks/test.js"

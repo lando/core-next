@@ -13,7 +13,10 @@
     "core"
   ],
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
+  },
+  "bin": {
+    "lando": "./bin/lando"
   },
   "exports": {
     "./app": "./lib/app.js",
@@ -49,9 +52,60 @@
     "docs:build": "vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "lint": "eslint . --ext .js --ext .mjs ",
+    "pkg": "pkg --config package.json --targets node20 --options dns-result-order=ipv4first bin/lando",
     "test:unit": "nyc --reporter=html --reporter=text mocha --timeout 5000 test/**/*.spec.js",
     "test:leia": "leia \"examples/**/README.md\" -c 'Destroy tests' --stdin",
     "test": "npm run lint && npm run test:unit"
+  },
+  "oclif": {
+    "bin": "lando",
+    "dirname": "lando",
+    "name": "@lando/cli-next",
+    "plugins": [],
+    "hooks": {
+      "minstrap": [
+        "./hooks/test.js"
+      ]
+    },
+    "topicSeparator": " "
+  },
+  "pkg": {
+    "outputPath": "dist",
+    "scripts": [
+      "bin/*.js",
+      "config/**/*.js",
+      "hooks/**/*.js",
+      "lib/**/*.js",
+      "node_modules/@lando/**/*.cjs",
+      "node_modules/@lando/**/*.js",
+      "utils/**/*.js"
+    ],
+    "assets": [
+      "FATCORE",
+      "config.yml",
+      "package.json",
+      "config/test.yaml",
+      "config/user.yaml",
+      "node_modules/@lando/**/fastcgi_params",
+      "node_modules/@lando/**/*.cnf",
+      "node_modules/@lando/**/*.conf",
+      "node_modules/@lando/**/*.ini",
+      "node_modules/@lando/**/*.inc",
+      "node_modules/@lando/**/*.json",
+      "node_modules/@lando/**/*.php",
+      "node_modules/@lando/**/*.ps1",
+      "node_modules/@lando/**/*.py",
+      "node_modules/@lando/**/*.sh",
+      "node_modules/@lando/**/*.toml",
+      "node_modules/@lando/**/*.tpl",
+      "node_modules/@lando/**/*.tmpl",
+      "node_modules/@lando/**/*.vcl",
+      "node_modules/@lando/**/*.xml",
+      "node_modules/@lando/**/*.yaml",
+      "node_modules/@lando/**/*.yml",
+      "node_modules/figlet/fonts/Small Slant.flf",
+      "node_modules/figlet/fonts/ANSI Shadow.flf"
+    ]
   },
   "dependencies": {
     "@npmcli/arborist": "^6.2.9",
