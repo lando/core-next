@@ -34,7 +34,7 @@ jobs:
           # - stable
           - 3-dev
         node-version:
-          - '18'
+          - '20'
         os:
           - ubuntu-24.04
 
@@ -44,9 +44,9 @@ jobs:
       # Eventually it would be great if these steps could live in a separate YAML file
       # that could be included in line to avoid code duplication
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install node ${{ matrix.node-version }}
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: https://registry.npmjs.org
@@ -60,7 +60,7 @@ jobs:
           version: dev
           sync: false
       - name: Setup lando ${{ matrix.lando-version }}
-        uses: lando/setup-lando@v2
+        uses: lando/setup-lando@v3
         with:
           lando-version: ${{ matrix.lando-version }}
           telemetry: false

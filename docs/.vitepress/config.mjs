@@ -1,19 +1,25 @@
 import {createRequire} from 'module';
 
 import {defineConfig} from '@lando/vitepress-theme-default-plus/config';
+import {default as getBaseUrl} from '@lando/vitepress-theme-default-plus/get-base-url';
 
 const require = createRequire(import.meta.url);
 
 const {name, version} = require('../../package.json');
 const landoPlugin = name.replace('@lando/', '');
 
+// get baseUrl
+const baseUrl = getBaseUrl();
+
 export default defineConfig({
-  title: 'Lando Core 4',
+  title: 'Lando 4',
   description: 'The offical Lando Core 4 docs.',
   landoDocs: 4,
   landoPlugin,
   version,
-  base: '/core/v4/',
+  base: '/v/next/',
+  baseUrl,
+  navBaseUrl: '/v/next',
   head: [
     ['meta', {name: 'viewport', content: 'width=device-width, initial-scale=1'}],
     ['link', {rel: 'icon', href: '/core/favicon.ico', size: 'any'}],
