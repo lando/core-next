@@ -33,7 +33,7 @@
   package = "netlify-plugin-checklinks"
   [plugins.inputs]
     todoPatterns = [ "load", "CHANGELOG.html", "x.com", "twitter.com" ]
-    skipPatterns = [ ".rss", ".gif", ".jpg" ]
+    skipPatterns = [ ".rss", ".gif", ".jpg", "--lando-core.netlify.app" ]
     checkExternal = true
 
 # We need this so preview environments and the base site look ok on their own
