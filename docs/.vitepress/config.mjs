@@ -19,7 +19,7 @@ export default defineConfig({
   version,
   base: '/v/next/',
   baseUrl,
-  navBaseUrl: '/v/next',
+  navBaseUrl: `${baseUrl}/v/next`,
   head: [
     ['meta', {name: 'viewport', content: 'width=device-width, initial-scale=1'}],
     ['link', {rel: 'icon', href: '/core/favicon.ico', size: 'any'}],
