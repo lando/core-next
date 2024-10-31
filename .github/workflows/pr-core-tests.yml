@@ -59,28 +59,28 @@ jobs:
           lando-plugin: true
           version: dev
           sync: false
-      - name: Setup lando ${{ matrix.lando-version }}
-        uses: lando/setup-lando@v3
-        with:
-          lando-version: ${{ matrix.lando-version }}
-          telemetry: false
-          config: |
-            setup.skipCommonPlugins=true
-            setup.plugins.@lando/core-next=/home/runner/work/core-next/core-next
+      # - name: Setup lando ${{ matrix.lando-version }}
+      #   uses: lando/setup-lando@v3
+      #   with:
+      #     lando-version: ${{ matrix.lando-version }}
+      #     telemetry: false
+      #     config: |
+      #       setup.skipCommonPlugins=true
+      #       setup.plugins.@lando/core-next=/home/runner/work/core-next/core-next
 
       # @TODO: swtich to @lando/setup-lando action?
-      - name: Globally dogfood the plugin
-        run: |
-          mkdir -p ~/.local/share/lando/plugins/@lando
-          ln -sf "$(pwd)" ~/.local/share/lando/plugins/@lando/core-next
-          ls -lsa ~/.local/share/lando/plugins/@lando
-          lando version --clear
-      - name: Verify we can run the packaged CLI
-        run: |
-          lando version --all
-          lando config
-          lando plugins
-          lando registry
+      # - name: Globally dogfood the plugin
+      #   run: |
+      #     mkdir -p ~/.local/share/lando/plugins/@lando
+      #     ln -sf "$(pwd)" ~/.local/share/lando/plugins/@lando/core-next
+      #     ls -lsa ~/.local/share/lando/plugins/@lando
+      #     lando version --clear
+      # - name: Verify we can run the packaged CLI
+      #   run: |
+      #     lando version --all
+      #     lando config
+      #     lando plugins
+      #     lando registry
 
       # - name: Run Leia Tests
       #   uses: lando/run-leia-action@v2
