@@ -26,6 +26,10 @@ export default defineConfig({
     ['link', {rel: 'icon', href: '/core/favicon.svg', type: 'image/svg+xml'}],
   ],
   themeConfig: {
+    multiVersionBuild: {
+      build: 'dev',
+      satisfies: '>=4.0.0',
+    },
     sidebarEnder: {
       text: `${landoPlugin}@v${version}`,
       collapsed: true,
