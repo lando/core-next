@@ -2,14 +2,46 @@ import {createRequire} from 'module';
 
 import {defineConfig} from '@lando/vitepress-theme-default-plus/config';
 import {default as getBaseUrl} from '@lando/vitepress-theme-default-plus/get-base-url';
+import {default as isDevRelease} from '@lando/vitepress-theme-default-plus/is-dev-release';
 
 const require = createRequire(import.meta.url);
 
-const {name, version} = require('../../package.json');
-const landoPlugin = name.replace('@lando/', '');
+const pjson = require('../../package.json');
+const landoPlugin = pjson.name.replace('@lando/', '');
+
+// backwards compat with LANDO_MVB_VERSION
+if (!process?.env?.VPL_MVB_VERSION && process?.env?.LANDO_MVB_VERSION) {
+  process.env.VPL_MVB_VERSION = process.env.LANDO_MVB_VERSION;
+}
+
+// allow version to imported from ENV which is nice for one-off dev builds
+const version = process?.env?.VPL_MVB_VERSION ? process.env.VPL_MVB_VERSION : `v${pjson.version}`;
 
 // get baseUrl
 const baseUrl = getBaseUrl();
+
+const sidebarEnder = {
+  text: version,
+  collapsed: true,
+  items: [
+    {
+      text: 'Other Doc Versions',
+      items: [
+        {rel: 'mvb', text: 'stable', target: '_blank', link: '/v/stable/'},
+        {rel: 'mvb', text: 'edge', target: '_blank', link: '/v/edge/'},
+        {rel: 'mvb', text: '<strong>see all versions</strong>', link: '/v/'},
+      ],
+    },
+    {text: 'Other Releases', link: 'https://github.com/lando/core-next/releases'},
+  ],
+};
+
+if (sidebarEnder && !isDevRelease(version)) {
+  sidebarEnder.items.splice(1, 0, {
+    text: 'Release Notes',
+    link: `https://github.com/lando/core-next/releases/releases/tag/${version}`,
+  });
+}
 
 export default defineConfig({
   title: 'Lando 4',
@@ -26,18 +58,15 @@ export default defineConfig({
     ['link', {rel: 'icon', href: '/core/favicon.svg', type: 'image/svg+xml'}],
   ],
   themeConfig: {
+    internalDomains: [
+      '^https:\/\/lando-core-next\.netlify\.app(\/.*)?$',
+      '^https:\/\/[a-zA-Z0-9-]+--lando-core-next\.netlify\.app(\/.*)?$',
+    ],
     multiVersionBuild: {
       build: 'dev',
       satisfies: '>=4.0.0',
     },
-    sidebarEnder: {
-      text: `${landoPlugin}@v${version}`,
-      collapsed: true,
-      items: [
-        {text: 'Release Notes', link: `https://github.com/lando/core-next/releases/tag/v${version}`},
-        {text: 'Older Versions', link: `https://github.com/lando/core-next/releases`},
-      ],
-    },
+    sidebarEnder,
     sidebar: [
       {
         text: 'Landofile',
