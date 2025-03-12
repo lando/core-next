@@ -1,4 +1,4 @@
-name: "XYŹ | AFFAIR"
+name: trivial
 services:
   defaults:
     type: apache
@@ -7,7 +7,6 @@ plugins:
   "@lando/core": ./../..
 
 # get this app to use the new v4 runtime
-runtime: 4
 config:
   core:
     development: true

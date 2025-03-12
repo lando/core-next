@@ -1,0 +1,66 @@
+#!/usr/bin/env node --dns-result-order=ipv4first
+
+/**
+ * devtool
+ *
+ * @name devtool
+ */
+
+'use strict';
+
+const argv = require('@lando/argv');
+const path = require('path');
+
+const ID = path.basename(process.argv[1]) ?? 'devtool';
+
+// if DEBUG is set then unset it, we dont want it to toggle any debugging inside of lando
+// @NOTE: are we sure? or at the very least are we sure dont want to do something with its value?
+if (process.env.DEBUG) delete process.env.DEBUG;
+
+// start assessing debug situation with DEVTOOL_DEBUG
+if (process.env.DEVTOOL_DEBUG) {
+  const scope = process.env.DEVTOOL_DEBUG === 1
+    || process.env.DEVTOOL_DEBUG === '1'
+    || process.env.DEVTOOL_DEBUG === true
+    || process.env.DEVTOOL_DEBUG === 'true'
+    || process.env.DT_DEBUG === 1
+    || process.env.DT_DEBUG === '1'
+    || process.env.DT_DEBUG === true
+    || process.env.DT_DEBUG === 'true'? 'devtool*' : process.env.DEVTOOL_DEBUG ?? process.env.DT_DEBUG;
+  require('debug').enable(scope);
+}
+
+// and finally prefer --debug
+if (argv.hasOption('--debug')) require('debug').enable(argv.getOption('--debug', {defaultValue: 'devtool*'}));
+
+// fetch debugger
+const debug = require('../lib/debug')(ID);
+
+// Set the OCLIF debug flag
+// we do a different check here because process.env.DEBUG should be set above
+if (debug.enabled) {
+  const oclif = require('@oclif/core');
+  oclif.settings.debug = true;
+}
+
+// get what we need for cli-next
+const cache = !argv.hasOption('--clear') && !argv.hasOption('--no-cache');
+const cacheDir = `${require('../utils/get-cache-dir')(ID)}.cli`;
+debug('handing off to %o with caching %o at %o and debug %o', 'devtool', cache ? 'enabled' : 'disabled', cacheDir, debug.enabled);
+
+// get the cli
+const Cli = require('../lib/cli');
+// override some default static props
+Cli.debug = debug.extend('cli');
+Cli.id = ID;
+
+// @NOTE: cli-next now allows hooks to be passed directly into the constructor. we do this because there are some
+// hooks eg init, init-preflight that run BEFORE we get the registry and the hooks that plugins have contributed
+// right now the only way to "access" these hooks is with oclif directly in the package.json.
+// @TODO: should we have some sort of "early hook" loader so that we can pass them in here? i feel like that would
+// be pretty difficult and is of questionable value?
+// @TODO: what about minstrapper stuff?
+const cli = new Cli({cache, cacheDir, debug});
+
+// run our oclifish CLI
+cli.run().then(require('@oclif/core/flush')).catch(require('@oclif/core/handle'));
