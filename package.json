@@ -1,6 +1,6 @@
 {
   "name": "@lando/core",
-  "description": "The libraries that power all of Lando.",
+  "description": "A next generation development tool.",
   "version": "4.0.0-unstable.6",
   "author": "Mike Pirog @pirog",
   "license": "GPL-3.0",
@@ -48,8 +48,9 @@
   },
   "scripts": {
     "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "docs:dev": "vitepress dev docs --debug",
-    "docs:build": "vitepress build docs",
+    "docs:build": "VPL_MVB_VERSION=$(git describe --tags --always --abbrev=1 --match=\"v[0-9].*\") vitepress build docs",
+    "docs:dev": "VPL_BASE_URL=http://localhost:5173 VPL_MVB_VERSION=$(git describe --tags --always --abbrev=1 --match=\"v[0-9].*\") vitepress dev docs",
+    "docs:mvb": "npx mvb docs",
     "docs:preview": "vitepress preview docs",
     "lint": "eslint . --ext .js --ext .mjs ",
     "pkg": "pkg --config package.json --targets node20 --options dns-result-order=ipv4first bin/lando",
@@ -135,11 +136,11 @@
   "devDependencies": {
     "@babel/eslint-parser": "^7.16.0",
     "@lando/leia": "^1.0.0-beta.4",
-    "@lando/vitepress-theme-default-plus": "^1.1.0-beta.16",
+    "@lando/vitepress-theme-default-plus": "^1.1.1",
     "eslint": "^7.32.0",
     "eslint-config-google": "^0.9.1",
     "eslint-plugin-vue": "^8.0.3",
-    "mocha": "^9.1.2",
+    "mocha": "^11.1.0",
     "nyc": "^15.1.0"
   }
 }

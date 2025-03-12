@@ -13,7 +13,7 @@ jobs:
         os:
           - ubuntu-24.04
         node-version:
-          - '18'
+          - '20'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -22,7 +22,6 @@ jobs:
         with:
           key: lando-mvb-docs
           path: docs/.vitepress/cache/@lando/mvb
-          save-always: true
       - name: Install node ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
