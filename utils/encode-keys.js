@@ -1,10 +1,9 @@
-'use strict';
+import isObject from 'lodash-es/isPlainObject.js';
+import kebabcaseKeys from 'kebabcase-keys';
 
-const isObject = require('lodash/isPlainObject');
-
-module.exports = data => {
+export default (data) => {
   // return non objects with no mutation
   if (!isObject(data)) return data;
   // mutate keys and return unless the key is in plugin format
-  return require('kebabcase-keys')(data, {deep: true, exclude: [new RegExp('(^@).*/')]});
+  return kebabcaseKeys(data, { deep: true, exclude: [new RegExp('(^@).*/')] });
 };

@@ -54,9 +54,9 @@ registry:
   storage:
     file-storage: './components/file-storage'
     no-storage: './components/no-storage'
-  # config:
-  #   yaml-schema:
-  #     import: !import PRIVACY.md
+  config:
+    yaml-schema:
+      import:
 
 tasks:
   config: './tasks/config'

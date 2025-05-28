@@ -15,34 +15,30 @@
 
 # Logs
 *.log
-logs
 
 # NPM files
 node_modules
 
-# lando config
+# devtool
 env.yaml
 env.yml
-lando.env
+devtool.env
+.devtool/id
 
 # Build dirs
 build
+cache
 dist
+temp
 
 # coverage reporting
 .nyc_output
 coverage/
 
-# lando
-.lando/id
-
-# docs
+# vitepress
 .temp
 .cache
 _site
-dist
-cache
-temp
 config.*.timestamp-*-*.*
 
 # YARN

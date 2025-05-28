@@ -1,15 +1,14 @@
-'use strict';
+import path from 'node:path';
 
-const dropRight = require('lodash/dropRight');
-const path = require('path');
-const range = require('lodash/range');
+import dropRight from 'lodash-es/dropRight.js';
+import range from 'lodash-es/range.js';
 
 /*
  * TBD
  */
-module.exports = (files, startsFrom) => {
+export default (files, startsFrom) => {
   return range(startsFrom.split(path.sep).length)
-  .map(end => dropRight(startsFrom.split(path.sep), end).join(path.sep))
-  .map(dir => files.map(file => path.join(dir, path.basename(file))))
-  .flat(Number.POSITIVE_INFINITY);
+    .map((end) => dropRight(startsFrom.split(path.sep), end).join(path.sep))
+    .map((dir) => files.map((file) => path.join(dir, path.basename(file))))
+    .flat(Number.POSITIVE_INFINITY);
 };

@@ -1,40 +1,62 @@
-'use strict';
+import fs from 'node:fs';
+import path from 'node:path';
 
-const fs = require('fs');
-const get = require('lodash/get');
-const path = require('path');
+import get from 'lodash-es/get.js';
+import jsonfile from 'jsonfile';
+
+import { stringify as stringifyYAML } from 'yaml';
+const { writeFileSync: writeJSON } = jsonfile;
+
+const write = (file, data) => {
+  if (!fs.existsSync(file)) fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, data, { encoding: 'utf8' });
+};
 
 // @TODO: maybe extension should be in {options}?
-module.exports = (file, data, options = {}) => {
-  // @TODO: error handling, defaults etc?
-
+// @TODO: error handling, defaults etc?
+// @TODO: better data type handling
+export default (file, data, options = {}) => {
   // set extension if not set
-  const extension = options.extension || path.extname(file);
+  const extension = options.extension ?? path.extname(file);
+  // linux line endings
+  const forcePosixLineEndings = options.forcePosixLineEndings ?? false;
+
+  // special handling for ImportString
+  // @TODO: we a better way to do this without a bunch of ImportString checking?
+  if (typeof data !== 'string' && data?.constructor?.name === 'ImportString') data = data.toString();
+  // data is a string and posixOnly then replace
+  if (typeof data === 'string' && forcePosixLineEndings) data = data.replace(/\r\n/g, '\n');
 
   switch (extension) {
+    case '.json':
+    case 'json': {
+      writeJSON(file, data, { spaces: 2, ...options });
+      break;
+    }
+
     case '.yaml':
     case '.yml':
     case 'yaml':
-    case 'yml':
-      // if this is a YAML DOC then use yaml module
-      if (get(data, 'constructor.name') === 'Document') {
-        try {
-          fs.writeFileSync(file, data.toString());
-        } catch (error) {
-          throw new Error(error);
-        }
+    case 'yml': {
+      // if this is empty yaml then do nothing
+      if (data === undefined || data === null) break;
 
-      // otherwise use the normal js-yaml dump
-      } else {
-        try {
-          return fs.writeFileSync(file, require('js-yaml').dump(data, options));
-        } catch (error) {
-          throw new Error(error);
-        }
+      // otherwise special handling for a full yaml doc
+      if (get(data, 'constructor.name') === 'Document') {
+        // if this is empty then lets enforce nullStr to empty
+        // this prevents an empty doc from outputting string "null"
+        const nullStr = data.contents === null ? '' : 'null';
+
+        write(file, data.toString({ nullStr, ...options }));
+        break;
       }
-    case '.json':
-    case 'json':
-      require('jsonfile').writeFileSync(file, data, {spaces: 2, ...options});
+
+      // if this is a YAML DOC th en use yaml module
+      write(file, stringifyYAML(data, options));
+      break;
+    }
+
     default:
+      write(file, data);
   }
 };

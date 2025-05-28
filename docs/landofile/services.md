@@ -19,7 +19,8 @@ Or it _could_ mean serving up an enterprise grade microservices application stac
 
 Services will generally take the below form:
 
-***Landofile***
+**_Landofile_**
+
 ```yaml
 services:
   my-service:
@@ -65,25 +66,26 @@ As noted above, most Lando services are provided by plugins that implement a spe
 
 For example the `@lando/php` plugin implements a `php` service that looks something like this:
 
-***Landofile***
+**_Landofile_**
+
 ```yaml
 services:
   runtime:
-    type: "php:8.2"
+    type: 'php:8.2'
     api: 4
     extensions:
-      - "curl"
-      - "gd"
-      - "imap"
-      - "json"
-      - "xdebug"
+      - 'curl'
+      - 'gd'
+      - 'imap'
+      - 'json'
+      - 'xdebug'
     config:
-      memory_limit: "512M"
+      memory_limit: '512M'
 ```
 
 Generally, users will want to use officially supported or third party plugins. You can find a good list of officially supported and maintained services and their docs [over here](/). **@TODO: <- that page**
 
 However, if those do not satisfy your use case Lando 4 provides two lower level core services:
 
-* [L-337 Service](../services/l337.html)
-* [Lando Service](../services/lando.html) **@TODO: <- that page**
+- [L-337 Service](../services/l337.html)
+- [Lando Service](../services/lando.html) **@TODO: <- that page**

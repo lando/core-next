@@ -2,7 +2,7 @@
 
 This example exists primarily to test the following:
 
-* TBD
+- TBD
 
 ## Start up tests
 

@@ -4,7 +4,7 @@ services:
     type: apache
 
 plugins:
-  "@lando/core": ./../..
+  '@lando/core': ./../..
 
 # get this app to use the new v4 runtime
 config:

@@ -1,34 +1,46 @@
-'use strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { createRequire } from 'node:module';
 
-const fs = require('fs');
-const path = require('path');
+import jsonfile from 'jsonfile';
 
-module.exports = (file, options = {}) => {
+import { parse as readYAML, parseDocument as readYAMLDoc } from 'yaml';
+const readCJS = createRequire(import.meta.url);
+const { readFileSync: readJSON } = jsonfile;
+
+const read = (file) => fs.readFileSync(file, { encoding: 'utf8' });
+
+export default (file, options = {}) => {
   // @TODO: file does nto exist?
 
   // set extension if not set
-  const extension = options.extension || path.extname(file);
+  const extension = options.extension ?? path.extname(file);
+  // yaml expansion
+  const fullYamlDoc = options.fullYamlDoc ?? false;
 
   // @TODO: better try/catches here?
   // @TODO: throw error for default?
-  // @TODO: require('js-yaml').loadAll?
   switch (extension) {
+    case '.cjs':
+    case 'cjs':
+    case '.js':
+    case 'js': {
+      return readCJS(file);
+    }
+
+    case '.json':
+    case 'json': {
+      return readJSON(file, options);
+    }
+
     case '.yaml':
     case '.yml':
     case 'yaml':
-    case 'yml':
-      try {
-        return require('js-yaml').load(fs.readFileSync(file, 'utf8'), options);
-      } catch (e) {
-        throw e;
-      }
-    case '.js':
-    case 'js':
-      return require(file);
-    case '.json':
-    case 'json':
-      return require('jsonfile').readFileSync(file, options);
+    case 'yml': {
+      return fullYamlDoc ? readYAMLDoc(read(file), options) : readYAML(read(file), options);
+    }
+
     default:
-      // throw error
+      return read(file);
   }
 };

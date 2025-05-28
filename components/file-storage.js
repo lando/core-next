@@ -1,15 +1,15 @@
-'use strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 
-// Modules
-const fs = require('fs');
-const id2key = require('../utils/normalize-id2key');
-const merge = require('lodash/merge');
-const path = require('path');
-const read = require('../utils/read-file');
-const size = require('../utils/get-size');
-const write = require('../utils/write-file');
+import NodeCache from 'node-cache';
+import merge from 'lodash-es/merge.js';
 
-const NodeCache = require('node-cache');
+import createDebug from '../lib/debug.js';
+import id2key from '../utils/normalize-id2key.js';
+import read from '../utils/read-file.js';
+import size from '../utils/get-size.js';
+import write from '../utils/write-file.js';
 
 /*
  * Creates a new Cache instance.
@@ -17,28 +17,24 @@ const NodeCache = require('node-cache');
 class FileStorage extends NodeCache {
   static name = 'file-storage';
   static cspace = 'file-storage';
-  static debug = require('../lib/debug')('@lando/core:file-storage');
+  static debug = createDebug('@lando/devtool:file-storage');
   static config = {
-    dir: require('os').tmpdir(),
+    dir: os.tmpdir(),
     delimiter: '.',
   };
 
   // @TBD: helper to get key from an id
-  static getKey = (id, delimiter = FileStorage.config.delimiter) => id2key(id, delimiter = FileStorage.config.delimiter);
+  static getKey = (id, delimiter = FileStorage.config.delimiter) => id2key(id, delimiter);
 
   // helper to wipe a storage directory
   static flush(dir, debug = FileStorage.debug) {
     // @TODO: error handle dir?
-    fs.rmSync(dir, {recursive: true});
-    fs.mkdirSync(dir, {recursive: true});
+    fs.rmSync(dir, { recursive: true });
+    fs.mkdirSync(dir, { recursive: true });
     debug('flushed file storage at %o', dir);
   }
 
-  constructor({
-    debug = FileStorage.debug,
-    delimiter = FileStorage.config.delimiter,
-    dir = FileStorage.config.dir,
-  } = {}) {
+  constructor({ debug = FileStorage.debug, delimiter = FileStorage.config.delimiter, dir = FileStorage.config.dir } = {}) {
     // Get the nodecache opts
     super();
 
@@ -48,7 +44,7 @@ class FileStorage extends NodeCache {
     this.dir = dir;
 
     // Ensure the cache dir exists
-    fs.mkdirSync(this.dir, {recursive: true});
+    fs.mkdirSync(this.dir, { recursive: true });
   }
 
   // wipes all keys
@@ -85,10 +81,10 @@ class FileStorage extends NodeCache {
       this.debug('retrieved %o items from mem at key %o', size(memResult), key);
       return memResult;
 
-    // otherwise try to get from file storage
+      // otherwise try to get from file storage
     } else {
       try {
-        const data = read(path.join(this.dir, key), {extension: 'json'});
+        const data = read(path.join(this.dir, key), { extension: 'json' });
         this.debug('retrieved %o items from file storage at %o', size(data), path.join(this.dir, key));
         this.__set(key, data, 0);
         return data;
@@ -106,7 +102,7 @@ class FileStorage extends NodeCache {
     if (this.__get(key)) return true;
     // otherwise look for it in file storage
     try {
-      return read(path.join(this.dir, key), {extension: 'json'}) ? true : false;
+      return read(path.join(this.dir, key), { extension: 'json' }) ? true : false;
     } catch (e) {
       return false;
     }
@@ -158,7 +154,7 @@ class FileStorage extends NodeCache {
    * // Add an object to the cache for five seconds
    * lando.cache.set('mykey', data, {ttl: 5});
    */
-  set(id, data, {persist = true, ttl = 0} = {}) {
+  set(id, data, { persist = true, ttl = 0 } = {}) {
     // get key
     const key = FileStorage.getKey(id);
 
@@ -182,7 +178,7 @@ class FileStorage extends NodeCache {
     }
 
     // And add to file if we have persistence
-    if (persist) write(path.join(this.dir, key), data, {extension: 'json'});
+    if (persist) write(path.join(this.dir, key), data, { extension: 'json' });
   }
 
   // @TBD
@@ -192,7 +188,6 @@ class FileStorage extends NodeCache {
 
     // if its an object then merge and set, otherwise just replace
     if (typeof data === 'object') this.set(key, merge({}, this.get(key), value));
-
     // otherwise just replace it
     else this.set(key, value);
   }
@@ -216,4 +211,4 @@ FileStorage.prototype.__del = NodeCache.prototype.del;
 /*
  * Return the class
  */
-module.exports = FileStorage;
+export default FileStorage;

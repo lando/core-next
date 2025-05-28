@@ -10,14 +10,9 @@ const merge = require('./merge');
  */
 module.exports = (
   component,
-  registry = registry = new require('../lib/config')({id: 'component-registry'}), // eslint-disable-line new-cap
-  {
-    aliases = {},
-    config = {},
-    cache = undefined,
-    debug = require('../lib/debug')('@lando/core:get-component'),
-  } = {},
-  ) => {
+  registry = (registry = new require('../lib/config')({ id: 'component-registry' })), // eslint-disable-line new-cap
+  { aliases = {}, config = {}, cache = undefined, debug = require('../lib/debug')('@lando/core:get-component') } = {},
+) => {
   // determine whether we should cache or not
   const shouldCache = isObject(cache);
 
@@ -30,7 +25,7 @@ module.exports = (
   debug('looking for %o in %o', component, registry.id);
 
   // if an alias then rerun
-  if (has(aliases, component)) return module.exports(aliases[component], registry, {aliases, config, cache, debug});
+  if (has(aliases, component)) return module.exports(aliases[component], registry, { aliases, config, cache, debug });
 
   // if class is already loaded in registry and cache is true then just return the class
   if (shouldCache && cache[component]) {
@@ -39,7 +34,10 @@ module.exports = (
   }
 
   // try to get the path to the component
+  // @TODO: this should be a loader?
+  // if function then async?
   const componentPath = registry.get(component);
+
   // if there is no component or it does not exist then throw an error
   if (!componentPath || (!fs.existsSync(componentPath) && !fs.existsSync(`${componentPath}.js`))) {
     throw new Error(`could not find component ${component}`);
@@ -56,7 +54,7 @@ module.exports = (
   // whatever core.engine is
   //
   // otherwise assume the loader is the class itself
-  const Component = isDynamic ? loader.getComponent(module.exports(loader.extends, registry, {alises, cache, config, debug})) : loader;
+  const Component = isDynamic ? loader.getComponent(module.exports(loader.extends, registry, { alises, cache, config, debug })) : loader;
 
   // if Component is not a class then error
   if (!require('is-class')(Component)) throw new Error(`component ${component} needs to be a class`);

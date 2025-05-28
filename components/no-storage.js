@@ -1,23 +1,21 @@
-'use strict';
-
-// Modules
-const id2key = require('../utils/normalize-id2key');
+import createDebug from '../lib/debug.js';
+import id2key from '../utils/normalize-id2key.js';
 
 class NoStorage {
   static name = 'no-storage';
   static cspace = 'no-storage';
-  static debug = require('../lib/debug')('@lando/core:no-storage');
+  static debug = createDebug('@lando/devtool:no-storage');
   static config = {
     delimiter: '.',
   };
 
   // @TBD: helper to get key from an id
-  static getKey = (id, delimiter = NoStorage.config.delimiter) => id2key(id, delimiter = NoStorage.config.delimiter);
+  static getKey = (id, delimiter = NoStorage.config.delimiter) => id2key(id, delimiter);
 
   // helper to wipe a storage directory
-  static flush(dir, debug = NoStorage.debug) {}
+  static flush() {}
 
-  constructor({debug = NoStorage.debug} = {}) {
+  constructor({ debug = NoStorage.debug } = {}) {
     this.debug = debug;
   }
 
@@ -36,19 +34,19 @@ class NoStorage {
   }
 
   // @TDB
-  has(key) {
+  has() {
     return false;
   }
 
   /*
    * Sets an item in the cache
    */
-  set(key, data) {
+  set(key) {
     this.debug('caching disabled and/or using no storage backend so did not set key %o', id2key(key));
   }
 
   // @TBD
-  update(key, value) {
+  update(key) {
     this.debug('caching disabled and/or using no storage backend so did not update key %o', id2key(key));
   }
 }
@@ -56,4 +54,4 @@ class NoStorage {
 /*
  * Return the class
  */
-module.exports = NoStorage;
+export default NoStorage;

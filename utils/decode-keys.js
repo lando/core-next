@@ -1,10 +1,9 @@
-'use strict';
+import camelcaseKeys from 'camelcase-keys';
+import isObject from 'lodash-es/isPlainObject.js';
 
-const isObject = require('lodash/isPlainObject');
-
-module.exports = data => {
+export default (data) => {
   // return non objects with no mutation
   if (!isObject(data)) return data;
   // mutate keys and return
-  return require('camelcase-keys')(data, {deep: true});
+  return camelcaseKeys(data, { deep: true });
 };

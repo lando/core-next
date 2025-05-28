@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": false,
+    "declaration": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ES2022",
+    "moduleResolution": "node",
+    "outDir": "dist",
+    "rootDir": ".",
+    "skipLibCheck": true,
+    "strict": true,
+    "target": "ES2022"
+  },
+  "include": [
+    ".eslintrc.cjs",
+    "./bin/**/*",
+    "./commands/**/*",
+    "./components/**/*",
+    "./config/**/*",
+    "./hooks/**/*",
+    "./lib/**/*",
+    "./plugins/**/*",
+    "./tasks/**/*",
+    "./utils/**/*",
+    "workspace/appfile-app-defaults.js",
+    "workspace/product-defaults.js",
+    "workspace/product.js"
+  ]
+}

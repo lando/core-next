@@ -1,11 +1,9 @@
-'use strict';
-
-const isObject = require('lodash/isPlainObject');
-const merge = require('lodash/mergeWith');
-const mergeArrays = require('./merge-arrays');
+import isObject from 'lodash-es/isPlainObject.js';
+import merge from 'lodash-es/merge.js';
+import mergeArrays from './merge-arrays.js';
 
 // @TODO: error handling
-module.exports = (object, sources, ams = ['merge:id', 'replace']) => {
+export default (object, sources, ams = ['merge:id', 'replace']) => {
   // if sources is not an array then make it so
   if (!Array.isArray(sources)) sources = [sources];
 
@@ -25,7 +23,7 @@ module.exports = (object, sources, ams = ['merge:id', 'replace']) => {
     // if first strategy is merge and some part of objvalue has an object then try to merge with by
     if (first === 'merge') {
       // if mergable object detected in array then proceed
-      if (objValue.some(element => isObject(element))) return mergeArrays(objValue, srcValue, `merge:${by}`);
+      if (objValue.some((element) => isObject(element))) return mergeArrays(objValue, srcValue, `merge:${by}`);
       // otherwise return the fallback
       return mergeArrays(objValue, srcValue, fallback);
     }

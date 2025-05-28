@@ -1,9 +1,7 @@
-'use strict';
-
 /*
  * TBD
  */
-module.exports = data => {
+export default (data) => {
   // if null or undefined return 0
   if (!data || data === null) return 0;
   // if its an array then
