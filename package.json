@@ -3,7 +3,7 @@
   "description": "The libraries that power all of Lando.",
   "version": "4.0.0-unstable.6",
   "author": "Mike Pirog @pirog",
-  "license": "GPL-3.0",
+  "license": "MIT",
   "repository": "lando/core-next",
   "bugs": "https://github.com/lando/core-next/issues/new/choose",
   "homepage": "https://github.com/lando/core-next",
