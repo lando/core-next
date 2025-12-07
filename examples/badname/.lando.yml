@@ -1,14 +1,22 @@
 name: "XYŹ | AFFAIR"
 services:
   defaults:
-    type: apache
+    type: lando
+    services:
+      image: nginx:1.22.1
+      command: /docker-entrypoint.sh nginx -g "daemon off;"
+      ports:
+        - 0:80
+      volumes:
+        - ./:/usr/share/nginx/html:ro
+  defaults-v4:
+    api: 4
+    type: l337
+    image: nginx:1.22.1
+    ports:
+      - 0:80
+    volumes:
+      - ./:/usr/share/nginx/html:ro
 
 plugins:
-  "@lando/core": ./../..
-
-# get this app to use the new v4 runtime
-runtime: 4
-config:
-  core:
-    development: true
-    telemetry: false
+  "@lando/core": ../..

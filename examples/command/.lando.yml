@@ -1,0 +1,55 @@
+name: lando-command
+
+x-service:
+  &default-service
+    api: 4
+    app-mount: false
+    user: node
+    mounts:
+      - source: ./
+        destination: /app
+        type: copy
+    ports:
+      - 3000/http
+    overrides:
+      working_dir: /app
+    build:
+      image: |
+        npm install
+
+services:
+  web1:
+    << : *default-service
+    image: node:18
+    command: !load ./scripts/start.sh
+  web2:
+    << : *default-service
+    image: node:18
+    command: npm run dev
+  web3:
+    << : *default-service
+    image: node:18
+    command: |
+      #!/bin/sh
+      set -e
+      npm run dev
+  web4:
+    << : *default-service
+    image: |
+      FROM node:18
+      RUN echo "npm run dev" > /run.sh
+      RUN chmod +x /run.sh
+    command: /run.sh
+  web5:
+    << : *default-service
+    image: |
+      FROM node:18
+      CMD ["npm", "run", "dev"]
+  web6:
+    << : *default-service
+    image: |
+      FROM node:18
+      CMD npm run dev
+
+plugins:
+  "@lando/core": ../..

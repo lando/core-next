@@ -1,8 +1,12 @@
-version: '3.6'
 services:
   appserver:
     image: php:7.1-fpm-alpine
+    environment:
+      SERVICE: 'appserver'
   web:
     image: nginx
     environment:
       SERVICE: 'web'
+  alpine:
+    image: alpine
+    command: tail -f /dev/null

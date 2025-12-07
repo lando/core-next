@@ -1,22 +1,39 @@
 'use strict';
 
-module.exports = cli => {
+module.exports = lando => {
   return {
     command: 'poweroff',
-    level: 'engine',
     describe: 'Spins down all lando related containers',
-    run: () => {
-      console.log(cli.makeArt('poweroff', {phase: 'pre'}));
+    usage: '$0 poweroff',
+    level: 'engine',
+    run: async () => {
+      console.log(lando.cli.makeArt('poweroff', {phase: 'pre'}));
       // Get all our containers
-      return lando.engine.list()
+      const containers = await lando.engine.list();
+
       // SHUT IT ALL DOWN
-      .each(container => console.log('Bye bye %s ... ', container.name))
-      .delay(200)
-      .map(container => lando.engine.stop({id: container.id}))
+      if (containers.length > 0) {
+        const tasks = containers.map(container => ({
+          title: `Container ${container.name}`,
+          task: async () => await lando.engine.stop({id: container.id}),
+        }));
+
+        await lando.runTasks(tasks, {
+          renderer: 'dc2',
+          rendererOptions: {
+            header: 'Stopping',
+            states: {
+              COMPLETED: 'Stopped',
+              STARTED: 'Stopping',
+            },
+          },
+        });
+      }
+
       // Emit poweroff
-      .then(() => lando.events.emit('poweroff'))
+      await lando.events.emit('poweroff');
       // Finish up
-      .then(() => console.log(cli.makeArt('poweroff', {phase: 'post'})));
+      console.log(lando.cli.makeArt('poweroff', {phase: 'post'}));
     },
   };
 };

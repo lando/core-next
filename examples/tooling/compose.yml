@@ -1,12 +1,18 @@
-version: '3'
 services:
   web:
     image: httpd
     ports:
       - "80"
+    environment:
+      SERVICE: web
   web2:
     image: nginx
     ports:
       - "80"
   php:
     image: php:7.1-fpm-alpine
+    environment:
+      SERVICE: php
+  alpine:
+    image: alpine
+    command: tail -f /dev/null

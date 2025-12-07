@@ -1,0 +1,112 @@
+name: lando-sqlhelpers
+services:
+  mariadb:
+    api: 3
+    type: lando
+    healthcheck: mysqladmin ping -h mariadb -u test -ptest
+    overrides:
+      platform: linux/amd64
+    services:
+      image: bitnamilegacy/mariadb:10.4
+      command: /opt/bitnami/scripts/mariadb/entrypoint.sh /opt/bitnami/scripts/mariadb/run.sh
+      environment:
+        ALLOW_EMPTY_PASSWORD: yes
+        MARIADB_DATABASE: lando_test
+        MYSQL_DATABASE: lando_test
+        MARIADB_USER: test
+        MARIADB_PASSWORD: test
+  mariadb-default:
+    api: 3
+    type: lando
+    healthcheck: mysqladmin ping -h mariadb-default -u test -ptest
+    overrides:
+      platform: linux/amd64
+    services:
+      image: bitnamilegacy/mariadb:10.4
+      command: /opt/bitnami/scripts/mariadb/entrypoint.sh /opt/bitnami/scripts/mariadb/run.sh
+      environment:
+        ALLOW_EMPTY_PASSWORD: yes
+        MARIADB_DATABASE: database
+        MYSQL_DATABASE: database
+        MARIADB_USER: test
+        MARIADB_PASSWORD: test
+
+  mysql57:
+    api: 3
+    type: lando
+    healthcheck: mysqladmin ping -h mysql57 -u test -ptest
+    services:
+      image: bitnamilegacy/mysql:5.7
+      command: /opt/bitnami/scripts/mysql/entrypoint.sh /opt/bitnami/scripts/mysql/run.sh
+      environment:
+        ALLOW_EMPTY_PASSWORD: yes
+        MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
+        MYSQL_DATABASE: lando_test
+        MYSQL_PASSWORD: test
+        MYSQL_USER: test
+  mysql57-default:
+    api: 3
+    type: lando
+    healthcheck: mysqladmin ping -h mysql57-default -u test -ptest
+    services:
+      image: bitnamilegacy/mysql:5.7
+      command: /opt/bitnami/scripts/mysql/entrypoint.sh /opt/bitnami/scripts/mysql/run.sh
+      environment:
+        ALLOW_EMPTY_PASSWORD: yes
+        MYSQL_AUTHENTICATION_PLUGIN: mysql_native_password
+        MYSQL_DATABASE: database
+        MYSQL_PASSWORD: test
+        MYSQL_USER: test
+
+  mysql80:
+    api: 3
+    type: lando
+    healthcheck: mysqladmin ping -h mysql80 -u test -ptest
+    services:
+      image: bitnamilegacy/mysql:8.0
+      command: /opt/bitnami/scripts/mysql/entrypoint.sh /opt/bitnami/scripts/mysql/run.sh
+      environment:
+        ALLOW_EMPTY_PASSWORD: yes
+        MYSQL_AUTHENTICATION_PLUGIN: caching_sha2_password
+        MYSQL_DATABASE: lando_test
+        MYSQL_PASSWORD: test
+        MYSQL_USER: test
+  mysql80-default:
+    api: 3
+    type: lando
+    healthcheck: mysqladmin ping -h mysql80-default -u test -ptest
+    services:
+      image: bitnamilegacy/mysql:8.0
+      command: /opt/bitnami/scripts/mysql/entrypoint.sh /opt/bitnami/scripts/mysql/run.sh
+      environment:
+        ALLOW_EMPTY_PASSWORD: yes
+        MYSQL_AUTHENTICATION_PLUGIN: caching_sha2_password
+        MYSQL_DATABASE: database
+        MYSQL_PASSWORD: test
+        MYSQL_USER: test
+
+  postgres16:
+    api: 3
+    type: lando
+    healthcheck: pg_isready -h postgres16 -U postgres
+    services:
+      image: bitnamilegacy/postgresql:16.3.0
+      command: /opt/bitnami/scripts/postgresql/entrypoint.sh /opt/bitnami/scripts/postgresql/run.sh
+      environment:
+        ALLOW_EMPTY_PASSWORD: yes
+        POSTGRESQL_DATABASE: lando_test
+        POSTGRES_DB: lando_test
+  postgres16-default:
+    api: 3
+    type: lando
+    healthcheck: pg_isready -h postgres16-default -U postgres
+    services:
+      image: bitnamilegacy/postgresql:16.3.0
+      command: /opt/bitnami/scripts/postgresql/entrypoint.sh /opt/bitnami/scripts/postgresql/run.sh
+      environment:
+        ALLOW_EMPTY_PASSWORD: yes
+        POSTGRESQL_DATABASE: database
+        POSTGRES_DB: database
+
+plugins:
+  "@lando/core": "../../.."

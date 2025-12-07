@@ -45,7 +45,7 @@ if (sidebarEnder && !isDevRelease(version)) {
 
 export default defineConfig({
   title: 'Lando 4',
-  description: 'The offical Lando Core 4 docs.',
+  description: 'The offical Lando 4 docs.',
   landoDocs: 4,
   landoPlugin,
   version,

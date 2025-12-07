@@ -1,0 +1,91 @@
+name: lando-storage
+volumes:
+  my-data:
+services:
+  db:
+    api: 4
+    image: mysql:8.3
+    user: mysql
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    # below goes through addLandoServiceData which will add an extra volume "my-data" without context during appBuild
+    # volumes:
+    #   - my-data:/my-data
+    # so we want to use "overrides" which uses addServiceData and will not to additional processing and not create
+    # the extra volumes
+    overrides:
+      volumes:
+        - my-data:/my-data
+    storage:
+      # short form single service scoped volume at /var/lib/mysql
+      - /var/lib/mysql
+      # long form of the above
+      - destination: /some/other/dir
+        scope: service
+        type: volume
+
+      # differently scoped volume mount storage
+      # app|project is available in other services in this app|project
+      # global is available to ANY lando project
+      - destination: /stuff
+        scope: app
+      - destination: /everywhere
+        scope: global
+
+      # storage via a bind mount
+      # short form
+      - ./shared:/shared
+      # long form
+      - source: ./shared
+        target: /shared-again
+        type: bind
+
+      # "image" storage basically just sets correct ownership/perms on a dir thats already in the image
+      # you actually can use any type that isnt "bind" or "volume" and this will work the same eg "image"
+      # is just a convention
+      # we need to reset the perms here to run the image non-root since /var/run/mysqld is where the socket
+      # is and it is owned by root
+      - destination: /var/run/mysqld
+        type: image
+
+      # remount for fun?
+      - source: landostorage-db-var-lib-mysql
+        target: /var/lib/mysql-backup
+  alpine:
+    api: 4
+    image: alpine:3.20
+    command: sleep infinity
+    user: me
+    persistent-storage:
+      - /some/cache/directory
+      - destination: /stuff
+        scope: project
+      - destination: /everywhere
+        scope: global
+      - ./shared:/shared
+      - source: ./shared
+        target: /shared-again
+        type: bind
+
+      # or if you are clever and know the storage volume names you can remount them elsewhere
+      - source: landostorage-stuff
+        target: /things
+      - source: lando-everywhere
+        target: /universal
+
+  owners:
+    api: 4
+    image: alpine:3.20
+    command: sleep infinity
+    user: me
+    storage:
+      - destination: /someplace
+        owner: games
+      - destination: /someplace-secret
+        owner: root
+      - destination: /someplace-free
+        owner: root
+        permissions: 777
+
+plugins:
+  "@lando/core": ../..
