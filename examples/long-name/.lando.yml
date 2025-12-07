@@ -1,15 +1,23 @@
 name: lando-the-sitename-that-never-ends-it-goes-on-and-on-my-friends-no-seriously-it-keeps-going-on-and-on
 services:
   defaults:
-    type: nginx
-    ssl: true
+    api: 3
+    type: lando
+    services:
+      image: nginx:1.22.1
+      volumes:
+      - ./index.html:/usr/share/nginx/html/index.html
+      command: /docker-entrypoint.sh nginx -g "daemon off;"
+      ports:
+        - '0:80'
+  l337:
+    api: 4
+    type: l337
+    image: nginx:1.22.1
+    ports:
+      - '0:80'
+    volumes:
+    - ./:/usr/share/nginx/html
 
 plugins:
-  "@lando/core": ./../..
-
-# get this app to use the new v4 runtime
-runtime: 4
-config:
-  core:
-    dev-mode: 1
-    telemetry: 0
+  "@lando/core": ../..

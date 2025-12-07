@@ -1,7 +1,0 @@
-name: "@lando/recipes"
-enabled: false
-# registry:
-#   legacy:
-#     tasks:
-#       init: './tasks/init'
-

@@ -1,0 +1,128 @@
+name: lando-healthcheck
+events:
+  post-start:
+    - database1: mysql -uroot --silent --execute "SHOW DATABASES;"
+services:
+  appserver:
+    api: 3
+    type: lando
+    services:
+      image: php:8.2-fpm
+      command: docker-php-entrypoint sleep infinity
+      volumes:
+        - "./healthcheck.sh:/usr/local/bin/healthcheck"
+    healthcheck: healthcheck
+  appserver2:
+    api: 3
+    type: lando
+    services:
+      image: php:8.2-fpm
+      command: docker-php-entrypoint sleep infinity
+    healthcheck: |
+      #!/bin/bash
+      set -eo pipefail
+      touch /tmp/hi
+      exit 0
+
+  nginx:
+    api: 3
+    type: lando
+    services:
+      image: nginx:1.22.1
+      command: /docker-entrypoint.sh nginx -g "daemon off;"
+      ports:
+        - 0:80
+      volumes:
+        - ./:/usr/share/nginx/html
+    run_as_root:
+      - echo "$(id)" > /run_as_root.txt
+      - ln -snf /usr/share/zoneinfo/America/New_York /etc/localtime
+      - echo "America/New_York" > /etc/timezone
+    overrides:
+      environment:
+        THING: STUFF
+      volumes:
+        - "./test.txt:/var/www/test.txt"
+  nginx2:
+    api: 4
+    image:
+      context:
+        - ./healthcheck.sh:/usr/local/bin/healthcheck
+      imagefile: |
+        FROM nginxinc/nginx-unprivileged:1.26.1
+        USER root
+        RUN apt update -y
+        RUN apt install git ssh socat sudo -y
+        RUN ssh-keyscan github.com >> /etc/ssh/ssh_known_hosts
+      steps:
+        - instructions: RUN chmod +x /usr/local/bin/healthcheck
+    user: nginx
+    healthcheck:
+      command: healthcheck
+      retry: 10
+      delay: 1000
+  nginx3:
+    api: 4
+    image:
+      imagefile: nginxinc/nginx-unprivileged:1.26.1
+    user: nginx
+    healthcheck: !load healthcheck.sh
+
+  database1:
+    api: 3
+    type: lando
+    healthcheck:
+      command: mysql -uroot --silent --execute "SHOW DATABASES;"
+      user: mysql
+      retry: 10
+      delay: 1000
+    services:
+      image: mariadb:10.4
+      command: docker-entrypoint.sh mysqld
+      environment:
+        MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: da
+        MARIADB_MYSQL_LOCALHOST_USER: da
+        MARIADB_DATABASE: test
+        MARIADB_USER: test
+        MARIADB_PASSWORD: test
+        MARIADB_AUTO_UPGRADE: da
+  database2:
+    api: 3
+    type: lando
+    healthcheck:
+      command:
+        - mysql
+        - -uroot
+        - --silent
+        - --execute
+        - SHOW DATABASES;
+      user: mysql
+      retry: 1
+      delay: 1000
+    services:
+      image: mariadb:10.4
+      command: docker-entrypoint.sh mysqld
+      environment:
+        MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: da
+        MARIADB_MYSQL_LOCALHOST_USER: da
+        MARIADB_DATABASE: test
+        MARIADB_USER: test
+        MARIADB_PASSWORD: test
+        MARIADB_AUTO_UPGRADE: da
+  disablebase:
+    api: 3
+    type: lando
+    healthcheck: disabled
+    services:
+      image: mariadb:10.4
+      command: docker-entrypoint.sh mysqld
+      environment:
+        MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: da
+        MARIADB_MYSQL_LOCALHOST_USER: da
+        MARIADB_DATABASE: test
+        MARIADB_USER: test
+        MARIADB_PASSWORD: test
+        MARIADB_AUTO_UPGRADE: da
+
+plugins:
+  "@lando/core": ../..

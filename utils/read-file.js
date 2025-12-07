@@ -11,17 +11,12 @@ module.exports = (file, options = {}) => {
 
   // @TODO: better try/catches here?
   // @TODO: throw error for default?
-  // @TODO: require('js-yaml').loadAll?
   switch (extension) {
     case '.yaml':
     case '.yml':
     case 'yaml':
     case 'yml':
-      try {
-        return require('js-yaml').load(fs.readFileSync(file, 'utf8'), options);
-      } catch (e) {
-        throw e;
-      }
+      return require('../components/yaml').load(fs.readFileSync(file, 'utf8'), options);
     case '.js':
     case 'js':
       return require(file);
@@ -29,6 +24,6 @@ module.exports = (file, options = {}) => {
     case 'json':
       return require('jsonfile').readFileSync(file, options);
     default:
-      // throw error
+      return fs.readFileSync(file, 'utf8');
   }
 };

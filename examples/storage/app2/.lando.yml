@@ -1,0 +1,15 @@
+name: lando-storage-2
+services:
+  alpine:
+    api: 4
+    image: alpine:3.20
+    command: sleep infinity
+    storage:
+      - destination: /everywhere
+        scope: global
+      - source: lando-everywhere
+        target: /universal
+      - ./../shared:/shared
+
+plugins:
+  "@lando/core": ../..

@@ -9,13 +9,14 @@ module.exports = ({
   args,
   code,
   command,
+  context,
   error,
   errorCode,
-  exitCode,
   short,
   statusCode,
   stdout,
   stderr,
+  exitCode = 1,
 }) => {
   // attempt to discover various codes
   code = (error && error.code) || code || undefined;
@@ -25,9 +26,10 @@ module.exports = ({
   // construct a better message
   // @TODO: does this make sense?
   short = short ||
+    (error && error?.json?.message) ||
     (error && error.reason) ||
     (error && error.body && error.body.error);
-  const message = [stdout, stderr].filter(Boolean).join('\n') || all;
+  const message = [stdout, stderr].filter(Boolean).join('\n') || all || error.message;
 
   // repurpose original error if we have one
   if (Object.prototype.toString.call(error) === '[object Error]') {
@@ -43,9 +45,10 @@ module.exports = ({
   error.all = all;
   error.code = code;
   error.command = command;
+  error.context = context;
   error.args = args;
-  error.errorCode = errorCode;
-  error.exitCode = exitCode;
+  error.errorCode = errorCode ?? code;
+  error.exitCode = exitCode ?? code;
   error.short = short || message || stdout || stderr || all;
   error.statusCode = statusCode;
   error.stdout = stdout;

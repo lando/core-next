@@ -4,31 +4,101 @@ compose:
 events:
   post-start:
     - node: whoami | grep node
+    - echo "$PRIMARY_SERVICE" | grep yes
 services:
   node:
-    type: node:14
+    api: 3
+    type: lando
+    meUser: node
+    scriptsDir: scripts
+    services:
+      image: node:16
+      command: docker-entrypoint.sh tail -f /dev/null
+      environment:
+        PRIMARY_SERVICE: yes
+        LANDO_WEBROOT_USER: 'node'
+        LANDO_WEBROOT_GROUP: 'node'
+        LANDO_WEBROOT_UID: '1000'
+        LANDO_WEBROOT_GID: '1000'
+  l337-node:
+    api: 4
+    type: l337
+    image: node:16
+    command: tail -f /dev/null
+    user: node
+    volumes:
+      - "./:/app"
+    environment:
+      SERVICE: l337-node
+  l337-php:
+    api: 4
+    type: l337
+    image: php:7.1-fpm-alpine
+    volumes:
+      - "./:/web"
+  l337-slim:
+    api: 4
+    type: l337
+    command: tail -f /dev/null
+    image: alpine:3.18.3
+    user: root
+    working_dir: /tmp
+  lando4:
+    api: 4
+    type: lando
+    command: tail -f /dev/null
+    image: |
+      FROM debian
+      RUN apt-get update -y && apt-get install procps -y
+    user: bob
+
 tooling:
   php:
     service: php
     description: Run php commands
     cmd: php
   iamroot:
-    service: php
     cmd: echo "$HOME" && echo "$(id)" > /whoami
     user: root
+    service: :service
+    options:
+      service:
+        default: php
+        alias:
+          - s
+        describe: Runs in this service
   whoami:
-    service: php
-    cmd: id
-  nodeme:
-    service: node
     cmd: whoami
+    service: :service
+    options:
+      service:
+        default: php
+        alias:
+          - s
+        describe: Runs in this service
+  nodeme:
+    cmd: whoami
+    service: :service
+    options:
+      service:
+        default: node
+        alias:
+          - s
+        describe: Runs in this service
   stillme:
     cmd:
-      - node: whoami
+      - node: whoami | grep node
+      - l337-node: whoami | grep node
   notme:
-    service: node
     cmd: whoami
+    service: :service
     user: www-data
+    options:
+      service:
+        default: node
+        alias:
+          - s
+        describe: Runs in this service
   pipesandstuff:
     service: node
     cmd:
@@ -40,11 +110,22 @@ tooling:
       - php -v
       - php -m
     description: Run all the tests
+  test2:
+    service: l337-php
+    cmd:
+      - php -v
+      - php -m
+    description: Run all the tests 2
   word:
-    service: web
+    service: :service
     cmd: /app/word.sh
     level: app
     options:
+      service:
+        default: web
+        alias:
+          - s
+        describe: Runs in this service
       word:
         passthrough: true
         alias:
@@ -55,20 +136,96 @@ tooling:
           message: What is the word?
           default: bird
           weight: 600
-  dynamic:
-    cmd: env
+  word-imported:
     service: :service
+    cmd: !import word.sh
+    level: app
     options:
       service:
         default: web
         alias:
           - s
-        describe: Run a different service
+        describe: Runs in this service
+      word:
+        passthrough: true
+        alias:
+          - w
+        describe: Print what the word is
+        interactive:
+          type: input
+          message: What is the word?
+          default: bird
+          weight: 600
+  all-the-words:
+    cmd:
+      - web: !import word.sh
+      - lando4: |
+          /app/word.sh
+      - l337-node: /app/word.sh
+
+  word-wrapped:
+    service: :service
+    cmd: |
+      #!/bin/bash
+       /app/word.sh "$@"
+    level: engine
+    options:
+      service:
+        default: web
+        alias:
+          - s
+        describe: Runs in this service
+      word:
+        passthrough: true
+        alias:
+          - w
+        describe: Print what the word is
+        interactive:
+          type: input
+          message: What is the word?
+          default: bird
+          weight: 600
+
+  word-engine [word]:
+    service: :service
+    cmd: /app/word-engine.sh
+    level: engine
+    options:
+      service:
+        default: web
+        alias:
+          - s
+        describe: Runs in this service
+      random:
+        passthrough: true
+        alias:
+          - w
+        describe: Random number
+        interactive:
+          type: input
+          message: What is the random number?
+          default: 7
+          weight: 600
+  lonely-bird:
+    service: web
+    cmd: /app/word.sh
+  dynamic:
+    cmd: env
+    service: :service
+    env:
+      MILEY: cyrus
+    options:
+      service:
+        default: web
+        alias:
+          - s
+        describe: Runs in this service
   env:
     cmd:
-      - php: env
-      - web: env
-    description: Print environment variables for a few things
+      - php: env | grep SERVICE | grep php
+      - web: env | grep SERVICE | grep web
+      - l337-node: env | grep SERVICE | grep l337-node
+    description: Print service names for php, web, l337-node
   busted:
     service: web
     cmd: i-do-not-exist
@@ -77,6 +234,15 @@ tooling:
     cmd: echo "$TAYLOR"
     env:
       TAYLOR: swift
+  l4env:
+    service: lando4
+    cmd: env
+  cols:
+    service: lando4
+    cmd: sh -c "tput cols > cols"
+  lines:
+    service: lando4
+    cmd: sh -c "tput lines > lines"
   listfiles:
     service: web
     cmd: ls -lsa /app/*
@@ -92,13 +258,73 @@ tooling:
     cmd: pwd
     service: web
     dir: /tmp
+  emptyopter:
+    cmd: pwd
+    service: web
+    options:
+  pwd:
+    cmd: pwd
+    service: :service
+    options:
+      service:
+        default: web
+        alias:
+          - s
+        describe: Runs in this service
+  backgrounder:
+    cmd: sleep infinity &
+    service: :service
+    user: root
+    options:
+      service:
+        default: alpine
+        alias:
+          - s
+        describe: Runs in this service
+
+  'pwd-app [file]':
+    cmd: pwd
+    service: :container
+    options:
+      container:
+        default: node
+        alias:
+          - s
+        describe: Runs in this service
+  bad-tool: disabled
+  naughty-tool: fals
+  everything:
+    cmd: /app/args.sh
+    service: node
+    user: root
+    usage: $0 everything [arg1] [arg2] MORETHINGS
+    examples:
+      - $0 everything thing
+      - $0 everything stuff morestuff
+      - $0 this is just for testing
+    positionals:
+      arg1:
+        describe: Uses arg1
+        type: string
+        choices:
+          - thing
+          - stuff
+      arg2:
+        describe: Uses arg2
+        type: string
+  sdargs:
+    cmd: /etc/lando/service/helpers/args.sh
+    service: node
+    positionals:
+      arg1:
+        describe: Uses arg1
+        type: string
+        choices:
+          - thing
+          - stuff
+      arg2:
+        describe: Uses arg2
+        type: string
 
 plugins:
-  "@lando/core": ./../..
-
-# get this app to use the new v4 runtime
-runtime: 4
-config:
-  core:
-    dev-mode: 1
-    telemetry: 0
+  "@lando/core": ../..

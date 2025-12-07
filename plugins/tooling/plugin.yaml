@@ -1,7 +1,0 @@
-name: "@lando/tooling"
-enabled: false
-registry:
-  legacy:
-    tasks:
-      ssh: './tasks/ssh'
-

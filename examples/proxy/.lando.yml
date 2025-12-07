@@ -17,6 +17,7 @@ proxy:
     # - db.lndo.site:3306
     - "*-lando-proxy.lndo.site"
     - "wild.*.lando-proxy.lndo.site"
+    - web3.lndo.site/actually-web-2
   web3:
     - "lets.combine.*.lndo.site:8080/everything/for-real"
     - "*.more.web3.lndo.site:8080"
@@ -24,6 +25,23 @@ proxy:
     - web4.lndo.site:8080
     - hostname: web5.lndo.site
       port: 8080
+  l337:
+    - "give.me.*.lndo.site:8888/more/subs"
+    - hostname: "*.wild.l337.lndo.site:8888"
+    - www.l337.lndo.site:8888
+    - hostname: l337.lndo.site
+      port: 8888
+    - hostname: headers.l337.lndo.site
+      port: 8888
+      middlewares:
+        - name: test
+          key: headers.customresponseheaders.X-Lando-Test
+          value: on
+  web4:
+    - hostname: lando4.lndo.site
+      port: 8080
+  web5:
+    - another-web.lndo.site:8888
   php:
     - hostname: object-format.lndo.site
       port: 80
@@ -39,20 +57,22 @@ proxy:
       port: 80
 
 services:
-  web3:
-    type: compose
-    ssl: true
-    sslExpose: false
-    services:
-      image: bitnami/nginx
-      command: /opt/bitnami/scripts/nginx/entrypoint.sh /opt/bitnami/scripts/nginx/run.sh
-      volumes:
-        - "./:/app"
-      ports:
-        - "8080"
-      user: root
+  l337:
+    api: 4
+    type: l337
+    image: nginx:1.22.1
+    volumes:
+      - "./:/app"
+      - "./default.conf.template:/etc/nginx/templates/default.conf.template"
+    ports:
+      - "8888/http"
+    environment:
+      NGINX_PORT: "8888"
+      NGINX_WEBROOT: "/app"
+      NGINX_SERVER_NAME: "l337"
   php:
-    type: compose
+    api: 3
+    type: lando
     ssl: true
     sslExpose: false
     services:
@@ -61,14 +81,46 @@ services:
       volumes:
         - "./web:/var/www/html"
       ports:
-        - "80"
+        - "0:80"
+  web3:
+    api: 3
+    type: lando
+    ssl: true
+    sslExpose: false
+    services:
+      image: bitnamilegacy/nginx
+      command: /opt/bitnami/scripts/nginx/entrypoint.sh /opt/bitnami/scripts/nginx/run.sh
+      volumes:
+        - "./:/app"
+      ports:
+        - "8080"
+      user: root
+  web4:
+    api: 4
+    type: lando
+    image:
+      imagefile: nginxinc/nginx-unprivileged:1.26.1
+      context:
+        - ./default-ssl.conf:/etc/nginx/conf.d/default.conf
+    certs: /certs/cert.crt
+    ports:
+      - 8080/http
+      - 8443/https
+    app-mount:
+      destination: /usr/share/nginx/html
+  web5:
+    api: 4
+    image: nginx:1.22.1
+    certs: false
+    volumes:
+      - "./default.conf.template:/etc/nginx/templates/default.conf.template"
+    ports:
+      - "8888/http"
+    user: root
+    environment:
+      NGINX_PORT: "8888"
+      NGINX_WEBROOT: "/app"
+      NGINX_SERVER_NAME: "l337"
 
 plugins:
-  "@lando/core": ./../..
-
-# get this app to use the new v4 runtime
-runtime: 4
-config:
-  core:
-    dev-mode: 1
-    telemetry: 0
+  "@lando/core": ../..

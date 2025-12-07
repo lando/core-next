@@ -1,0 +1,5 @@
+name: "@lando/core"
+
+api: 4
+core: true
+is-updateable: true

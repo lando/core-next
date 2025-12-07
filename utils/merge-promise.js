@@ -9,6 +9,7 @@ const descriptors = ['then', 'catch', 'finally']
 
 module.exports = (thing, promise) => {
   for (const [property, descriptor] of descriptors) {
+    // eslint-disable-next-line max-len
     const value = typeof promise === 'function' ? (...args) => Reflect.apply(descriptor.value, promise(), args) : descriptor.value.bind(promise);
     Reflect.defineProperty(thing, property, {...descriptor, value});
   }
