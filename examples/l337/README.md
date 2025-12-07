@@ -22,10 +22,10 @@ lando destroy -y
 
 # should have correct info when not built
 lando info --service db | grep api: | grep 4
-lando info --service db | grep type: | grep l337
-lando info --service db | grep healthy: | grep unknown
+lando info --service db | grep api: | grep 4
+lando l4 info --service db | grep healthy: | grep unknown
 lando info --service db | grep state: | grep IMAGE: | grep UNBUILT
-lando info --service db | grep -z image: | grep core/examples/l337/Dockerfile
+lando info --service db | grep -z image: | grep core-next/examples/l337/Dockerfile
 lando info --service db | grep primary: | grep false
 lando info --service db | grep user: | grep root
 cat $(lando info --service db --path "image" --format json | tr -d '"') | grep "ENV SERVICE=db"
@@ -38,10 +38,10 @@ lando info --service web | grep appMount: | grep /site
 lando info --service web | grep user: | grep nginx
 cat $(lando info --service web --path "image" --format json | tr -d '"') | grep ENV | grep SERVICE | grep web
 lando info --service image-1 | grep image: | grep nginx:1.21.6
-lando info --service image-2 | grep -z image: | grep core/examples/l337/images/nginx/Dockerfile
+lando info --service image-2 | grep -z image: | grep core-next/examples/l337/images/nginx/Dockerfile
 lando info --service image-3 | grep -z image: | grep /Imagefile
 lando info --service image-4 | grep image: | grep nginx:1.21.5
-lando info --service image-5 | grep -z image: | grep core/examples/l337/images/nginx/Dockerfile2
+lando info --service image-5 | grep -z image: | grep core-next/examples/l337/images/nginx/Dockerfile2
 lando info --service image-6 | grep -z image: | grep /Imagefile
 
 # should start again successfully

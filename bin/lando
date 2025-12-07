@@ -26,6 +26,7 @@ const argv = require('@lando/argv');
 const defaultConfig = require('../utils/get-default-config');
 const getApp = require('../utils/get-app');
 const getLandoFiles = require('../utils/get-lando-files');
+const id = path.basename(process.argv[1]);
 const lmerge = require('../utils/legacy-merge');
 
 // if DEBUG is set then unset it, we dont want it to toggle any debugging inside of lando
@@ -37,7 +38,7 @@ if (process.env.LANDO_DEBUG) {
   const scope = process.env.LANDO_DEBUG === 1
     || process.env.LANDO_DEBUG === '1'
     || process.env.LANDO_DEBUG === true
-    || process.env.LANDO_DEBUG === 'true' ? 'lando*' : process.env.LANDO_DEBUG;
+    || process.env.LANDO_DEBUG === 'true' ? `${id}*` : process.env.LANDO_DEBUG;
   require('debug').enable(scope);
 }
 
@@ -53,11 +54,10 @@ if (process.env.LANDO_DEBUG) {
 
 // and finally prefer --debug
 if (argv.hasOption('--debug')) {
-  require('debug').enable(argv.getOption('--debug', {defaultValue: 'lando*'}));
+  require('debug').enable(argv.getOption('--debug', {defaultValue: `${id}*`}));
 }
 
 // debugger
-const id = path.basename(process.argv[1]);
 const debug = require('debug')(id || 'lando');
 
 // now load in the runtime selector
