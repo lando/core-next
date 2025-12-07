@@ -33,7 +33,7 @@ lando version | grep "$(lando version --component core)"
 lando version --all
 lando version --all | grep lando | grep "$(lando version --component @lando/core)"
 lando version --all | grep @lando/base-test-plugin-2 | grep v1.0.2
-lando version -a | grep lando | grep v3
+lando version -a | grep lando | grep v4
 
 # Should print specific component information
 lando version --component @lando/base-test-plugin-2 | grep v1.0.2

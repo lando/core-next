@@ -1,4 +1,4 @@
-name: Core Tests
+name: Core Protected Tests
 
 on:
   pull_request:
@@ -12,53 +12,9 @@ jobs:
       fail-fast: false
       matrix:
         leia-test:
-          - badname
-          - build
-          - c,o,m,m,a
-          - cache
-          - certs
-          - command
-          - config
-          - debug
-          - envfile
-          - entrypoint
-          # - environment
-          - events
-          - excludes
-          - exec
-          - experimental
-          - healthcheck
-          - host
-          # - hostnames
-          - info
-          - keys
-          - l337
-          # - lando-v4
-          - landofile
-          - landofile-custom
-          - list
-          - logs
-          - long-name
-          - mounts
-          - networking
-          - no-services
-          - orchestrator
-          - plugins
-          - proxy
-          - rebuild
-          - renderer
-          - recipes
-          - release-channel
-          - restart
-          - scanner
-          - security
-          - sluggy
-          - sql-helpers
-          - ssh
-          - storage
-          - tooling
-          - update
-          - version
+          # - init-github
+          # - init-remote
+          # - private-plugins
           - yaml
         node-version:
           - "20"
