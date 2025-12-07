@@ -1,12 +1,12 @@
 {
   "name": "@lando/core",
   "description": "The libraries that power all of Lando.",
-  "version": "3.25.6",
+  "version": "4.0.0-unstable.4",
   "author": "Mike Pirog @pirog",
   "license": "MIT",
   "repository": "lando/core",
-  "bugs": "https://github.com/lando/core/issues/new/choose",
-  "homepage": "https://github.com/lando/core",
+  "bugs": "https://github.com/lando/core-next/issues/new/choose",
+  "homepage": "https://github.com/lando/core-next",
   "keywords": [
     "lando",
     "lando-plugin"

@@ -1,5 +1,5 @@
 name: "@lando/core"
 
-api: 3
+api: 4
 core: true
 is-updateable: true

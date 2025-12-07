@@ -31,7 +31,7 @@ jobs:
           - host
           # - hostnames
           - info
-          - init-github
+          # - init-github
           - init-remote
           - keys
           - l337
@@ -73,15 +73,9 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
-      - name: Install SSH key
-        uses: shimataro/ssh-key-action@v2
-        with:
-          key: ${{ secrets.DEPLOY_KEY }}
-          known_hosts: unnecessary
-          if_key_exists: replace
+        uses: actions/checkout@v6
       - name: Install node ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: https://registry.npmjs.org
@@ -115,9 +109,6 @@ jobs:
             setup.skipCommonPlugins=true
       - name: Run Leia Tests
         uses: lando/run-leia-action@v2
-        env:
-          GITHUB_PAT: ${{ secrets.KYBER_AMPLIFICATION_MATRIX }}
-          GITHUB_KEY_NAME: "${{ github.sha }}${{ matrix.os }}"
         with:
           leia-test: "./examples/${{ matrix.leia-test }}/README.md"
           cleanup-header: "Destroy tests"

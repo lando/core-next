@@ -55,7 +55,7 @@ jobs:
       TERM: xterm
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Create paths
         run: mkdir -p /tmp/sign/${{ github.sha }}
       - name: Download binaries
