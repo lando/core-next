@@ -8,8 +8,6 @@ This example exists primarily to test the v3 runtime implementation of following
 
 ```bash
 # should start successfully
-eval "$(ssh-agent -s)"
-ssh-add ~/.ssh/id_rsa
 lando poweroff
 lando start
 ```
