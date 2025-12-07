@@ -23,7 +23,7 @@ lando destroy -y
 # should have correct info when not built
 lando info --service db | grep api: | grep 4
 lando info --service db | grep api: | grep 4
-lando l4 info --service db | grep healthy: | grep unknown
+lando info --service db | grep healthy: | grep unknown
 lando info --service db | grep state: | grep IMAGE: | grep UNBUILT
 lando info --service db | grep -z image: | grep core-next/examples/l337/Dockerfile
 lando info --service db | grep primary: | grep false
