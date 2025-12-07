@@ -119,7 +119,7 @@ services:
         RUN <<EOF
         apt-get update
         apt-get install -y curl git
-        EO
+        EOF
 
         # these are not universally supported yet
         # ADD --keep-git-dir=true https://github.com/moby/buildkit.git#v0.10.1 /buildkit
