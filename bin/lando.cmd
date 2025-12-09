@@ -1,3 +1,3 @@
 @echo off
 
-node "%~dp0\lando" %*
+bun "%~dp0\lando" %*

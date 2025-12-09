@@ -1,10 +1,10 @@
 [build]
   base = "./"
   publish = "./docs/.vitepress/dist"
-  command = "npx mvb docs"
+  command = "bunx mvb docs"
 
 [context.deploy-preview]
-  command = "npm run docs:build"
+  command = "bun run docs:build"
 
 # https://github.com/munter/netlify-plugin-checklinks#readme
 [[context.deploy-preview.plugins]]
