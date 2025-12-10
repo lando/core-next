@@ -27,9 +27,9 @@ const sidebarEnder = {
     {
       text: 'Other Doc Versions',
       items: [
-        {rel: 'mvb', text: 'stable', target: '_blank', link: '/v/stable/'},
-        {rel: 'mvb', text: 'edge', target: '_blank', link: '/v/edge/'},
-        {rel: 'mvb', text: '<strong>see all versions</strong>', link: '/v/'},
+        {text: 'stable', target: '_blank', link: '../../v/stable/'},
+        {text: 'edge', target: '_blank', link: '../../v/edge/'},
+        {text: '<strong>see all versions</strong>', target: '_blank', link: '../../v/'},
       ],
     },
     {text: 'Other Releases', link: 'https://github.com/lando/core-next/releases'},
