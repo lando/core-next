@@ -42,12 +42,12 @@ const getComposeDownloadDest = (base, version = '2.31.0') => {
 };
 
 module.exports = async (lando, options) => {
-  const debug = require('../utils/debug-shim')(lando.log);
-  const {color} = require('listr2');
+  const debug = lando.log;
+  const { color } = require('listr2');
 
   // get stuff from config/opts
-  const {orchestratorBin, userConfRoot} = lando.config;
-  const {orchestrator} = options;
+  const { orchestratorBin, userConfRoot } = lando.config;
+  const { orchestrator } = options;
 
   // if orchestrator engine is set to false allow it to be skipped
   // @NOTE: this is mostly for internal stuff
@@ -70,21 +70,22 @@ module.exports = async (lando, options) => {
       // true if we get here
       return true;
     },
-    task: async (ctx, task) => new Promise((resolve, reject) => {
-      const download = require('../utils/download-x')(url, {debug, dest, test: ['--version']});
-      // success
-      download.on('done', data => {
-        task.title = `Installed orchestrator (Docker Compose) to ${dest}`;
-        resolve(data);
-      });
-      // handle errors
-      download.on('error', error => {
-        reject(error);
-      });
-      // update title to reflect download progress
-      download.on('progress', progress => {
-        task.title = `Downloading orchestrator ${color.dim(`[${progress.percentage}%]`)}`;
-      });
-    }),
+    task: async (ctx, task) =>
+      new Promise((resolve, reject) => {
+        const download = require('../utils/download-x')(url, { debug, dest, test: ['--version'] });
+        // success
+        download.on('done', (data) => {
+          task.title = `Installed orchestrator (Docker Compose) to ${dest}`;
+          resolve(data);
+        });
+        // handle errors
+        download.on('error', (error) => {
+          reject(error);
+        });
+        // update title to reflect download progress
+        download.on('progress', (progress) => {
+          task.title = `Downloading orchestrator ${color.dim(`[${progress.percentage}%]`)}`;
+        });
+      }),
   });
 };

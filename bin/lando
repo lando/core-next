@@ -7,26 +7,38 @@
  * @name lando
  */
 
-'use strict';
+// @ts-nocheck
 
-// set this first for all other downstream concerns
-const dns = require('dns');
+import dns from 'node:dns';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+import argv from '@lando/argv';
+import find from 'lodash-es/find';
+import get from 'lodash-es/get';
+import isEmpty from 'lodash-es/isEmpty';
+
+import createDebug from '../components/debug.js';
+
+import defaultConfig from '../utils/get-default-config.js';
+import getApp from '../utils/get-app.js';
+import getLandoFiles from '../utils/get-lando-files.js';
+import getTasks from '../utils/get-tasks.js';
+import isWslInterop from '../utils/is-wsl-interop.js';
+import legacyMerge from '../utils/legacy-merge.js';
+import loadEnvars from '../utils/load-envars.js';
+import loadFile from '../utils/load-file.js';
+
+import Cli from '../lib/cli.js';
+import Debug from 'debug';
+import Lando from '../lib/lando.js';
 
 // Set DNS result order to IPv4 first
 dns.setDefaultResultOrder('ipv4first');
 
-// other mods
-const fs = require('fs');
-const path = require('path');
-
-const _ = require('lodash');
-const argv = require('@lando/argv');
-
-const defaultConfig = require('../utils/get-default-config');
-const getApp = require('../utils/get-app');
-const getLandoFiles = require('../utils/get-lando-files');
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const id = path.basename(process.argv[1]);
-const lmerge = require('../utils/legacy-merge');
 
 // if DEBUG is set then unset it, we dont want it to toggle any debugging inside of lando
 // @NOTE: are we sure? or at the very least are we sure dont want to do something with its value?
@@ -34,11 +46,14 @@ if (process.env.DEBUG) delete process.env.DEBUG;
 
 // start assessing debug situation with LANDO_DEBUG
 if (process.env.LANDO_DEBUG) {
-  const scope = process.env.LANDO_DEBUG === 1
-    || process.env.LANDO_DEBUG === '1'
-    || process.env.LANDO_DEBUG === true
-    || process.env.LANDO_DEBUG === 'true' ? `${id}*` : process.env.LANDO_DEBUG;
-  require('debug').enable(scope);
+  const scope =
+    process.env.LANDO_DEBUG === 1 ||
+    process.env.LANDO_DEBUG === '1' ||
+    process.env.LANDO_DEBUG === true ||
+    process.env.LANDO_DEBUG === 'true'
+      ? `${id}*`
+      : process.env.LANDO_DEBUG;
+  Debug.enable(scope);
 }
 
 // @NOTE: reconsider this when we have lando 4 arg parsing? or have that just be a lando 4 thing?
@@ -53,17 +68,18 @@ if (process.env.LANDO_DEBUG) {
 
 // and finally prefer --debug
 if (argv.hasOption('--debug')) {
-  require('debug').enable(argv.getOption('--debug', {defaultValue: `${id}*`}));
+  Debug.enable(argv.getOption('--debug', { defaultValue: `${id}*` }));
 }
 
 // debugger
-const debug = require('debug')(id || 'lando');
+const debug = createDebug(id || 'lando');
 
 // now load in the runtime selector
-const pjson = require(path.resolve(__dirname, '..', 'package.json'));
+const packageJsonPath = path.resolve(__dirname, '..', 'package.json');
+const pjson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
 
 // start the preflight
-debug('starting %o version %o runtime selector...', id, pjson.version);
+debug('starting %o runtime version %o', id, pjson.version);
 
 // allow envvars to override a few core things
 // @NOTE: we've kept these around for backwards compatibility, you probably shouldnt use them though
@@ -74,18 +90,18 @@ const RUNTIME = process.env.LANDO_CORE_RUNTIME;
 
 // start by "minstrapping" the lando/app config
 // primarily this means getting the MININMAL amount of stuff we need to determine the runtime to be used
-let config = defaultConfig({envPrefix: ENVPREFIX, runtime: RUNTIME, userConfRoot: USERCONFROOT});
+let config = defaultConfig({ envPrefix: ENVPREFIX, runtime: RUNTIME, userConfRoot: USERCONFROOT });
 
 // @NOTE: is it safe to assume configSources exists and is iterable? i think so?
 for (const file of config.configSources) {
-  config = lmerge(config, require('../utils/load-file')(file));
+  config = legacyMerge(config, loadFile(file));
   debug('merged in additional config source from file %o', file);
 }
 
 // merge in any envvars that set things
 if (config.envPrefix) {
-  const data = require('../utils/load-envars')(config.envPrefix);
-  config = lmerge(config, data);
+  const data = loadEnvars(config.envPrefix);
+  config = legacyMerge(config, data);
   debug('merged in additional config source from %o envvars with data %o', `${config.envPrefix}_*`, data);
 }
 
@@ -93,77 +109,80 @@ if (config.envPrefix) {
 debug('final assembled minconf is %O', config);
 
 // try to get app configuration if we can
-const {preLandoFiles, landoFile, postLandoFiles, userConfRoot} = config;
+const { preLandoFiles, landoFile, postLandoFiles, userConfRoot } = config;
 
 const landoFiles = getLandoFiles([preLandoFiles, [landoFile], postLandoFiles].flat(1));
-const appConfig = (landoFiles.length > 0) ? getApp(landoFiles, userConfRoot) : {};
+const appConfig = landoFiles.length > 0 ? getApp(landoFiles, userConfRoot) : {};
 
 // if we have an app then normalize runtime and also log some helpful stuff
 if (Object.keys(appConfig).length > 0) debug('detected an app %o at %o', appConfig.name, path.dirname(landoFiles[0]));
 
 // gather core candidates
-const cores = [
-  path.join(config.userConfRoot, 'plugins', '@lando', 'core'),
-  path.resolve(__dirname, '..'),
-];
+const cores = [path.join(config.userConfRoot, 'plugins', '@lando', 'core'), path.resolve(__dirname, '..')];
 
 // if appConfig points to a different core lets set that here
-if (typeof _.get(appConfig, 'plugins.@lando/core') === 'string') {
+if (typeof get(appConfig, 'plugins.@lando/core') === 'string') {
   cores.unshift(path.resolve(appConfig.root, appConfig.plugins['@lando/core']));
 }
 
 // return the first core that exists that we find
-const COREBASE = _.find(cores, core => fs.existsSync(path.join(core, 'index.js')));
+const COREBASE = find(cores, (core) => fs.existsSync(path.join(core, 'index.js')));
 
-// Summon the implementation of @lando/cli@3 that works with @lando/core@3
-const Cli = require(`${COREBASE}/lib/cli`);
-const cli = new Cli(ENVPREFIX, LOGLEVELCONSOLE, USERCONFROOT, COREBASE, debug);
-const getTasks = require(`${COREBASE}/utils/get-tasks`);
-debug('starting lando with %o runtime using cli %o', `v3`, {ENVPREFIX, LOGLEVELCONSOLE, USERCONFROOT, COREBASE});
+const main = async () => {
+  if (!COREBASE) throw new Error('Unable to locate @lando/core runtime');
 
-// Check for sudo usage
-cli.checkPerms();
+  // Summon the implementation of @lando/cli@3 that works with @lando/core@3
 
-// Lando cache stuffs
-process.lando = 'node';
-process.landoPlatform = require(`${COREBASE}/utils/is-wsl-interop`)() ? 'wsl' : process.platform;
-process.landoTaskCacheName = '_.tasks.cache';
-process.landoTaskCacheFile = path.join(cli.defaultConfig().userConfRoot, 'cache', process.landoTaskCacheName);
-process.landoAppCacheFile = !_.isEmpty(appConfig) ? appConfig.composeCache : undefined;
+  const cli = new Cli(ENVPREFIX, LOGLEVELCONSOLE, USERCONFROOT, COREBASE, debug);
+  debug('starting lando with %o runtime using cli %o', 'v3', { ENVPREFIX, LOGLEVELCONSOLE, USERCONFROOT, COREBASE });
 
-// Check for a recipe cache and enforce manual app tasks cache clear if applicable
-if (appConfig.recipe && !fs.existsSync(appConfig.recipeCache)) {
-  if (fs.existsSync(process.landoAppCacheFile)) fs.unlinkSync(process.landoAppCacheFile);
-}
+  // Check for sudo usage
+  cli.checkPerms();
 
-// determine bs level
-const bsLevel = !_.isEmpty(appConfig) && !fs.existsSync(process.landoAppCacheFile) ? 'APP' : 'TASKS';
+  // Lando cache stuffs
+  process.lando = 'node';
+  process.landoPlatform = isWslInterop() ? 'wsl' : process.platform;
+  process.landoTaskCacheName = '_.tasks.cache';
+  process.landoTaskCacheFile = path.join(cli.defaultConfig().userConfRoot, 'cache', process.landoTaskCacheName);
+  process.landoAppCacheFile = !isEmpty(appConfig) ? appConfig.composeCache : undefined;
 
-// Check to see if we have a compose cache and if we dont then lets enforce a manual lando tasks cache clear
-if (bsLevel === 'APP' && !fs.existsSync(appConfig.composeCache)) {
-  if (fs.existsSync(process.landoTaskCacheFile)) fs.unlinkSync(process.landoTaskCacheFile);
-}
+  // Check for a recipe cache and enforce manual app tasks cache clear if applicable
+  if (appConfig.recipe && !fs.existsSync(appConfig.recipeCache)) {
+    if (fs.existsSync(process.landoAppCacheFile)) fs.unlinkSync(process.landoAppCacheFile);
+  }
 
-// Print the cli if we've got tasks cached
-if (fs.existsSync(process.landoTaskCacheFile)) {
-  cli.run(getTasks(appConfig, cli.argv()), appConfig);
-// Otherwise min bootstrap lando so we can generate the task cache first
-} else {
-  // NOTE: we require lando down here because it adds .5 seconds if we do it above
-  const Lando = require(COREBASE);
+  // determine bs level
+  const bsLevel = !isEmpty(appConfig) && !fs.existsSync(process.landoAppCacheFile) ? 'APP' : 'TASKS';
+
+  // Check to see if we have a compose cache and if we dont then lets enforce a manual lando tasks cache clear
+  if (bsLevel === 'APP' && !fs.existsSync(appConfig.composeCache)) {
+    if (fs.existsSync(process.landoTaskCacheFile)) fs.unlinkSync(process.landoTaskCacheFile);
+  }
+
+  // Print the cli if we've got tasks cached
+  if (fs.existsSync(process.landoTaskCacheFile)) {
+    cli.run(getTasks(appConfig, cli.argv()), appConfig);
+    return;
+  }
+
+  // Otherwise min bootstrap lando so we can generate the task cache first
   const lando = new Lando(cli.defaultConfig(appConfig));
   // add cli and appconfig for downstream usage
   lando.cli = cli;
   lando.appConfig = appConfig;
 
   // Bootstrap lando at the correct level
-  lando.bootstrap(bsLevel).then(lando => {
-    // If bootstrap level is APP then we need to get and init our app to generate the app task cache
-    if (bsLevel === 'APP') {
-      lando.getApp().init({noEngine: true}).then(() => cli.run(getTasks(appConfig, cli.argv()), appConfig));
-    // Otherwise run as yooz
-    } else {
-      cli.run(getTasks(appConfig, cli.argv()), appConfig);
-    }
-  });
-}
+  const bootstrappedLando = await lando.bootstrap(bsLevel);
+
+  // If bootstrap level is APP then we need to get and init our app to generate the app task cache
+  if (bsLevel === 'APP') {
+    await bootstrappedLando.getApp().init({ noEngine: true });
+  }
+
+  cli.run(getTasks(appConfig, cli.argv()), appConfig);
+};
+
+main().catch((error) => {
+  console.error(error); // eslint-disable-line no-console
+  process.exitCode = 1;
+});

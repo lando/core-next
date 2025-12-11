@@ -7,7 +7,7 @@ const os = require('os');
 const path = require('path');
 const semver = require('semver');
 
-const {color} = require('listr2');
+const { color } = require('listr2');
 
 const buildIds = {
   '4.37.2': '179585',
@@ -38,7 +38,7 @@ const buildIds = {
 /*
  * Helper to get build engine id
  */
-const getId = version => {
+const getId = (version) => {
   // if false return false
 
   // if version is an integer then assume its already the id
@@ -47,11 +47,11 @@ const getId = version => {
   return buildIds[version];
 };
 
-const getVersion = version => {
+const getVersion = (version) => {
   // if version is not an integer then assume its already the version
   if (semver.valid(version) !== null) return version;
   // otherwise return the version that corresponds to the build id
-  return Object.keys(buildIds).find(key => buildIds[key] === version);
+  return Object.keys(buildIds).find((key) => buildIds[key] === version);
 };
 
 /*
@@ -65,25 +65,26 @@ const getEngineDownloadUrl = (id = '175267') => {
 /*
  * wrapper for docker-desktop install
  */
-const downloadDockerDesktop = (url, {debug, task}) => new Promise((resolve, reject) => {
-  const download = require('../utils/download-x')(url, {debug});
-  // success
-  download.on('done', result => {
-    task.title = `Downloaded build engine`;
-    resolve(result);
+const downloadDockerDesktop = (url, { debug, task }) =>
+  new Promise((resolve, reject) => {
+    const download = require('../utils/download-x')(url, { debug });
+    // success
+    download.on('done', (result) => {
+      task.title = `Downloaded build engine`;
+      resolve(result);
+    });
+    // handle errors
+    download.on('error', (error) => {
+      reject(error);
+    });
+    // update title to reflect download progress
+    download.on('progress', (progress) => {
+      task.title = `Downloading build engine ${color.dim(`[${progress.percentage}%]`)}`;
+    });
   });
-  // handle errors
-  download.on('error', error => {
-    reject(error);
-  });
-  // update title to reflect download progress
-  download.on('progress', progress => {
-    task.title = `Downloading build engine ${color.dim(`[${progress.percentage}%]`)}`;
-  });
-});
 
 module.exports = async (lando, options) => {
-  const debug = require('../utils/debug-shim')(lando.log);
+  const debug = lando.log;
   // if build engine is set to false allow it to be skipped
   // @NOTE: this is mostly for internal stuff
   if (options.buildEngine === false) return;
@@ -110,10 +111,10 @@ module.exports = async (lando, options) => {
 
       // if we get here let's make sure the engine is on
       try {
-        await lando.engine.daemon.up({max: 1, backoff: 1000});
+        await lando.engine.daemon.up({ max: 1, backoff: 1000 });
         return true;
       } catch (error) {
-        lando.log.debug('docker install task has not run %j', error);
+        lando.log('docker install task has not run %j', error);
         return false;
       }
     },
@@ -123,18 +124,20 @@ module.exports = async (lando, options) => {
       // throw error if we cannot ping the download link
       await axios.head(url);
       // throw if user is not an admin
-      if (!await require('../utils/is-admin-user')()) {
-        throw new Error([
-          `User "${os.userInfo().username}" does not have permission to install the build engine!`,
-          'Contact your system admin for permission and then rerun setup.',
-        ].join(os.EOL));
+      if (!(await require('../utils/is-admin-user')())) {
+        throw new Error(
+          [
+            `User "${os.userInfo().username}" does not have permission to install the build engine!`,
+            'Contact your system admin for permission and then rerun setup.',
+          ].join(os.EOL),
+        );
       }
 
       return true;
     },
     task: async (ctx, task) => {
       // download the installer
-      ctx.download = await downloadDockerDesktop(url, {ctx, debug, task});
+      ctx.download = await downloadDockerDesktop(url, { ctx, debug, task });
 
       // prompt for password if interactive
       if (ctx.password === undefined && lando.config.isInteractive) {
@@ -142,8 +145,8 @@ module.exports = async (lando, options) => {
           type: 'password',
           name: 'password',
           message: `Enter computer password for ${lando.config.username} to install build engine`,
-          validate: async input => {
-            const options = {debug, ignoreReturnCode: true, password: input};
+          validate: async (input) => {
+            const options = { debug, ignoreReturnCode: true, password: input };
             const response = await require('../utils/run-elevated')(['echo', 'hello there'], options);
             if (response.code !== 0) return response.stderr;
             return true;
@@ -162,7 +165,7 @@ module.exports = async (lando, options) => {
       if (options.debug || options.verbose > 0 || lando.debuggy) command.push('--debug');
 
       // run
-      const result = await require('../utils/run-elevated')(command, {debug, password: ctx.password});
+      const result = await require('../utils/run-elevated')(command, { debug, password: ctx.password });
       result.download = ctx.download;
 
       // finish up

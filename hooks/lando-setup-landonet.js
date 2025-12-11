@@ -13,14 +13,15 @@ const getDockerDesktopBin = require('../utils/get-docker-desktop-x');
  * @return {Promise<void>}
  */
 module.exports = async (lando, options) => {
-  const debug = require('../utils/debug-shim')(lando.log);
+  const debug = lando.log;
 
   // skip the installation of the network if set
   if (options.skipNetworking) return;
 
   // we need access to dat socket for this to work
-  const dependsOn = ['linux', 'wsl']
-    .includes(lando.config.os.landoPlatform) ? ['setup-build-engine-group', 'setup-build-engine'] : ['setup-build-engine'];
+  const dependsOn = ['linux', 'wsl'].includes(lando.config.os.landoPlatform)
+    ? ['setup-build-engine-group', 'setup-build-engine']
+    : ['setup-build-engine'];
 
   options.tasks.push({
     title: `Creating Landonet`,
@@ -43,7 +44,7 @@ module.exports = async (lando, options) => {
 
       // otherwise attempt to sus things out
       try {
-        await lando.engine.daemon.up({max: 10, backoff: 1000});
+        await lando.engine.daemon.up({ max: 10, backoff: 1000 });
         const landonet = lando.engine.getNetwork(lando.config.networkBridge);
         await landonet.inspect();
         return lando.versions.networking > 1;
@@ -58,27 +59,29 @@ module.exports = async (lando, options) => {
       const daemon = new LandoDaemon(lando.cache, lando.events, undefined, lando.log);
 
       // we need docker up for this
-      await daemon.up({max: 5, backoff: 1000});
+      await daemon.up({ max: 5, backoff: 1000 });
 
       // if we are v1 then disconnect and remove for upgrade
       if (lando.versions.networking === 1) {
         const landonet = lando.engine.getNetwork(lando.config.networkBridge);
-        await landonet.inspect()
-          .then(data => _.keys(data.Containers))
-          .each(id => landonet.disconnect({Container: id, Force: true}))
+        await landonet
+          .inspect()
+          .then((data) => _.keys(data.Containers))
+          .each((id) => landonet.disconnect({ Container: id, Force: true }))
           .then(() => landonet.remove())
-          .catch(error => {
+          .catch((error) => {
             debug('error disconnecting from old landonet %o %o', error.message, error.stack);
           });
       }
 
       // create landonet2
-      await lando.engine.getNetworks()
-        .then(networks => _.some(networks, network => network.Name === lando.config.networkBridge))
-        .then(exists => {
+      await lando.engine
+        .getNetworks()
+        .then((networks) => _.some(networks, (network) => network.Name === lando.config.networkBridge))
+        .then((exists) => {
           if (!exists) {
             return lando.engine.createNetwork(lando.config.networkBridge).then(() => {
-              lando.cache.set('versions', _.merge({}, lando.versions, {networking: 2}), {persist: true});
+              lando.cache.set('versions', _.merge({}, lando.versions, { networking: 2 }), { persist: true });
               lando.versions = lando.cache.get('versions');
               debug('created %o with version info %o', lando.config.networkBridge, lando.versions.networking);
             });

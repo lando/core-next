@@ -1,12 +1,8 @@
-import {createRequire} from 'module';
+import { defineConfig } from '@lando/vitepress-theme-default-plus/config';
+import { default as getBaseUrl } from '@lando/vitepress-theme-default-plus/get-base-url';
+import { default as isDevRelease } from '@lando/vitepress-theme-default-plus/is-dev-release';
+import pjson from '../../package.json';
 
-import {defineConfig} from '@lando/vitepress-theme-default-plus/config';
-import {default as getBaseUrl} from '@lando/vitepress-theme-default-plus/get-base-url';
-import {default as isDevRelease} from '@lando/vitepress-theme-default-plus/is-dev-release';
-
-const require = createRequire(import.meta.url);
-
-const pjson = require('../../package.json');
 const landoPlugin = pjson.name.replace('@lando/', '');
 
 // backwards compat with LANDO_MVB_VERSION
@@ -27,12 +23,12 @@ const sidebarEnder = {
     {
       text: 'Other Doc Versions',
       items: [
-        {text: 'stable', target: '_blank', link: '../../v/stable/'},
-        {text: 'edge', target: '_blank', link: '../../v/edge/'},
-        {text: '<strong>see all versions</strong>', target: '_blank', link: '../../v/'},
+        { text: 'stable', target: '_blank', link: '../../v/stable/' },
+        { text: 'edge', target: '_blank', link: '../../v/edge/' },
+        { text: '<strong>see all versions</strong>', target: '_blank', link: '../../v/' },
       ],
     },
-    {text: 'Other Releases', link: 'https://github.com/lando/core-next/releases'},
+    { text: 'Other Releases', link: 'https://github.com/lando/core-next/releases' },
   ],
 };
 
@@ -53,14 +49,14 @@ export default defineConfig({
   baseUrl,
   navBaseUrl: 'https://docs.lando.dev/v/next',
   head: [
-    ['meta', {name: 'viewport', content: 'width=device-width, initial-scale=1'}],
-    ['link', {rel: 'icon', href: '/favicon.ico', size: 'any'}],
-    ['link', {rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml'}],
+    ['meta', { name: 'viewport', content: 'width=device-width, initial-scale=1' }],
+    ['link', { rel: 'icon', href: '/favicon.ico', size: 'any' }],
+    ['link', { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' }],
   ],
   themeConfig: {
     internalDomains: [
-      '^https:\/\/lando-core-next\.netlify\.app(\/.*)?$',
-      '^https:\/\/[a-zA-Z0-9-]+--lando-core-next\.netlify\.app(\/.*)?$',
+      '^https:\/\/lando-core-next\.netlify\.app(\/.*)?$', // eslint-disable-line no-useless-escape
+      '^https:\/\/[a-zA-Z0-9-]+--lando-core-next\.netlify\.app(\/.*)?$', // eslint-disable-line no-useless-escape
     ],
     multiVersionBuild: {
       build: 'dev',
@@ -71,32 +67,28 @@ export default defineConfig({
       {
         text: 'Landofile',
         collapsed: false,
-        items: [
-          {text: 'Services', link: '/landofile/services.html'},
-        ],
+        items: [{ text: 'Services', link: '/landofile/services.html' }],
       },
       {
         text: 'Services',
         collapsed: false,
-        items: [
-          {text: 'L-337', link: '/services/l337.html'},
-        ],
+        items: [{ text: 'L-337', link: '/services/l337.html' }],
       },
       {
         text: 'Contribution',
         collapsed: false,
         items: [
-          {text: 'Development', link: '/development'},
-          {text: 'Team', link: '/team'},
+          { text: 'Development', link: '/development' },
+          { text: 'Team', link: '/team' },
         ],
       },
       {
         text: 'Help & Support',
         collapsed: false,
         items: [
-          {text: 'GitHub', link: 'https://github.com/lando/core-next/issues/new/choose'},
-          {text: 'Slack', link: 'https://www.launchpass.com/devwithlando'},
-          {text: 'Contact Us', link: '/support'},
+          { text: 'GitHub', link: 'https://github.com/lando/core-next/issues/new/choose' },
+          { text: 'Slack', link: 'https://www.launchpass.com/devwithlando' },
+          { text: 'Contact Us', link: '/support' },
         ],
       },
       {
@@ -106,4 +98,3 @@ export default defineConfig({
     ],
   },
 });
-

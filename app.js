@@ -4,7 +4,9 @@
 const _ = require('lodash');
 const path = require('path');
 
-const {nanoid} = require('nanoid');
+const { nanoid } = require('nanoid');
+
+const debug = require('./components/debug.js').default;
 
 // Helper to set the LANDO_LOAD_KEYS var
 const getKeys = (keys = true) => {
@@ -22,25 +24,29 @@ module.exports = async (app, lando) => {
   app.postLockfile = `${app.name}.post-build.lock`;
   // add compose cache updated
   app.updateComposeCache = () => {
-    lando.cache.set(app.composeCache, {
-      allServices: app.allServices,
-      compose: app.compose,
-      containers: app.containers,
-      info: _.cloneDeep(app.info).map(service => ({...service, hostname: [], urls: []})),
-      name: app.name,
-      overrides: {
-        tooling: app._coreToolingOverrides,
+    lando.cache.set(
+      app.composeCache,
+      {
+        allServices: app.allServices,
+        compose: app.compose,
+        containers: app.containers,
+        info: _.cloneDeep(app.info).map((service) => ({ ...service, hostname: [], urls: [] })),
+        name: app.name,
+        overrides: {
+          tooling: app._coreToolingOverrides,
+        },
+        primary: app._defaultService,
+        project: app.project,
+        root: app.root,
+        sapis: require('./utils/get-service-apis')(app),
       },
-      primary: app._defaultService,
-      project: app.project,
-      root: app.root,
-      sapis: require('./utils/get-service-apis')(app),
-    }, {persist: true});
+      { persist: true },
+    );
   };
 
   // Add v4 stuff to the app object
   app.v4 = {};
-  app.v4._debugShim = require('./utils/debug-shim')(app.log);
+  app.v4._debugShim = debug('app:something');
   app.v4._dir = path.join(lando.config.userConfRoot, 'v4', `${app.name}-${app.id}`);
   app.v4.preLockfile = `${app.name}.v4.build.lock`;
   app.v4.postLockfile = `${app.name}.v4.build.lock`;
@@ -50,39 +56,48 @@ module.exports = async (app, lando) => {
   // Add compose cache v4 updaters
   // add compose cache updated
   app.v4.updateComposeCache = () => {
-    lando.cache.set(app.v4.composeCache, {
-      allServices: app.allServices,
-      compose: app.compose,
-      containers: app.containers,
-      info: _.cloneDeep(app.info).map(service => ({...service, hostname: [], urls: []})),
-      name: app.name,
-      mounts: require('./utils/get-mounts')(_.get(app, 'v4.services', {})),
-      primary: app._defaultService,
-      project: app.project,
-      root: app.root,
-      sapis: require('./utils/get-service-apis')(app),
-      overrides: {
-        tooling: app._coreToolingOverrides,
+    lando.cache.set(
+      app.v4.composeCache,
+      {
+        allServices: app.allServices,
+        compose: app.compose,
+        containers: app.containers,
+        info: _.cloneDeep(app.info).map((service) => ({ ...service, hostname: [], urls: [] })),
+        name: app.name,
+        mounts: require('./utils/get-mounts')(_.get(app, 'v4.services', {})),
+        primary: app._defaultService,
+        project: app.project,
+        root: app.root,
+        sapis: require('./utils/get-service-apis')(app),
+        overrides: {
+          tooling: app._coreToolingOverrides,
+        },
       },
-
-    }, {persist: true});
+      { persist: true },
+    );
   };
 
   // front load top level networks
   app.v4.addNetworks = (data = {}) => {
-    app.add({
-      id: `v4-networks-${nanoid()}`,
-      info: {},
-      data: [{networks: data}],
-    }, true);
+    app.add(
+      {
+        id: `v4-networks-${nanoid()}`,
+        info: {},
+        data: [{ networks: data }],
+      },
+      true,
+    );
   };
   // front load top level volumes
   app.v4.addVolumes = (data = {}) => {
-    app.add({
-      id: `v4-volumes-${nanoid()}`,
-      info: {},
-      data: [{volumes: data}],
-    }, true);
+    app.add(
+      {
+        id: `v4-volumes-${nanoid()}`,
+        info: {},
+        data: [{ volumes: data }],
+      },
+      true,
+    );
   };
 
   // load in and parse recipes
@@ -246,17 +261,9 @@ module.exports = async (app, lando) => {
   // process events
   if (!_.isEmpty(_.get(app, 'config.events', []))) {
     _.forEach(app.config.events, (cmds, event) => {
-      app.events.on(event, 9999, async data => await require('./hooks/app-run-events')(app, lando, cmds, data, event));
+      app.events.on(event, 9999, async (data) => await require('./hooks/app-run-events')(app, lando, cmds, data, event));
     });
   }
-
-  // LEGACY URL Scanner urls
-  if (_.get(lando, 'config.scanner', true) === 'legacy') {
-    app.events.on('post-start', 10, async () => await require('./hooks/app-run-legacy-scanner')(app, lando));
-  }
-
-  // legacy sharing stuff
-  await require('./hooks/app-load-legacy-sharing')(app, lando);
 
   // REturn defualts
   return {
@@ -265,12 +272,12 @@ module.exports = async (app, lando) => {
       LANDO_APP_NAME: app.name,
       LANDO_APP_ROOT: app.root,
       LANDO_APP_ROOT_BIND: app.root,
-      LANDO_APP_COMMON_NAME: _.truncate(app.project, {length: 64}),
+      LANDO_APP_COMMON_NAME: _.truncate(app.project, { length: 64 }),
       LANDO_LOAD_KEYS: getKeys(_.get(app, 'config.keys')),
       BITNAMI_DEBUG: 'true',
     },
     labels: {
-      'io.lando.landofiles': app.configFiles.map(file => path.basename(file)).join(','),
+      'io.lando.landofiles': app.configFiles.map((file) => path.basename(file)).join(','),
       'io.lando.root': app.root,
       'io.lando.src': app.configFiles.join(','),
       'io.lando.http-ports': '80,443',

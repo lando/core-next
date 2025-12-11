@@ -14,6 +14,6 @@ module.exports = async (lando, options) => {
   }
 
   // otherwise proceed
-  lando.log.debug('rebased install plugins %o on common ones %o', options.plugins, lando.config.setup.commonPlugins);
+  lando.log('rebased install plugins %o on common ones %o', options.plugins, lando.config.setup.commonPlugins);
   options.plugins = merge({}, lando.config.setup.commonPlugins, options.plugins);
 };

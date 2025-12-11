@@ -2,7 +2,7 @@
 
 const _ = require('lodash');
 
-module.exports = async app => {
+module.exports = async (app) => {
   // Determine local vs pullable services
   const whereats = _(_.get(app, 'config.services', {}))
     .map((data, service) => ({
@@ -12,9 +12,15 @@ module.exports = async app => {
     .value();
 
   // Set local and pullys for downstream concerns
-  app.log.debug('determined pullable services', whereats);
+  app.log('determined pullable services', whereats);
   app.opts = _.merge({}, app.opts, {
-    pullable: _(whereats).filter(service => !service.isLocal).map('service').value(),
-    local: _(whereats).filter(service => service.isLocal).map('service').value(),
+    pullable: _(whereats)
+      .filter((service) => !service.isLocal)
+      .map('service')
+      .value(),
+    local: _(whereats)
+      .filter((service) => service.isLocal)
+      .map('service')
+      .value(),
   });
 };

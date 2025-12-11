@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = async lando => {
+module.exports = async (lando) => {
   // if we dont have an orchestrator bin yet then discover it
   if (!lando.config.orchestratorBin) lando.config.orchestratorBin = require('../utils/get-compose-x')(lando.config);
 
@@ -18,5 +18,5 @@ module.exports = async lando => {
   }
 
   // log our sitch
-  lando.log.debug('using docker-compose %s', lando.config.orchestratorBin);
+  lando.log('using docker-compose %s', lando.config.orchestratorBin);
 };

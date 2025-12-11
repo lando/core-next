@@ -15,7 +15,7 @@ const parseLandofileConfig = (config = {}) => ({
   landoFile: true,
 });
 
-module.exports = options => {
+module.exports = (options) => {
   // Modules
   const hasher = require('object-hash');
 
@@ -31,7 +31,7 @@ module.exports = options => {
   // add the core config.yaml as a config source if we have it, ideally splice it in after the cli config
   // but if we cant then just put it at the beginning
   if (fs.existsSync(path.resolve(__dirname, '..', 'config.yml'))) {
-    const splicedex = _.findIndex(config.configSources, element => _.endsWith(element, '/cli/config.yml')) || 0;
+    const splicedex = _.findIndex(config.configSources, (element) => _.endsWith(element, '/cli/config.yml')) || 0;
     config.configSources.splice(splicedex + 1, 0, path.resolve(__dirname, '..', 'config.yml'));
   }
 
@@ -74,11 +74,9 @@ module.exports = options => {
   if (config.composeBin && !config.orchestratorBin) config.orchestratorBin = config.composeBin;
 
   // If orchestratorBin is set, is an absolute path and exists then unset orchestratorVersion and rely on this alone
-  if (typeof config.orchestratorBin === 'string'
-    && path.isAbsolute(config.orchestratorBin)
-    && fs.existsSync(config.orchestratorBin)) {
+  if (typeof config.orchestratorBin === 'string' && path.isAbsolute(config.orchestratorBin) && fs.existsSync(config.orchestratorBin)) {
     delete config.orchestratorVersion;
-  // Otherwise remove orchestratorBin and rely on orchestratorVersion alone
+    // Otherwise remove orchestratorBin and rely on orchestratorVersion alone
   } else {
     delete config.orchestratorBin;
   }
@@ -108,4 +106,3 @@ module.exports = options => {
   // Return the config
   return config;
 };
-

@@ -5,7 +5,7 @@ const fs = require('fs');
 const path = require('path');
 const _ = require('lodash');
 
-const {color} = require('listr2');
+const { color } = require('listr2');
 
 // @TODO: when we have a file for recipes/compose we can set choices on service
 
@@ -34,7 +34,7 @@ module.exports = (lando, config = lando.appConfig) => ({
       alias: ['u'],
     },
   },
-  run: async options => {
+  run: async (options) => {
     // construct a minapp from various places
     const minapp = !_.isEmpty(config) ? config : lando.appConfig;
 
@@ -54,13 +54,13 @@ module.exports = (lando, config = lando.appConfig) => ({
     // Load only what we need so we don't pay the appinit penalty
     if (!_.isEmpty(_.get(app, 'config.events', []))) {
       _.forEach(app.config.events, (cmds, name) => {
-        app.events.on(name, 9999, async data => await require('../hooks/app-run-events')(app, lando, cmds, data));
+        app.events.on(name, 9999, async (data) => await require('../hooks/app-run-events')(app, lando, cmds, data));
       });
     }
 
     // nice things
     const aservices = app?.config?.allServices ?? app?.allServices ?? [];
-    const choices = `[${color.green('choices:')} ${aservices.map(service => `"${service}"`).join(', ')}]`;
+    const choices = `[${color.green('choices:')} ${aservices.map((service) => `"${service}"`).join(', ')}]`;
 
     // gather our options
     options.service = options._[1];
@@ -83,7 +83,7 @@ module.exports = (lando, config = lando.appConfig) => ({
         throw new Error('You must specify a command! See usage above.');
       }
 
-    // collect, usage throw
+      // collect, usage throw
     } catch (error) {
       if (options?._yargs?.showHelp) options._yargs.showHelp();
       console.log('');
@@ -116,8 +116,8 @@ module.exports = (lando, config = lando.appConfig) => ({
     // ensure all v3 services have their appMount set to /app
     // @TODO: do we still need this?
     const v3Mounts = _(_.get(app, 'info', []))
-      .filter(service => service.api !== 4)
-      .map(service => ([service.service, service.appMount || '/app']))
+      .filter((service) => service.api !== 4)
+      .map((service) => [service.service, service.appMount || '/app'])
       .fromPairs()
       .value();
     app.mounts = _.merge({}, v3Mounts, app.mounts);
@@ -136,12 +136,12 @@ module.exports = (lando, config = lando.appConfig) => ({
 
     // try to run it
     try {
-      lando.log.debug('running exec command %o on %o', runner.cmd, runner.id);
+      lando.log('running exec command %o on %o', runner.cmd, runner.id);
       await require('../utils/build-docker-exec')(lando, 'inherit', runner);
 
-    // error
+      // error
     } catch (error) {
-      return lando.engine.isRunning(runner.id).then(isRunning => {
+      return lando.engine.isRunning(runner.id).then((isRunning) => {
         if (!isRunning) {
           throw new Error(`Looks like your app is stopped! ${color.bold('lando start')} it up to exec your heart out.`);
         } else {
@@ -150,7 +150,7 @@ module.exports = (lando, config = lando.appConfig) => ({
         }
       });
 
-    // finally
+      // finally
     } finally {
       await app.events.emit('post-exec', config);
     }
