@@ -16,7 +16,7 @@ module.exports = (lando) => {
       const Plugin = require('../components/plugin');
 
       // reset Plugin.debug to use the lando 3 debugger
-      Plugin.debug = require('../utils/debug-shim')(lando.log);
+      Plugin.debug = lando.log;
 
       // merge plugins together, parse/normalize their names and return only unique values
       const plugins = options._.slice(1)

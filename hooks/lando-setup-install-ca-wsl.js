@@ -12,9 +12,9 @@ const path = require('path');
  * @return {Promise<void>}
  */
 module.exports = async (lando, options) => {
-  const debug = require('../utils/debug-shim')(lando.log);
+  const debug = lando.log;
 
-  const {caCert} = lando.config;
+  const { caCert } = lando.config;
 
   // Skip the installation of the CA if set in options
   if (options.skipInstallCa) return;
@@ -34,7 +34,7 @@ module.exports = async (lando, options) => {
         debug('computed sha1 fingerprint %o for ca %o', fingerprint, caCert);
 
         // get fingerprints
-        const linuxfps = await require('../utils/get-system-cas')({platform: 'linux'});
+        const linuxfps = await require('../utils/get-system-cas')({ platform: 'linux' });
 
         // check if we have it in both
         return linuxfps.includes(fingerprint);
@@ -45,11 +45,13 @@ module.exports = async (lando, options) => {
     },
     canRun: async () => {
       // Check for admin privileges
-      if (!await require('../utils/is-admin-user')()) {
-        throw new Error([
-          `User "${lando.config.username}" does not have permission to trust the CA!`,
-          'Contact your system admin for permission and then rerun setup.',
-        ].join(os.EOL));
+      if (!(await require('../utils/is-admin-user')())) {
+        throw new Error(
+          [
+            `User "${lando.config.username}" does not have permission to trust the CA!`,
+            'Contact your system admin for permission and then rerun setup.',
+          ].join(os.EOL),
+        );
       }
 
       return true;
@@ -63,8 +65,8 @@ module.exports = async (lando, options) => {
           type: 'password',
           name: 'password',
           message: `Enter computer password for ${lando.config.username} to install the CA`,
-          validate: async input => {
-            const options = {debug, ignoreReturnCode: true, password: input};
+          validate: async (input) => {
+            const options = { debug, ignoreReturnCode: true, password: input };
             const response = await require('../utils/run-elevated')(['echo', 'Validating elevated access'], options);
             if (response.code !== 0) return response.stderr;
             return true;
@@ -80,7 +82,7 @@ module.exports = async (lando, options) => {
       if (options.debug || options.verbose > 0 || lando.debuggy) command.push('--debug');
 
       // Execute the installation command with elevated privileges
-      const result = await require('../utils/run-elevated')(command, {debug, password: ctx.password});
+      const result = await require('../utils/run-elevated')(command, { debug, password: ctx.password });
 
       // Update task title on successful installation
       task.title = 'Installed Lando Development Certificate Authority (CA) to Linux store';
@@ -127,7 +129,7 @@ module.exports = async (lando, options) => {
       if (!lando.config.isInteractive) args.push('-NonInteractive');
 
       // Run the installation command
-      const result = await require('../utils/run-powershell-script')(script, args, {debug});
+      const result = await require('../utils/run-powershell-script')(script, args, { debug });
 
       // Update task title on successful installation
       task.title = 'Installed Lando Development Certificate Authority (CA) to Windows store';

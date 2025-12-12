@@ -91,7 +91,7 @@ const downloadDockerDesktop = (url, { debug, dest, task, ctx }) =>
   });
 
 module.exports = async (lando, options) => {
-  const debug = require('../utils/debug-shim')(lando.log);
+  const debug = lando.log;
   debug.enabled = lando.debuggy;
 
   // if build engine is set to false allow it to be skipped

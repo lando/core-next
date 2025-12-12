@@ -292,7 +292,7 @@ module.exports = (lando) => {
           }
           ux.action.start('Restarting');
           await require('../utils/shutdown-os')({
-            debug: require('../utils/debug-shim')(lando.log),
+            debug: lando.log,
             message: 'Lando needs to restart to complete setup!',
           });
           ux.action.stop(color.green('done'));

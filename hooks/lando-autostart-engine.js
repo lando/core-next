@@ -5,7 +5,7 @@
 // not going to address it in favor of lando 4 stuff
 module.exports = async (lando) => {
   if (lando._bootstrapLevel >= 3 && (await lando.engine.daemon.isUp()) === false) {
-    const debug = require('../utils/debug-shim')(lando.log);
+    const debug = lando.log;
     const tasks = [
       {
         title: 'It seems Docker is not running, trying to start it up...',

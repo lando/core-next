@@ -62,7 +62,7 @@ module.exports = (lando) => {
 
       // reset Plugin static defaults for v3 purposes
       Plugin.config = options.config;
-      Plugin.debug = require('../utils/debug-shim')(lando.log);
+      Plugin.debug = lando.log;
       Plugin.fetchConfig.namespace = options.fetchNamespace;
       Plugin.fetchConfig.excludeDeps = options.removeDependency;
 

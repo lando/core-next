@@ -11,9 +11,9 @@ const path = require('path');
  * @return {Promise<void>}
  */
 module.exports = async (lando, options) => {
-  const debug = require('../utils/debug-shim')(lando.log);
+  const debug = lando.log;
 
-  const {caCert} = lando.config;
+  const { caCert } = lando.config;
 
   // Skip the installation of the CA if set in options
   if (options.skipInstallCa) return;
@@ -56,7 +56,7 @@ module.exports = async (lando, options) => {
       if (!lando.config.isInteractive) args.push('-NonInteractive');
 
       // Run the installation command
-      const result = await require('../utils/run-powershell-script')(script, args, {debug});
+      const result = await require('../utils/run-powershell-script')(script, args, { debug });
 
       // Update task title on successful installation
       task.title = 'Installed Lando Development Certificate Authority (CA)';
