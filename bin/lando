@@ -9,6 +9,9 @@
 
 // @ts-nocheck
 
+console.log('hello');
+process.exit(0);
+
 import dns from 'node:dns';
 import fs from 'node:fs';
 import path from 'node:path';
