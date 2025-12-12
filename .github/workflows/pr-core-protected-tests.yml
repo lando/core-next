@@ -73,6 +73,7 @@ jobs:
           env
           which lando || true
           where lando || true
+          bun bin/lando version --debug
           bin/lando version --debug
 
       - name: Run Leia Tests
