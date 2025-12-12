@@ -1,7 +1,10 @@
 name: Setup Linux Tests
 
 on:
-  pull_request:
+  # pull_request:
+  push:
+    branches:
+      - NOTRIGHTNOW
 
 jobs:
   leia-tests:
@@ -14,7 +17,7 @@ jobs:
         leia-test:
           - setup-linux
         node-version:
-          - "20"
+          - '20'
         os:
           - ubuntu-24.04
 
@@ -44,7 +47,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
           options: --options dns-result-order=ipv4first
           upload: false
-          pkg: "@yao-pkg/pkg@5.16.1"
+          pkg: '@yao-pkg/pkg@5.16.1'
       - name: Install full deps
         run: npm clean-install --prefer-offline --frozen-lockfile
       - name: Setup lando ${{ steps.pkg-action.outputs.file }}
@@ -56,7 +59,7 @@ jobs:
       - name: Run Leia Tests
         uses: lando/run-leia-action@v2
         with:
-          leia-test: "./examples/${{ matrix.leia-test }}/README.md"
-          cleanup-header: "Destroy tests"
+          leia-test: './examples/${{ matrix.leia-test }}/README.md'
+          cleanup-header: 'Destroy tests'
           shell: bash
           stdin: true

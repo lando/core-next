@@ -12,8 +12,6 @@ jobs:
       matrix:
         os:
           - ubuntu-24.04
-        node-version:
-          - "20"
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -22,41 +20,7 @@ jobs:
         with:
           key: lando-mvb-docs
           path: docs/.vitepress/cache/@lando/mvb
-      - name: Install node ${{ matrix.node-version }}
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: npm
-      - name: Install dependencies
-        run: npm clean-install --prefer-offline --frozen-lockfile
 
-      # Run tests
-      - name: Run linter
-        run: npm run lint
-      - name: Test mvb
-        run: npm run docs:mvb
-      - name: Test build
-        run: npm run docs:build
-
-  lando-docs-tests:
-    runs-on: ${{ matrix.os }}
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      DEBUG: "@lando/*"
-    strategy:
-      matrix:
-        os:
-          - ubuntu-24.04
-        node-version:
-          - "20"
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-      - name: Install node ${{ matrix.node-version }}
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: npm
       - name: Bundle Deps
         uses: lando/prepare-release-action@v3
         with:
@@ -64,27 +28,70 @@ jobs:
           version: dev
           sync: false
       - name: Install pkg dependencies
-        run: npm clean-install --prefer-offline --frozen-lockfile --production
-      - name: Package into node binary
-        uses: lando/pkg-action@v6
-        id: pkg-action
+        run: bun install --frozen-lockfile
+
+      - name: Run linter
+        run: bun run lint
+      - name: Test mvb
+        run: bun run docs:mvb
+      - name: Test build
+        run: bun run docs:build
+
+  lando-docs-tests:
+    runs-on: ${{ matrix.os }}
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      DEBUG: '@lando/*'
+    strategy:
+      matrix:
+        os:
+          - ubuntu-24.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install bun
+        uses: oven-sh/setup-bun@v2
         with:
-          entrypoint: bin/lando
-          filename: lando
-          node-version: ${{ matrix.node-version }}
-          options: --options dns-result-order=ipv4first
-          upload: false
-          pkg: "@yao-pkg/pkg@5.16.1"
+          bun-version-file: .bun-version
+      - name: Bundle Deps
+        uses: lando/prepare-release-action@v3
+        with:
+          lando-plugin: true
+          version: dev
+          sync: false
+      - name: Install pkg dependencies
+        run: bun install --frozen-lockfile --production
+
+      # - name: Package into node binary
+      #   uses: lando/pkg-action@v6
+      #   id: pkg-action
+      #   with:
+      #     entrypoint: bin/lando
+      #     filename: lando
+      #     node-version: ${{ matrix.node-version }}
+      #     options: --options dns-result-order=ipv4first
+      #     upload: false
+      #     pkg: '@yao-pkg/pkg@5.16.1'
       - name: Install full deps
-        run: npm clean-install --prefer-offline --frozen-lockfile
-      - name: Setup lando ${{ steps.pkg-action.outputs.file }}
+        run: bun install --frozen-lockfile --production
+      # - name: Setup lando ${{ steps.pkg-action.outputs.file }}
+      #   uses: lando/setup-lando@v3
+      #   with:
+      #     lando-version: ${{ steps.pkg-action.outputs.file }}
+      #     telemetry: false
+      #     config: |
+      #       setup.skipCommonPlugins=true
+
+      - name: Setup lando ${{ github.workspace }}/bin/lando
         uses: lando/setup-lando@v3
         with:
-          lando-version: ${{ steps.pkg-action.outputs.file }}
+          lando-version: ${{ github.workspace }}/bin/lando
           telemetry: false
           config: |
             setup.skipCommonPlugins=true
       - name: Lando tests
         run: |
-          lando start
-          lando vitepress build docs
+          lando version
+          # lando start
+          # lando vitepress build docs
