@@ -61,17 +61,20 @@ jobs:
       #     config: |
       #       setup.skipCommonPlugins=true
 
-      - name: Setup lando ${{ github.workspace }}/bin/lando
+      - name: Setup lando
         uses: lando/setup-lando@v3
+        id: setup-lando
         with:
-          lando-version: ${{ github.workspace }}/bin/lando
+          lando-version: 3
           telemetry: false
           config: |
             setup.skipCommonPlugins=true
           debug: true
-
-      - name: Check
+      - name: Replace with lando from source
         run: |
+          sudo ln -sf /Users/pirog/work/core-next/bin/lando /usr/local/bin/l4
+          sudo ln -sf ${{ github.workspace }}bin/lando ${{ steps.setup-lando.outputs.lando-path }}
+
           which lando || true
           lando version || true
 
