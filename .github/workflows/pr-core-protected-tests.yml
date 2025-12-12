@@ -61,20 +61,19 @@ jobs:
       #     config: |
       #       setup.skipCommonPlugins=true
 
-      - name: Setup lando
+      - name: Setup lando ${{ github.workspace }}/bin/lando
         uses: lando/setup-lando@v3
         with:
+          lando-version: ${{ github.workspace }}/bin/lando
           telemetry: false
           config: |
             setup.skipCommonPlugins=true
-      - name: Temp run from source until bun build is ready
+          debug: true
+
+      - name: Check
         run: |
-          echo "${{ github.workspace }}/bin" >> $GITHUB_PATH
-          env
           which lando || true
-          where lando || true
-          bun bin/lando version --debug || true
-          bin/lando version --debug || true
+          lando version || true
 
       - name: Run Leia Tests
         uses: lando/run-leia-action@v2
