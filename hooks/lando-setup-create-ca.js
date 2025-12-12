@@ -7,9 +7,9 @@ const wslpath = require('../utils/winpath-2-wslpath');
 const remove = require('../utils/remove');
 
 module.exports = async (lando, options) => {
-  const debug = require('../utils/debug-shim')(lando.log);
+  const debug = lando.log;
 
-  const {caCert, caKey} = lando.config;
+  const { caCert, caKey } = lando.config;
 
   // create CA
   options.tasks.push({
@@ -20,10 +20,10 @@ module.exports = async (lando, options) => {
       'NOT INSTALLED': 'Will create Lando Development Certificate Authority (CA)',
     },
     hasRun: async () => {
-      if ([caCert, caKey].some(file => !fs.existsSync(file))) return false;
+      if ([caCert, caKey].some((file) => !fs.existsSync(file))) return false;
 
       // check if the ca is valid and has a matching key
-      if (!require('../utils/validate-ca')(caCert, caKey, {debug})) {
+      if (!require('../utils/validate-ca')(caCert, caKey, { debug })) {
         remove(caCert);
         remove(caKey);
         return false;
@@ -34,10 +34,10 @@ module.exports = async (lando, options) => {
     },
     task: async (ctx, task) => {
       const write = require('../utils/write-file');
-      const {createCA} = require('mkcert');
+      const { createCA } = require('mkcert');
 
       // generate the CA and KEY
-      const {cert, key} = await createCA({
+      const { cert, key } = await createCA({
         organization: 'Lando Development CA',
         countryCode: 'US',
         state: 'California',

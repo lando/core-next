@@ -17,8 +17,6 @@ jobs:
           # - init-remote
           # - private-plugins
           - yaml
-        node-version:
-          - "20"
         os:
           # - macos-14
           - ubuntu-24.04
@@ -29,12 +27,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-      - name: Install node ${{ matrix.node-version }}
-        uses: actions/setup-node@v6
+
+      - name: Install bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: ${{ matrix.node-version }}
-          registry-url: https://registry.npmjs.org
-          cache: npm
+          bun-version-file: .bun-version
       - name: Bundle Deps
         uses: lando/prepare-release-action@v3
         with:
@@ -42,30 +39,42 @@ jobs:
           version: dev
           sync: false
       - name: Install pkg dependencies
-        run: npm clean-install --prefer-offline --frozen-lockfile --production
-      - name: Package into node binary
-        uses: lando/pkg-action@v6
-        id: pkg-action
-        with:
-          entrypoint: bin/lando
-          filename: lando
-          node-version: ${{ matrix.node-version }}
-          options: --options dns-result-order=ipv4first
-          upload: false
-          pkg: "@yao-pkg/pkg@5.16.1"
-      - name: Install full deps
-        run: npm clean-install --prefer-offline --frozen-lockfile
-      - name: Setup lando ${{ steps.pkg-action.outputs.file }}
+        run: bun install --frozen-lockfile --production
+
+      # - name: Package into node binary
+      #   uses: lando/pkg-action@v6
+      #   id: pkg-action
+      #   with:
+      #     entrypoint: bin/lando
+      #     filename: lando
+      #     node-version: ${{ matrix.node-version }}
+      #     options: --options dns-result-order=ipv4first
+      #     upload: false
+      #     pkg: '@yao-pkg/pkg@5.16.1'
+      # - name: Install full deps
+      #   run: npm clean-install --prefer-offline --frozen-lockfile
+      # - name: Setup lando ${{ steps.pkg-action.outputs.file }}
+      #   uses: lando/setup-lando@v3
+      #   with:
+      #     lando-version: ${{ steps.pkg-action.outputs.file }}
+      #     telemetry: false
+      #     config: |
+      #       setup.skipCommonPlugins=true
+
+      - name: Setup lando
         uses: lando/setup-lando@v3
+        id: setup-lando
         with:
-          lando-version: ${{ steps.pkg-action.outputs.file }}
+          lando-version: 3
           telemetry: false
           config: |
             setup.skipCommonPlugins=true
+      - name: Replace with lando from source
+        run: sudo ln -sf ${{ github.workspace }}/bin/lando ${{ steps.setup-lando.outputs.lando-path }}
+
       - name: Run Leia Tests
-        uses: lando/run-leia-action@v2
-        with:
-          leia-test: "./examples/${{ matrix.leia-test }}/README.md"
-          cleanup-header: "Destroy tests"
-          shell: ${{ matrix.shell }}
-          stdin: true
+        run: |
+          bunx @lando/leia './examples/${{ matrix.leia-test }}/README.md' \
+            --cleanup-header="Destroy tests" \
+            --shell="${{ matrix.shell }}" \
+            --stdin ${RUNNER_DEBUG:+--debug}

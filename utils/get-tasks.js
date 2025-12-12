@@ -9,7 +9,7 @@ const path = require('path');
  */
 const pathsToRoot = (startFrom = process.cwd()) => {
   return _(_.range(path.dirname(startFrom).split(path.sep).length))
-    .map(end => _.dropRight(path.dirname(startFrom).split(path.sep), end).join(path.sep))
+    .map((end) => _.dropRight(path.dirname(startFrom).split(path.sep), end).join(path.sep))
     .unshift(startFrom)
     .dropRight()
     .value();
@@ -20,18 +20,18 @@ const pathsToRoot = (startFrom = process.cwd()) => {
  */
 const getBsLevel = (config, command) => {
   if (_.has(config, `tooling.${command}.level`)) return config.tooling[command].level;
-  else if (_.find(config.tooling, {id: command}).level) return _.find(config.tooling, {id: command}).level;
-  else return (!fs.existsSync(config.composeCache)) ? 'app' : 'engine';
+  else if (_.find(config.tooling, { id: command }).level) return _.find(config.tooling, { id: command }).level;
+  else return !fs.existsSync(config.composeCache) ? 'app' : 'engine';
 };
 
 /*
  * Helper to load cached file without cache module
  */
-const loadCacheFile = file => {
+const loadCacheFile = (file) => {
   try {
-    return JSON.parse(JSON.parse(fs.readFileSync(file, {encoding: 'utf-8'})));
+    return JSON.parse(JSON.parse(fs.readFileSync(file, { encoding: 'utf-8' })));
   } catch (e) {
-    fs.rmSync(file, {force: true, retryDelay: 201, maxRetries: 16, recursive: true});
+    fs.rmSync(file, { force: true, retryDelay: 201, maxRetries: 16, recursive: true });
     return {};
   }
 };
@@ -39,11 +39,12 @@ const loadCacheFile = file => {
 /*
  * Helper to run the app task runner
  */
-const appRunner = command => (argv, lando) => {
+const appRunner = (command) => (argv, lando) => {
   const app = lando.getApp(argv._app.root);
-  return lando.events.emit('pre-app-runner', app)
-  .then(() => lando.events.emit('pre-command-runner', app))
-  .then(() => app.init().then(() => _.find(app.tasks, {command}).run(argv)));
+  return lando.events
+    .emit('pre-app-runner', app)
+    .then(() => lando.events.emit('pre-command-runner', app))
+    .then(() => app.init().then(() => _.find(app.tasks, { command }).run(argv)));
 };
 
 /*
@@ -59,7 +60,7 @@ const engineRunner = (config, command) => (argv, lando) => {
   // Load only what we need so we don't pay the appinit penalty
   if (!_.isEmpty(_.get(app, 'config.events', []))) {
     _.forEach(app.config.events, (cmds, name) => {
-      app.events.on(name, 9999, async data => await require('./../hooks/app-run-events')(app, lando, cmds, data));
+      app.events.on(name, 9999, async (data) => await require('./../hooks/app-run-events')(app, lando, cmds, data));
     });
   }
 
@@ -67,16 +68,16 @@ const engineRunner = (config, command) => (argv, lando) => {
   app.config.tooling = require('./get-tooling-tasks')(app.config.tooling, app);
   // get task
   // @NOTE: can we actually assume this will always find something? i **THINK** we catch upstream?
-  const task = _.find(app.config.tooling, task => task.name === command);
+  const task = _.find(app.config.tooling, (task) => task.name === command);
   // get service, note this is not trivial because dynamic services are a thing
 
   const service = !_.startsWith(task.service, ':') ? task.service : argv[_.trim(task.service, ':')];
-  lando.log.debug('resolved tooling command %s service to %s', command, service);
+  lando.log('resolved tooling command %s service to %s', command, service);
 
   // ensure all v3 services have their appMount set to /app
   const v3Mounts = _(_.get(app, 'info', []))
-    .filter(service => service.api !== 4)
-    .map(service => ([service.service, service.appMount || '/app']))
+    .filter((service) => service.api !== 4)
+    .map((service) => [service.service, service.appMount || '/app'])
     .fromPairs()
     .value();
   app.mounts = _.merge({}, v3Mounts, app.mounts);
@@ -92,27 +93,30 @@ const engineRunner = (config, command) => (argv, lando) => {
   }
 
   // Final event to modify and then load and run
-  return lando.events.emit('pre-engine-runner', app)
-  .then(() => lando.events.emit('pre-command-runner', app))
-  .then(() => require('./build-tooling-task')(task, lando).run(argv));
+  return lando.events
+    .emit('pre-engine-runner', app)
+    .then(() => lando.events.emit('pre-command-runner', app))
+    .then(() => require('./build-tooling-task')(task, lando).run(argv));
 };
 
 module.exports = (config = {}, argv = {}, tasks = []) => {
   // merge in recipe cache config first
   if (fs.existsSync(config.recipeCache) && _.has(config, 'recipe')) {
-    config = _.merge({}, JSON.parse(fs.readFileSync(config.recipeCache, {encoding: 'utf-8'})), config);
+    config = _.merge({}, JSON.parse(fs.readFileSync(config.recipeCache, { encoding: 'utf-8' })), config);
   }
 
   // If we have a tooling router lets rebase on that
   if (fs.existsSync(config.toolingRouter)) {
     // Get the closest route
     const closestRoute = _(loadCacheFile(config.toolingRouter))
-      .map(route => _.merge({}, route, {
-        closeness: _.indexOf(pathsToRoot(), route.route),
-      }))
-      .filter(route => route.closeness !== -1)
+      .map((route) =>
+        _.merge({}, route, {
+          closeness: _.indexOf(pathsToRoot(), route.route),
+        }),
+      )
+      .filter((route) => route.closeness !== -1)
       .orderBy('closeness')
-      .thru(routes => routes[0])
+      .thru((routes) => routes[0])
       .value();
 
     // If we have a closest route lets mod config.tooling
@@ -128,8 +132,11 @@ module.exports = (config = {}, argv = {}, tasks = []) => {
   });
 
   // If the tooling command is being called lets assess whether we can get away with engine bootstrap level
-  const ids = _(config.tooling).map(task => task.id).filter(_.identity).value();
-  const level = (_.includes(ids, argv._[0])) ? getBsLevel(config, argv._[0]) : 'app';
+  const ids = _(config.tooling)
+    .map((task) => task.id)
+    .filter(_.identity)
+    .value();
+  const level = _.includes(ids, argv._[0]) ? getBsLevel(config, argv._[0]) : 'app';
 
   // Load all the tasks, remember we need to remove "disabled" tasks (eg non-object tasks) here
   _.forEach(_.get(config, 'tooling', {}), (task, command) => {
@@ -144,18 +151,21 @@ module.exports = (config = {}, argv = {}, tasks = []) => {
         options: _.get(task, 'options', {}),
         positionals: _.get(task, 'positionals', {}),
         usage: _.get(task, 'usage', command),
-        run: (level === 'app') ? appRunner(command) : engineRunner({...config, argv}, command, task),
+        run: level === 'app' ? appRunner(command) : engineRunner({ ...config, argv }, command, task),
       });
     }
   });
 
   // get core tasks
-  const coreTasks = _(loadCacheFile(process.landoTaskCacheFile)).map(t => ([t.command, t])).fromPairs().value();
+  const coreTasks = _(loadCacheFile(process.landoTaskCacheFile))
+    .map((t) => [t.command, t])
+    .fromPairs()
+    .value();
 
   // mix in any relevant compose cache things
   if (fs.existsSync(config.composeCache)) {
     try {
-      const composeCache = JSON.parse(fs.readFileSync(config.composeCache, {encoding: 'utf-8'}));
+      const composeCache = JSON.parse(fs.readFileSync(config.composeCache, { encoding: 'utf-8' }));
 
       // merge in additional tooling;
       Object.assign(coreTasks, composeCache?.overrides?.tooling ?? {});
@@ -171,5 +181,5 @@ module.exports = (config = {}, argv = {}, tasks = []) => {
   }
 
   // and combine
-  return tasks.concat(_.map(coreTasks, task => task));
+  return tasks.concat(_.map(coreTasks, (task) => task));
 };

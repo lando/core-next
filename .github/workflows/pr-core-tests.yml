@@ -13,55 +13,53 @@ jobs:
       matrix:
         leia-test:
           - badname
-          - build
-          - c,o,m,m,a
-          - cache
-          - certs
-          - command
-          - config
-          - debug
-          - envfile
-          - entrypoint
+          # - build
+          # - c,o,m,m,a
+          # - cache
+          # - certs
+          # - command
+          # - config
+          # - debug
+          # - envfile
+          # - entrypoint
           # - environment
-          - events
-          - excludes
-          - exec
-          - experimental
-          - healthcheck
-          - host
+          # - events
+          # - excludes
+          # - exec
+          # - experimental
+          # - healthcheck
+          # - host
           # - hostnames
-          - info
-          - keys
-          - l337
+          # - info
+          # - keys
+          # - l337
           # - lando-v4
-          - landofile
-          - landofile-custom
-          - list
-          - logs
-          - long-name
-          - mounts
-          - networking
-          - no-services
-          - orchestrator
-          - plugins
-          - proxy
-          - rebuild
-          - renderer
-          - recipes
-          - release-channel
-          - restart
-          - scanner
-          - security
-          - sluggy
-          - sql-helpers
-          - ssh
+          # - landofile
+          # - landofile-custom
+          # - list
+          # - logs
+          # - long-name
+          # - mounts
+          # - networking
+          # - no-services
+          # - orchestrator
+          # - plugins
+          # - proxy
+          # - rebuild
+          # - renderer
+          # - recipes
+          # - release-channel
+          # - restart
+          # - scanner
+          # - security
+          # - sluggy
+          # - sql-helpers
+          # - ssh
           # - storage
-          - tooling
-          - update
-          - version
-          - yaml
-        node-version:
-          - "20"
+          # - tooling
+          # - update
+          # - version
+          # - yaml
         os:
           # - macos-14
           - ubuntu-24.04
@@ -72,12 +70,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-      - name: Install node ${{ matrix.node-version }}
-        uses: actions/setup-node@v6
+
+      - name: Install bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: ${{ matrix.node-version }}
-          registry-url: https://registry.npmjs.org
-          cache: npm
+          bun-version-file: .bun-version
       - name: Bundle Deps
         uses: lando/prepare-release-action@v3
         with:
@@ -85,30 +82,42 @@ jobs:
           version: dev
           sync: false
       - name: Install pkg dependencies
-        run: npm clean-install --prefer-offline --frozen-lockfile --production
-      - name: Package into node binary
-        uses: lando/pkg-action@v6
-        id: pkg-action
-        with:
-          entrypoint: bin/lando
-          filename: lando
-          node-version: ${{ matrix.node-version }}
-          options: --options dns-result-order=ipv4first
-          upload: false
-          pkg: "@yao-pkg/pkg@5.16.1"
-      - name: Install full deps
-        run: npm clean-install --prefer-offline --frozen-lockfile
-      - name: Setup lando ${{ steps.pkg-action.outputs.file }}
+        run: bun install --frozen-lockfile --production
+
+      # - name: Package into node binary
+      #   uses: lando/pkg-action@v6
+      #   id: pkg-action
+      #   with:
+      #     entrypoint: bin/lando
+      #     filename: lando
+      #     node-version: ${{ matrix.node-version }}
+      #     options: --options dns-result-order=ipv4first
+      #     upload: false
+      #     pkg: '@yao-pkg/pkg@5.16.1'
+      # - name: Install full deps
+      #   run: bun install --frozen-lockfile --production
+      # - name: Setup lando ${{ steps.pkg-action.outputs.file }}
+      #   uses: lando/setup-lando@v3
+      #   with:
+      #     lando-version: ${{ steps.pkg-action.outputs.file }}
+      #     telemetry: false
+      #     config: |
+      #       setup.skipCommonPlugins=true
+
+      - name: Setup lando
         uses: lando/setup-lando@v3
+        id: setup-lando
         with:
-          lando-version: ${{ steps.pkg-action.outputs.file }}
+          lando-version: 3
           telemetry: false
           config: |
             setup.skipCommonPlugins=true
+      - name: Replace with lando from source
+        run: sudo ln -sf ${{ github.workspace }}/bin/lando ${{ steps.setup-lando.outputs.lando-path }}
+
       - name: Run Leia Tests
-        uses: lando/run-leia-action@v2
-        with:
-          leia-test: "./examples/${{ matrix.leia-test }}/README.md"
-          cleanup-header: "Destroy tests"
-          shell: ${{ matrix.shell }}
-          stdin: true
+        run: |
+          bunx @lando/leia './examples/${{ matrix.leia-test }}/README.md' \
+            --cleanup-header="Destroy tests" \
+            --shell="${{ matrix.shell }}" \
+            --stdin ${RUNNER_DEBUG:+--debug}

@@ -21,12 +21,14 @@ const normalizeBind = (bind, address = '127.0.0.1') => {
 };
 
 module.exports = async (app, lando) => {
-  _.forEach(app.composeData, service => {
-    _.forEach(service.data, datum => {
-      _.forEach(datum.services, props => {
+  _.forEach(app.composeData, (service) => {
+    _.forEach(service.data, (datum) => {
+      _.forEach(datum.services, (props) => {
         if (!_.isEmpty(props.ports)) {
-          app.log.debug('ensuring exposed ports on %s are bound to %s', service.id, lando.config.bindAddress);
-          props.ports = _(props.ports).map(port => normalizeBind(port, lando.config.bindAddress)).value();
+          app.log('ensuring exposed ports on %s are bound to %s', service.id, lando.config.bindAddress);
+          props.ports = _(props.ports)
+            .map((port) => normalizeBind(port, lando.config.bindAddress))
+            .value();
         }
       });
     });

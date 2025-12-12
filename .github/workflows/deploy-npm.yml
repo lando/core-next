@@ -2,18 +2,12 @@ name: Deploy npm
 
 on:
   workflow_call:
-    inputs:
-      node-version:
-        default: "20"
-        description: The node version to use
-        required: false
-        type: string
     secrets:
       github-token:
-        description: "The github token"
+        description: 'The github token'
         required: true
       npm-token:
-        description: "The npm deploy token"
+        description: 'The npm deploy token'
         required: true
 
 jobs:
@@ -24,19 +18,25 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-      - name: Install node ${{ inputs.node-version }}
+
+      - name: Install node
         uses: actions/setup-node@v6
         with:
-          node-version: ${{ inputs.node-version }}
+          node-version: '24'
           registry-url: https://registry.npmjs.org
           cache: npm
+      - name: Install bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
 
       - name: Install dependencies
-        run: npm clean-install --prefer-offline --frozen-lockfile
+        run: bun install --frozen-lockfile
+
       - name: Lint code
-        run: npm run lint
+        run: bun run lint
       - name: Run unit tests
-        run: npm run test:unit
+        run: bun run test:unit
 
       - name: Update edge release alias
         shell: bash

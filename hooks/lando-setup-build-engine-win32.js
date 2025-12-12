@@ -6,8 +6,8 @@ const getDockerDesktopBin = require('../utils/get-docker-desktop-x');
 const os = require('os');
 const path = require('path');
 const semver = require('semver');
-const {color} = require('listr2');
-const {nanoid} = require('nanoid');
+const { color } = require('listr2');
+const { nanoid } = require('nanoid');
 
 const buildIds = {
   '4.37.1': '178610',
@@ -40,18 +40,18 @@ const buildIds = {
 /*
  * Helper to get build engine id
  */
-const getId = version => {
+const getId = (version) => {
   // if version is an integer then assume its already the id
   if (semver.valid(version) === null && Number.isInteger(parseInt(version))) return version;
   // otherwise return that corresponding build-id
   return buildIds[version];
 };
 
-const getVersion = version => {
+const getVersion = (version) => {
   // if version is not an integer then assume its already the version
   if (semver.valid(version) !== null) return version;
   // otherwise return the version that corresponds to the build id
-  return Object.keys(buildIds).find(key => buildIds[key] === version);
+  return Object.keys(buildIds).find((key) => buildIds[key] === version);
 };
 
 /*
@@ -65,27 +65,28 @@ const getEngineDownloadUrl = (id = '175267') => {
 /*
  * wrapper for docker-desktop install
  */
-const downloadDockerDesktop = (url, {debug, task, ctx}) => new Promise((resolve, reject) => {
-  const download = require('../utils/download-x')(url, {
-    debug,
-    dest: path.join(os.tmpdir(), `${nanoid()}.exe`),
-  });
+const downloadDockerDesktop = (url, { debug, task, ctx }) =>
+  new Promise((resolve, reject) => {
+    const download = require('../utils/download-x')(url, {
+      debug,
+      dest: path.join(os.tmpdir(), `${nanoid()}.exe`),
+    });
 
-  // success
-  download.on('done', result => {
-    task.title = `Downloaded build engine`;
-    resolve(result);
+    // success
+    download.on('done', (result) => {
+      task.title = `Downloaded build engine`;
+      resolve(result);
+    });
+    // handle errors
+    download.on('error', (error) => {
+      ctx.errors.push(error);
+      reject(error);
+    });
+    // update title to reflect download progress
+    download.on('progress', (progress) => {
+      task.title = `Downloading build engine ${color.dim(`[${progress.percentage}%]`)}`;
+    });
   });
-  // handle errors
-  download.on('error', error => {
-    ctx.errors.push(error);
-    reject(error);
-  });
-  // update title to reflect download progress
-  download.on('progress', progress => {
-    task.title = `Downloading build engine ${color.dim(`[${progress.percentage}%]`)}`;
-  });
-});
 
 module.exports = async (lando, options) => {
   const debug = require('../utils/debug-shim')(lando.log);
@@ -117,10 +118,10 @@ module.exports = async (lando, options) => {
 
       // if we get here let's make sure the engine is on
       try {
-        await lando.engine.daemon.up({max: 5, backoff: 1000});
+        await lando.engine.daemon.up({ max: 5, backoff: 1000 });
         return true;
       } catch (error) {
-        lando.log.debug('docker install task has not run %j', error);
+        lando.log('docker install task has not run %j', error);
         return false;
       }
     },
@@ -134,14 +135,14 @@ module.exports = async (lando, options) => {
     },
     requiresRestart: async () => {
       // if wsl is not installed then this requires a restart
-      const {installed, features} = await require('../utils/get-wsl-status')({debug});
+      const { installed, features } = await require('../utils/get-wsl-status')({ debug });
       const restart = !installed || !features;
       debug('wsl installed=%o, features=%o, restart %o', installed, features, restart ? 'required' : 'not required');
       return restart;
     },
     task: async (ctx, task) => {
       // download the installer
-      ctx.download = await downloadDockerDesktop(url, {ctx, debug, task});
+      ctx.download = await downloadDockerDesktop(url, { ctx, debug, task });
       // script
       const script = path.join(lando.config.userConfRoot, 'scripts', 'install-docker-desktop.ps1');
       // args
@@ -151,7 +152,7 @@ module.exports = async (lando, options) => {
 
       // run install command
       task.title = `Installing build engine ${color.dim('(this may take a minute)')}`;
-      const result = await require('../utils/run-powershell-script')(script, args, {debug});
+      const result = await require('../utils/run-powershell-script')(script, args, { debug });
       result.download = ctx.download;
 
       // finish up
@@ -173,10 +174,10 @@ module.exports = async (lando, options) => {
     hasRun: async () => require('../utils/is-group-member')('docker-users'),
     task: async (ctx, task) => {
       // check one last time incase this was added by a dependee or otherwise
-      if (require('../utils/is-group-member')('docker-users')) return {code: 0};
+      if (require('../utils/is-group-member')('docker-users')) return { code: 0 };
 
       const command = ['net', 'localgroup', 'docker-users', lando.config.username, '/ADD'];
-      const {code, stdout, stderr} = await require('../utils/run-elevated')(command, {ignoreReturnCode: true, debug});
+      const { code, stdout, stderr } = await require('../utils/run-elevated')(command, { ignoreReturnCode: true, debug });
 
       // fail on anything except 1378 which is user already exists
       if (code !== 0 && (!stderr.includes('1378') || !stderr.includes('already a member'))) {
@@ -188,8 +189,7 @@ module.exports = async (lando, options) => {
       }
 
       task.title = `Added ${lando.config.username} to docker-users`;
-      return {code, stdout, stderr};
+      return { code, stdout, stderr };
     },
   });
 };
-

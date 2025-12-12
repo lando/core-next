@@ -4,25 +4,26 @@ const axios = require('../utils/get-axios')();
 const os = require('os');
 const path = require('path');
 
-const {color} = require('listr2');
+const { color } = require('listr2');
 
-const downloadDockerEngine = (url = 'https://get.docker.com', {debug, task}) => new Promise((resolve, reject) => {
-  const download = require('../utils/download-x')(url, {debug});
+const downloadDockerEngine = (url = 'https://get.docker.com', { debug, task }) =>
+  new Promise((resolve, reject) => {
+    const download = require('../utils/download-x')(url, { debug });
 
-  // success
-  download.on('done', result => {
-    task.title = `Downloaded build engine`;
-    resolve(result);
+    // success
+    download.on('done', (result) => {
+      task.title = `Downloaded build engine`;
+      resolve(result);
+    });
+    // handle errors
+    download.on('error', (error) => {
+      reject(error);
+    });
+    // update title to reflect download progress
+    download.on('progress', (progress) => {
+      task.title = `Downloading build engine ${color.dim(`[${progress.percentage}%]`)}`;
+    });
   });
-  // handle errors
-  download.on('error', error => {
-    reject(error);
-  });
-  // update title to reflect download progress
-  download.on('progress', progress => {
-    task.title = `Downloading build engine ${color.dim(`[${progress.percentage}%]`)}`;
-  });
-});
 
 module.exports = async (lando, options) => {
   const debug = require('../utils/debug-shim')(lando.log);
@@ -46,10 +47,10 @@ module.exports = async (lando, options) => {
 
       // if we get here let's make sure the engine is on
       try {
-        await lando.engine.daemon.up({max: 1, backoff: 1000});
+        await lando.engine.daemon.up({ max: 1, backoff: 1000 });
         return true;
       } catch (error) {
-        lando.log.debug('docker install task has not run %j', error);
+        lando.log('docker install task has not run %j', error);
         return false;
       }
     },
@@ -59,18 +60,20 @@ module.exports = async (lando, options) => {
       // throw error if we cannot ping the download link
       await axios.head(url);
       // throw if user is not an admin
-      if (!await require('../utils/is-admin-user')()) {
-        throw new Error([
-          `User "${lando.config.username}" does not have permission to install the build engine!`,
-          'Contact your system admin for permission and then rerun setup.',
-        ].join(os.EOL));
+      if (!(await require('../utils/is-admin-user')())) {
+        throw new Error(
+          [
+            `User "${lando.config.username}" does not have permission to install the build engine!`,
+            'Contact your system admin for permission and then rerun setup.',
+          ].join(os.EOL),
+        );
       }
 
       return true;
     },
     task: async (ctx, task) => {
       // download the installer
-      ctx.download = await downloadDockerEngine(url, {ctx, debug, task});
+      ctx.download = await downloadDockerEngine(url, { ctx, debug, task });
 
       // prompt for password if interactive and we dont have it
       if (ctx.password === undefined && lando.config.isInteractive) {
@@ -78,8 +81,8 @@ module.exports = async (lando, options) => {
           type: 'password',
           name: 'password',
           message: `Enter computer password for ${lando.config.username} to install the build engine`,
-          validate: async input => {
-            const options = {debug, ignoreReturnCode: true, password: input};
+          validate: async (input) => {
+            const options = { debug, ignoreReturnCode: true, password: input };
             const response = await require('../utils/run-elevated')(['echo', 'hello there'], options);
             if (response.code !== 0) return response.stderr;
             return true;
@@ -96,7 +99,7 @@ module.exports = async (lando, options) => {
       if (options.debug || options.verbose > 0 || lando.debuggy) command.push('--debug');
 
       // run
-      const result = await require('../utils/run-elevated')(command, {debug, password: ctx.password});
+      const result = await require('../utils/run-elevated')(command, { debug, password: ctx.password });
       result.download = ctx.download;
 
       // finish up
@@ -118,7 +121,7 @@ module.exports = async (lando, options) => {
     requiresRestart: true,
     task: async (ctx, task) => {
       // check one last time incase this was added by a dependee or otherwise
-      if (require('../utils/is-group-member')('docker')) return {code: 0};
+      if (require('../utils/is-group-member')('docker')) return { code: 0 };
 
       // prompt for password if interactive and we dont have it
       if (ctx.password === undefined && lando.config.isInteractive) {
@@ -126,8 +129,8 @@ module.exports = async (lando, options) => {
           type: 'password',
           name: 'password',
           message: `Enter computer password for ${lando.config.username} to add them to docker group`,
-          validate: async input => {
-            const options = {debug, ignoreReturnCode: true, password: input};
+          validate: async (input) => {
+            const options = { debug, ignoreReturnCode: true, password: input };
             const response = await require('../utils/run-elevated')(['echo', 'hello there'], options);
             if (response.code !== 0) return response.stderr;
             return true;
@@ -137,7 +140,7 @@ module.exports = async (lando, options) => {
 
       const script = path.join(lando.config.userConfRoot, 'scripts', 'add-to-group.sh');
       const command = [script, '--user', lando.config.username, '--group', 'docker'];
-      const response = await require('../utils/run-elevated')(command, {debug, password: ctx.password});
+      const response = await require('../utils/run-elevated')(command, { debug, password: ctx.password });
       task.title = `Added ${lando.config.username} to docker group`;
       return response;
     },

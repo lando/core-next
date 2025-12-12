@@ -13,13 +13,13 @@ module.exports = async (app, lando) => {
 
   // remove compose cache danglerz
   fs.readdirSync(app._dir)
-    .map(dangler => path.join(app._dir, dangler))
-    .filter(dangler => !app.compose.includes(dangler))
-    .map(dangler => {
+    .map((dangler) => path.join(app._dir, dangler))
+    .filter((dangler) => !app.compose.includes(dangler))
+    .map((dangler) => {
       try {
         remove(dangler);
       } catch {
-        app.log.info('Could not remove dangling compose file %s', dangler);
+        app.log('Could not remove dangling compose file %s', dangler);
         return dangler;
       }
     });

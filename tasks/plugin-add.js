@@ -1,8 +1,8 @@
 'use strict';
 
-module.exports = lando => {
+module.exports = (lando) => {
   // the default install directory
-  const {dir} = lando.config.pluginDirs.find(dir => dir.type === require('../utils/get-plugin-type')());
+  const { dir } = lando.config.pluginDirs.find((dir) => dir.type === require('../utils/get-plugin-type')());
 
   return {
     command: 'plugin-add',
@@ -50,7 +50,7 @@ module.exports = lando => {
         hidden: true,
       },
     },
-    run: async options => {
+    run: async (options) => {
       const getPluginConfig = require('../utils/get-plugin-config');
       const lopts2Popts = require('../utils/lopts-2-popts');
       const merge = require('../utils/merge');
@@ -58,10 +58,7 @@ module.exports = lando => {
       const Plugin = require('../components/plugin');
 
       // normalize incoming options on top of any managed or user plugin config we already have
-      options.config = merge({}, [
-        getPluginConfig(lando.config.pluginConfigFile, lando.config.pluginConfig),
-        lopts2Popts(options),
-      ]);
+      options.config = merge({}, [getPluginConfig(lando.config.pluginConfigFile, lando.config.pluginConfig), lopts2Popts(options)]);
 
       // reset Plugin static defaults for v3 purposes
       Plugin.config = options.config;
@@ -71,13 +68,13 @@ module.exports = lando => {
 
       // merge plugins together
       const plugins = options._.slice(1);
-      lando.log.debug('attempting to install plugins %j', plugins);
+      lando.log('attempting to install plugins %j', plugins);
 
       // prep listr things
-      const tasks = plugins.map(plugin => require('../utils/get-plugin-add-task')(plugin, {dir: options.dir, Plugin}));
+      const tasks = plugins.map((plugin) => require('../utils/get-plugin-add-task')(plugin, { dir: options.dir, Plugin }));
 
       // try to fetch the plugins
-      const {errors, results, total} = await lando.runTasks(tasks, {
+      const { errors, results, total } = await lando.runTasks(tasks, {
         renderer: 'lando',
         rendererOptions: {
           level: 0,
@@ -94,7 +91,7 @@ module.exports = lando => {
       // if we have errors then lets print them out
       if (errors.length > 0) {
         // print the full errors
-        for (const error of errors) lando.log.debug(error);
+        for (const error of errors) lando.log(error);
         throw Error('There was a problem installing some of your plugins. Rerun with -vvv for more details.');
       }
     },

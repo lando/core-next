@@ -4,7 +4,7 @@ const groupBy = require('lodash/groupBy');
 const merge = require('lodash/merge');
 const sortBy = require('lodash/sortBy');
 
-const {color, figures} = require('listr2');
+const { color, figures } = require('listr2');
 
 const defaultStatus = {
   'CANNOT INSTALL': 0,
@@ -14,13 +14,12 @@ const defaultStatus = {
 
 // helper to get a status groupings
 const getStatusGroups = (status = {}) => {
-  const results = Object.fromEntries(Object.entries(groupBy(status, 'state'))
-    .map(([state, items]) => ([state, items.length])));
+  const results = Object.fromEntries(Object.entries(groupBy(status, 'state')).map(([state, items]) => [state, items.length]));
   return merge({}, defaultStatus, results);
 };
 
 // get not installed message
-const getNotInstalledMessage = item => {
+const getNotInstalledMessage = (item) => {
   // start with the action and fallbacks`
   const message = [item.comment || `Will install ${item.version}` || 'Will install'];
   // add a restart message if applicable
@@ -30,8 +29,8 @@ const getNotInstalledMessage = item => {
 };
 
 // helper to get a renderable status table
-const getStatusTable = items => ({
-  rows: items.map(item => {
+const getStatusTable = (items) => ({
+  rows: items.map((item) => {
     switch (item.state) {
       case 'INSTALLED':
         return merge({}, item, {
@@ -57,13 +56,13 @@ const getStatusTable = items => ({
     }
   }),
   columns: {
-    description: {header: 'THING'},
-    status: {header: 'STATUS'},
-    comment: {header: 'COMMENT'},
+    description: { header: 'THING' },
+    status: { header: 'STATUS' },
+    comment: { header: 'COMMENT' },
   },
 });
 
-module.exports = lando => {
+module.exports = (lando) => {
   // get defaults from the lando config
   const defaults = lando.config.setup;
   // determine label for build engine
@@ -138,7 +137,7 @@ module.exports = lando => {
       '$0 setup --skip-install-ca --build-engine 4.31.0 --build-engine-accept-license',
     ],
     options,
-    run: async options => {
+    run: async (options) => {
       // @TODO: conditional visibility for lando setup re first time run succesfully?
       const parsePkgName = require('../utils/parse-package-name');
       const ux = lando.cli.getUX();
@@ -153,7 +152,7 @@ module.exports = lando => {
       // start by looping through option.plugin and object merging
       // this should allow us to skip plugin-resolution because its just going to always use the "last" version
       for (const plugin of options.plugin) {
-        const {name, peg} = parsePkgName(plugin);
+        const { name, peg } = parsePkgName(plugin);
         options.plugins[name] = peg === '*' ? 'latest' : peg;
       }
 
@@ -162,8 +161,11 @@ module.exports = lando => {
       const pstatus = await lando.getInstallPluginsStatus(options);
       const pstatusSummary = getStatusGroups(pstatus);
       options.installPlugins = pstatusSummary['NOT INSTALLED'] + pstatusSummary['CANNOT INSTALL'] > 0;
-      ux.action.stop(options.installPlugins ? `${color.green('done')} ${color.dim('[see table below]')}`
-        : `${color.green('done')} ${color.dim('[nothing to install]')}`);
+      ux.action.stop(
+        options.installPlugins
+          ? `${color.green('done')} ${color.dim('[see table below]')}`
+          : `${color.green('done')} ${color.dim('[nothing to install]')}`,
+      );
 
       // filter out any plugins that are alrady installed
       for (const plugin of pstatus) {
@@ -174,7 +176,7 @@ module.exports = lando => {
 
       // show plugin install status/summary and prompt if needed
       if (options.installPlugins && options.yes === false) {
-        const {rows, columns} = getStatusTable(pstatus);
+        const { rows, columns } = getStatusTable(pstatus);
         // print table
         console.log('');
         ux.table(sortBy(rows, ['row', 'weight']), columns);
@@ -186,7 +188,7 @@ module.exports = lando => {
           const answer = await ux.confirm(color.bold('DO YOU CONSENT?'));
           if (!answer) throw new Error('Setup terminated!');
 
-        // things are probably not ok
+          // things are probably not ok
         } else {
           console.log(`Lando has detected that ${pstatusSummary['CANNOT INSTALL']} plugins listed above cannot install correctly.`); // eslint-disable-line max-len
           console.log(color.magenta('It may be wise to resolve their issues before continuing!'));
@@ -203,7 +205,7 @@ module.exports = lando => {
       // @NOTE: should a plugin install error stop the rest of setup?
       if (presults.errors.length > 0) {
         const error = new Error(`A setup error occured! Rerun with ${color.bold('lando setup --debug')} for more info.`); // eslint-disable-line max-len
-        lando.log.debug('%j', presults.errors[0]);
+        lando.log('%j', presults.errors[0]);
         throw error;
       }
 
@@ -215,13 +217,16 @@ module.exports = lando => {
       const sstatus = await lando.getSetupStatus(options);
       const sstatusSummary = getStatusGroups(sstatus);
       options.installTasks = sstatusSummary['NOT INSTALLED'] + sstatusSummary['CANNOT INSTALL'] > 0;
-      ux.action.stop(options.installTasks ? `${color.green('done')} ${color.dim('[see table below]')}`
-        : `${color.green('done')} ${color.dim('[nothing to install]')}`);
+      ux.action.stop(
+        options.installTasks
+          ? `${color.green('done')} ${color.dim('[see table below]')}`
+          : `${color.green('done')} ${color.dim('[nothing to install]')}`,
+      );
 
       // show setup status/summary and prompt if needed
       if (options.installTasks && options.yes === false) {
         // @TODO: lando plugin header install art
-        const {rows, columns} = getStatusTable(sstatus);
+        const { rows, columns } = getStatusTable(sstatus);
 
         // print table
         console.log('');
@@ -234,7 +239,7 @@ module.exports = lando => {
           const answer = await ux.confirm(color.bold('DO YOU CONSENT?'));
           if (!answer) throw new Error('Setup terminated!');
 
-        // things are probably not ok
+          // things are probably not ok
         } else {
           console.log(`Lando has detected that ${sstatusSummary['CANNOT INSTALL']} setup tasks listed above cannot run correctly.`); // eslint-disable-line max-len
           console.log(color.magenta('It may be wise to resolve their issues before continuing!'));
@@ -258,14 +263,16 @@ module.exports = lando => {
 
       // we didnt have to do anything
       if (errors.length === 0 && results.length === 0) {
-        console.log(`As far as ${color.bold('lando setup')} can tell you are ${color.green('good to go')} and do not require additional setup!`); // eslint-disable-line max-len
+        console.log(
+          `As far as ${color.bold('lando setup')} can tell you are ${color.green('good to go')} and do not require additional setup!`,
+        ); // eslint-disable-line max-len
         return;
       }
 
       // if we had errors
       if (errors.length > 0) {
         const error = new Error(`A setup error occured! Rerun with ${color.bold('lando setup --debug')} for more info.`); // eslint-disable-line max-len
-        lando.log.debug('%j', errors[0]);
+        lando.log('%j', errors[0]);
         throw error;
       }
 
@@ -290,7 +297,7 @@ module.exports = lando => {
           });
           ux.action.stop(color.green('done'));
 
-        // otherwise the usual success message
+          // otherwise the usual success message
         } else {
           console.log(`Setup installed ${color.green(results.length)} of ${color.bold(results.length)} things successfully!`); // eslint-disable-line max-len
           console.log(`You are now ${color.green('good to go')} and can start using Lando!`);

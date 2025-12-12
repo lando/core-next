@@ -1,0 +1,7 @@
+name = "lando"
+entrypoint = "bin/lando"
+test-dir = "test"
+
+[test]
+coverage = true
+coverageSkipTestFiles = true

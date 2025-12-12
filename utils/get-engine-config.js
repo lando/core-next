@@ -5,24 +5,27 @@ const fs = require('fs');
 const path = require('path');
 const url = require('url');
 
-const setDockerHost = (hostname, port = 2376) => url.format({
-  protocol: 'tcp',
-  slashes: true,
-  hostname,
-  port,
-});
+const setDockerHost = (hostname, port = 2376) =>
+  url.format({
+    protocol: 'tcp',
+    slashes: true,
+    hostname,
+    port,
+  });
 
-module.exports = ({engineConfig = {}, env = {}}) => {
+module.exports = ({ engineConfig = {}, env = {} }) => {
   // Set defaults if we have to
   if (_.isEmpty(engineConfig)) {
     engineConfig = {
-      socketPath: (process.platform === 'win32') ? '//./pipe/docker_engine' : '/var/run/docker.sock',
-      host: '127.0.0.1',
-      port: 2376,
+      socketPath: process.platform === 'win32' ? '//./pipe/docker_engine' : '/var/run/docker.sock',
+      // host: '127.0.0.1',
+      // port: 2376,
     };
   }
+
   // Set the docker host if its non-standard
-  if (engineConfig.host !== '127.0.0.1') env.DOCKER_HOST = setDockerHost(engineConfig.host, engineConfig.port);
+  if (engineConfig.host && engineConfig.host !== '127.0.0.1') env.DOCKER_HOST = setDockerHost(engineConfig.host, engineConfig.port);
+
   // Set the TLS/cert things if needed
   if (_.has(engineConfig, 'certPath')) {
     env.DOCKER_CERT_PATH = engineConfig.certPath;

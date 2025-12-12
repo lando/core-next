@@ -10,20 +10,14 @@ jobs:
       matrix:
         os:
           - ubuntu-24.04
-        node-version:
-          - "20"
     steps:
-      # Install deps and cache
       - name: Checkout code
         uses: actions/checkout@v6
-      - name: Install node ${{ matrix.node-version }}
-        uses: actions/setup-node@v6
+      - name: Install bun
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: npm
+          bun-version-file: .bun-version
       - name: Install dependencies
-        run: npm clean-install --prefer-offline --frozen-lockfile
-
-      # Run the linter
+        run: bun install --frozen-lockfile
       - name: Run code linter
-        run: npm run lint
+        run: bun run lint

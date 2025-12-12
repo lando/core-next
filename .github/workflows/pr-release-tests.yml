@@ -19,7 +19,6 @@ jobs:
     with:
       arch: ${{ matrix.arch }}
       filename: lando-${{ matrix.os }}-${{ matrix.arch }}-${{ github.sha }}
-      node-version: "20"
       os: ${{ matrix.os }}
       version: dev
 
@@ -58,30 +57,37 @@ jobs:
       - release
     env:
       TERM: xterm
-    strategy:
-      matrix:
-        node-version:
-          - '20'
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-      - name: Install node ${{ matrix.node-version }}
+
+      - name: Install node
         uses: actions/setup-node@v6
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: '24'
           registry-url: https://registry.npmjs.org
           cache: npm
+      - name: Install bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+
       - name: Install dependencies
-        run: npm clean-install --prefer-offline --frozen-lockfile
+        run: bun install --frozen-lockfile
+
       - name: Lint code
-        run: npm run lint
+        run: bun run lint
       - name: Run unit tests
-        run: npm run test:unit
+        run: bun run test:unit
+
       - name: Prepare Release
         uses: lando/prepare-release-action@v3
         with:
           version: dev
           sync: false
           lando-plugin: true
+
       - name: Publish to npm dryrun
-        run: npm publish --access public --dry-run
+        run: npm publish --access public --tag next --dry-run
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_DEPLOY_TOKEN }}
