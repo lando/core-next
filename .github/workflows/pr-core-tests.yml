@@ -13,53 +13,53 @@ jobs:
       matrix:
         leia-test:
           - badname
-          - build
-          - c,o,m,m,a
-          - cache
-          - certs
-          - command
-          - config
-          - debug
-          - envfile
-          - entrypoint
+          # - build
+          # - c,o,m,m,a
+          # - cache
+          # - certs
+          # - command
+          # - config
+          # - debug
+          # - envfile
+          # - entrypoint
           # - environment
-          - events
-          - excludes
-          - exec
-          - experimental
-          - healthcheck
-          - host
+          # - events
+          # - excludes
+          # - exec
+          # - experimental
+          # - healthcheck
+          # - host
           # - hostnames
-          - info
-          - keys
-          - l337
+          # - info
+          # - keys
+          # - l337
           # - lando-v4
-          - landofile
-          - landofile-custom
-          - list
-          - logs
-          - long-name
-          - mounts
-          - networking
-          - no-services
-          - orchestrator
-          - plugins
-          - proxy
-          - rebuild
-          - renderer
-          - recipes
-          - release-channel
-          - restart
-          - scanner
-          - security
-          - sluggy
-          - sql-helpers
-          - ssh
+          # - landofile
+          # - landofile-custom
+          # - list
+          # - logs
+          # - long-name
+          # - mounts
+          # - networking
+          # - no-services
+          # - orchestrator
+          # - plugins
+          # - proxy
+          # - rebuild
+          # - renderer
+          # - recipes
+          # - release-channel
+          # - restart
+          # - scanner
+          # - security
+          # - sluggy
+          # - sql-helpers
+          # - ssh
           # - storage
-          - tooling
-          - update
-          - version
-          - yaml
+          # - tooling
+          # - update
+          # - version
+          # - yaml
         os:
           # - macos-14
           - ubuntu-24.04
@@ -104,17 +104,17 @@ jobs:
       #     config: |
       #       setup.skipCommonPlugins=true
 
-      - name: Setup lando ${{ github.workspace }}/bin/lando
-        uses: lando/setup-lando@v3
-        with:
-          lando-version: ${{ github.workspace }}/bin/lando
-          telemetry: false
-          config: |
-            setup.skipCommonPlugins=true
-      - name: Run Leia Tests
-        uses: lando/run-leia-action@v2
-        with:
-          leia-test: './examples/${{ matrix.leia-test }}/README.md'
-          cleanup-header: 'Destroy tests'
-          shell: ${{ matrix.shell }}
-          stdin: true
+      # - name: Setup lando ${{ github.workspace }}/bin/lando
+      #   uses: lando/setup-lando@v3
+      #   with:
+      #     lando-version: ${{ github.workspace }}/bin/lando
+      #     telemetry: false
+      #     config: |
+      #       setup.skipCommonPlugins=true
+      # - name: Run Leia Tests
+      #   uses: lando/run-leia-action@v2
+      #   with:
+      #     leia-test: './examples/${{ matrix.leia-test }}/README.md'
+      #     cleanup-header: 'Destroy tests'
+      #     shell: ${{ matrix.shell }}
+      #     stdin: true

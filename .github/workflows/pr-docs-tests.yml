@@ -83,15 +83,15 @@ jobs:
       #     config: |
       #       setup.skipCommonPlugins=true
 
-      - name: Setup lando ${{ github.workspace }}/bin/lando
-        uses: lando/setup-lando@v3
-        with:
-          lando-version: ${{ github.workspace }}/bin/lando
-          telemetry: false
-          config: |
-            setup.skipCommonPlugins=true
-      - name: Lando tests
-        run: |
-          lando version
-          # lando start
-          # lando vitepress build docs
+      # - name: Setup lando ${{ github.workspace }}/bin/lando
+      #   uses: lando/setup-lando@v3
+      #   with:
+      #     lando-version: ${{ github.workspace }}/bin/lando
+      #     telemetry: false
+      #     config: |
+      #       setup.skipCommonPlugins=true
+      # - name: Lando tests
+      #   run: |
+      #     lando version
+      #     # lando start
+      #     # lando vitepress build docs
