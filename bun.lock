@@ -33,6 +33,7 @@
         "is-docker": "^2.2.1",
         "is-interactive": "^1",
         "is-root": "^2",
+        "js-yaml": "^4.1.1",
         "jsonfile": "^2.4.0",
         "listr2": "^6.6.1",
         "lodash-es": "^4.17.21",
