@@ -104,17 +104,20 @@ jobs:
       #     config: |
       #       setup.skipCommonPlugins=true
 
-      # - name: Setup lando ${{ github.workspace }}/bin/lando
-      #   uses: lando/setup-lando@v3
-      #   with:
-      #     lando-version: ${{ github.workspace }}/bin/lando
-      #     telemetry: false
-      #     config: |
-      #       setup.skipCommonPlugins=true
-      # - name: Run Leia Tests
-      #   uses: lando/run-leia-action@v2
-      #   with:
-      #     leia-test: './examples/${{ matrix.leia-test }}/README.md'
-      #     cleanup-header: 'Destroy tests'
-      #     shell: ${{ matrix.shell }}
-      #     stdin: true
+      - name: Setup lando
+        uses: lando/setup-lando@v3
+        id: setup-lando
+        with:
+          lando-version: 3
+          telemetry: false
+          config: |
+            setup.skipCommonPlugins=true
+      - name: Replace with lando from source
+        run: sudo ln -sf ${{ github.workspace }}/bin/lando ${{ steps.setup-lando.outputs.lando-path }}
+
+      - name: Run Leia Tests
+        run: |
+          bunx @lando/leia './examples/${{ matrix.leia-test }}/README.md' \
+            --cleanup-header="Destroy tests" \
+            --shell="${{ matrix.shell }}" \
+            --stdin ${RUNNER_DEBUG:+--debug}

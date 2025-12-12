@@ -70,10 +70,7 @@ jobs:
           config: |
             setup.skipCommonPlugins=true
       - name: Replace with lando from source
-        run: |
-          sudo ln -sf ${{ github.workspace }}/bin/lando ${{ steps.setup-lando.outputs.lando-path }}
-          which lando || true
-          lando version || true
+        run: sudo ln -sf ${{ github.workspace }}/bin/lando ${{ steps.setup-lando.outputs.lando-path }}
 
       - name: Run Leia Tests
         run: |
