@@ -37,6 +37,23 @@
     "cache": true,
     "all": true
   },
+  "oclif": {
+    "bin": "lando",
+    "dirname": "lando",
+    "name": "@lando/core",
+    "plugins": [],
+    "hooks": {
+      "pre-config": [
+        "./hooks/test.js",
+        "./hooks/test2.js"
+      ],
+      "post-config": [
+        "./hooks/test2.js",
+        "./hooks/test.cjs"
+      ]
+    },
+    "topicSeparator": ":"
+  },
   "scripts": {
     "docs:build": "VPL_MVB_VERSION=$(git describe --tags --always --abbrev=1 --match=\"v[0-9].*\") vitepress build docs && npm run docs:rename-sitemap",
     "docs:dev": "VPL_BASE_URL=http://localhost:5173 VPL_MVB_VERSION=$(git describe --tags --always --abbrev=1 --match=\"v[0-9].*\") vitepress dev docs",
@@ -80,6 +97,7 @@
     "is-root": "^2",
     "js-yaml": "^4.1.1",
     "jsonfile": "^2.4.0",
+    "kebabcase-keys": "^1.0.0",
     "listr2": "^6.6.1",
     "lodash-es": "^4.17.21",
     "log-update": "4.0.0",

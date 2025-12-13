@@ -9,7 +9,57 @@
 
 // @ts-nocheck
 
+/**
+ * lando
+ *
+ * @name lando
+ */
 import dns from 'node:dns';
+
+import argv from '@lando/argv';
+
+import pkg from '../package.json';
+
+import Cli from '../_new/lib/cli.js';
+
+console.log(pkg);
+process.exit(1);
+
+// Set DNS result order to IPv4 first
+dns.setDefaultResultOrder('ipv4first');
+
+// cli opts
+const options = {
+  cache: !argv.hasOption('--clear') && !argv.hasOption('--no-cache'),
+  enableDebugger: false,
+};
+
+// if DEBUG is set then unset it, we dont want it to toggle any debugging inside of lando
+// @NOTE: are we sure? or at the very least are we sure dont want to do something with its value?
+// @NOTE: you can set a custom value with --debug="*"
+if (process.env.DEBUG) delete process.env.DEBUG;
+
+// start assessing debug situation with DEVTOOL_DEBUG
+if (process.env.LANDO_DEBUG) {
+  options.enableDebugger =
+    process.env.LANDO_DEBUG === 1 ||
+    process.env.LANDO_DEBUG === '1' ||
+    process.env.LANDO_DEBUG === true ||
+    process.env.LANDO_DEBUG === 'true'
+      ? true
+      : process.env.LANDO_DEBUG;
+}
+
+// and finally prefer --debug
+if (argv.hasOption('--debug')) options.enableDebugger = argv.getOption('--debug', { defaultValue: 'lando*' });
+
+// construct the cli
+const cli = new Cli(options);
+
+// execute
+cli.execute();
+
+/*
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -186,3 +236,4 @@ main().catch((error) => {
   console.error(error); // eslint-disable-line no-console
   process.exitCode = 1;
 });
+*/

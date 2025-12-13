@@ -1,16 +1,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import url from 'node:url';
-import { format, inspect } from 'node:util';
 
 import Debug from 'debug';
-import chalk from 'chalk';
 import isObject from 'lodash-es/isPlainObject.js';
-import { Config as OConfig } from '@oclif/core/config';
-import { Errors, Flags } from '@oclif/core';
-import { normalizeArgv } from '@oclif/core/help';
-import { parse } from '@oclif/core/parser';
-// import { ux, Errors } from '@oclif/core';
 
 import Config from '../lib/config.js';
 import createDebug from '../lib/debug.js';
@@ -23,11 +16,18 @@ import traverseUp from '../utils/traverse-up.js';
 import getDefaultConfig from '../utils/get-default-config.js';
 import runHook from '../utils/run-hook.js';
 
+// oclif
+import { CLIError } from '@oclif/core/errors';
+import { Config as OConfig } from '@oclif/core/config';
+import { Flags, flush, handle } from '@oclif/core';
+import { normalizeArgv } from '@oclif/core/help';
+import { parse } from '@oclif/core/parser';
+
 // get __dirname
 const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 // default consts
-const PRODUCT_ID = path.basename(process.argv[1]) || 'devtool';
+const PRODUCT_ID = path.basename(process.argv[1]) || 'lando';
 const PRODUCT_ROOT = path.dirname(traverseUp(['package.json'], __dirname).find(fs.existsSync));
 
 // default cli options
@@ -66,7 +66,7 @@ export default class Cli {
     'config': Flags.string({
       char: 'c',
       description: 'use configuration from specified file',
-      env: 'LANDO_CONFIG_FILE',
+      env: `${PRODUCT_ID.toUpperCase()}_CONFIG_FILE`,
       default: undefined,
       hidden: true,
       helpGroup: 'GLOBAL',
@@ -106,12 +106,6 @@ export default class Cli {
     // enable debug if needed
     if (enableDebugger !== false) this.enableDebugger(enableDebugger);
 
-    // computed stuff?
-
-    // add the CLIUX module from OCLIF
-    // @TODO: this should become some kind of getUX method?
-    // this.ux = ux;
-
     // some debugging about what happened
     this.debug('instantiated cli %o with %O', this.id, {
       cache: this.cache,
@@ -121,6 +115,8 @@ export default class Cli {
       plugins: this.plugins,
       root: this.root,
     });
+
+    // other stuff eg version?
   }
 
   async #getStorageBackend(cache = this.cache) {
@@ -155,18 +151,6 @@ export default class Cli {
     }
   }
 
-  async catch(err) {
-    process.exitCode = process.exitCode ?? err.exitCode ?? 1;
-    if (!err.message) throw err;
-    try {
-      this.ux.action.stop(chalk.bold.red('!'));
-    } catch {
-      // allow failures
-    }
-
-    throw err;
-  }
-
   enableDebugger(namespace) {
     // normalize namespace to a string
     namespace = typeof namespace === 'string' ? namespace : `${this.id}*`;
@@ -174,97 +158,15 @@ export default class Cli {
     Debug.enable(namespace);
   }
 
-  error(input, options) {
-    return Errors.error(input, options);
-  }
-
-  exit(code = 0) {
-    return Errors.exit(code);
-  }
-
-  exitError(input, options = {}, exitCode = 1) {
-    // get error
-    Errors.error(input, { ...options, exit: false });
-    // get code
-    exitCode = options && options.exit ? options.exit : exitCode;
-    // exit
-    process.exit(exitCode);
-  }
-
-  async finally(Error) {
-    try {
-      const config = Error.config;
-      if (config.errorLogger) await config.errorLogger.flush();
-    } catch (error) {
-      console.error(error);
+  async execute() {
+    if (!this.root) {
+      throw new CLIError('root is required.');
     }
+
+    return this.run(this.args ?? process.argv.slice(2))
+      .catch(async (error) => handle(error))
+      .finally(async () => flush());
   }
-
-  /*
-   * Format data
-   */
-  // formatData(data, { path = '', format = 'default', filter = [] } = {}, opts = {}) {
-  //   return require('./formatters').formatData(data, { path, format, filter }, opts);
-  // }
-
-  /*
-   * FormatOptios
-   */
-  // formatOptions(omit = []) {
-  //   return require('./formatters').formatOptions(omit);
-  // }
-
-  // getHelp(tasks, args, cid = this.cid) {
-  //   // if we have something cached then just return that
-  //   if (this.#_cache.has([cid, 'help'])) return this.#_cache.get([cid, 'help']);
-
-  //   // if we get here then we need to do task discovery
-  //   this.debug('running %o help discovery...', 'cli');
-  //   // get help
-  //   const help = tasks
-  //     .map((task) => {
-  //       // we try catch here because we dont want a busted task to break the whole thing
-  //       try {
-  //         return { ...require(task.file)(...args), file: task.file };
-  //       } catch (error) {
-  //         // @NOTE: what is the best log level for this? warning?
-  //         this.warn(`Had problems loading task '${task.name}' from ${task.file}!`);
-  //         this.debug('could not load task %o from %o with error %O', task.name, task.file, error);
-  //       }
-  //     })
-  //     // this makes sure any "caught" tasks dont get added as undefined elements
-  //     .filter(Boolean)
-  //     // and then lets sort it alphabetically by command
-  //     .sort((a, b) => {
-  //       if (a.command < b.command) return -1;
-  //       if (a.command > b.command) return 1;
-  //       return 0;
-  //     });
-
-  //   // set and return
-  //   this.#_cache.set([cid, 'help'], help);
-  //   return help;
-  // }
-
-  // getHooks(ctx) {
-  //   return ctx.manifest.getUncoded('hooks.cli', { ams: 'aoa' });
-  // }
-
-  // getTasks(ctx, cid = this.cid) {
-  //   // if we have something cached then just return that
-  //   if (this.#_cache.has([cid, 'tasks'])) return this.#_cache.get([cid, 'tasks']);
-
-  //   // if we get here then we need to do task discovery
-  //   this.debug('running %o task discovery...', 'cli');
-  //   // get the list
-  //   const tasks = Object.entries(ctx.manifest.get('tasks'))
-  //     .map(([name, file]) => ({ name, file }))
-  //     .filter((task) => fs.existsSync(`${task.file}.js`) || fs.existsSync(task.file));
-
-  //   // set and return
-  //   this.#_cache.set([cid, 'tasks'], tasks);
-  //   return tasks;
-  // }
 
   async init() {
     // @TODO: allow this to only run once eg if #_oclif is set then just return that?
@@ -307,31 +209,6 @@ export default class Cli {
     return oclif;
   }
 
-  log(message = '', ...args) {
-    message = typeof message === 'string' ? message : inspect(message);
-    process.stdout.write(format(message, ...args) + '\n');
-  }
-
-  logToStderr(message = '', ...args) {
-    message = typeof message === 'string' ? message : inspect(message);
-    process.stderr.write(format(message, ...args) + '\n');
-  }
-
-  /**
-   * Returns some cli "art"
-   *
-   * @since 3.0.0
-   * @alias lando.cli.makeArt
-   * @param {String} [func='start'] The art func you want to call
-   * @param {Object} [opts] Func options
-   * @return {String} Usually a printable string
-   * @example
-   * console.log(lando.cli.makeArt('secretToggle', true);
-   */
-  // makeArt(func, opts) {
-  //   return require('./art')[func](opts);
-  // }
-
   // @TODO: add support for options.args?
   async parse(argv = process.argv.slice(2), options = {}) {
     // NOTE: we are only interested in parsing and normalizing so its ok for validation to fail
@@ -344,80 +221,6 @@ export default class Cli {
     // return the same as oclif for compatibility
     return options._parsed;
   }
-
-  /*
-   * Parses a lando task object into something that can be used by the [yargs](http://yargs.js.org/docs/) CLI.
-   *
-   * A lando task object is an abstraction on top of yargs that also contains some
-   * metadata about how to interactively ask questions on both a CLI and GUI.
-   *
-   * @since 3.5.0
-   * @alias lando.cli.parseToYargs
-   * @see [yargs docs](http://yargs.js.org/docs/)
-   * @see [inquirer docs](https://github.com/sboudrias/Inquirer.js)
-   * @param {Object} task A Lando task object (@see add for definition)
-   * @param {Object} [config={}] The landofile
-   * @return {Object} A yargs command object
-   * @example
-   * // Add a task to the yargs CLI
-   * yargs.command(lando.tasks.parseToYargs(task));
-   */
-  // async parseToYargs(task) {
-  //   const handler = async (argv) => {
-  //     // if run is not a function then we need to get it
-  //     if (task.run instanceof Function === false) task.run = require(task.file)(this).run;
-  //     // immediately build some arg data set opts and interactive options
-  //     const data = { options: argv, inquiry: require('./formatters').getInteractive(task.options, argv) };
-
-  //     // run our pre command hook
-  //     // @TODO: add command names and such?
-  //     await this.runHook('prerun', { id: argv._[0], data, cli: this, task });
-
-  //     // queue up an extended debugger
-  //     const debug = this.debug.extend(`task:${task.command}`);
-  //     debug('start task %o', task.file);
-
-  //     // run the command here
-  //     let err;
-  //     let result;
-  //     try {
-  //       debug('start task %o with %o', task.command, data);
-  //       result = await task.run(data.options, {
-  //         app: this.app,
-  //         context: this.context,
-  //         ctx: this.ctx,
-  //         debug,
-  //         [this.id]: this.product,
-  //         product: this.product,
-  //       });
-  //     } catch (error) {
-  //       err = error;
-  //       await this.catch(error);
-  //     } finally {
-  //       await this.finally(err);
-  //       debug('done task %o', task.command);
-  //     }
-
-  //     // run postrun hook
-  //     // as per the OCLIF docs this ONLY runs if the command succeeds
-  //     await this.runHook('postrun', { id: argv._[0], result, cli: this });
-
-  //     // Return result
-  //     return result;
-  //   };
-
-  //   // Return our yarg command
-  //   return {
-  //     command: task.command,
-  //     describe: task.describe,
-  //     builder: require('./formatters').sortOptions(task.options),
-  //     handler,
-  //   };
-  // }
-
-  // prettify(data, { arraySeparator = ', ' } = {}) {
-  //   return require('../utils/prettify')(data, { arraySeparator });
-  // }
 
   /*
    * Run the CLI
@@ -440,6 +243,8 @@ export default class Cli {
 
     // await this.load
     const oclif = await this.init();
+    console.log(oclif);
+    process.exit(1);
     // assembles the config
 
     console.log('hello devtool');
@@ -667,10 +472,5 @@ export default class Cli {
 
   async runHook(event, data) {
     return runHook(event, data, this.hooks, { cli: this }, this.debug, this.exitError);
-  }
-
-  warn(input) {
-    Errors.warn(input);
-    return input;
   }
 }
