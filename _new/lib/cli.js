@@ -12,7 +12,6 @@ import getObjectSizes from '../utils/get-object-sizes.js';
 import getSize from '../utils/get-size.js';
 import getSystemDataDir from '../utils/get-system-data-dir.js';
 import normalizeManifestPaths from '../utils/normalize-manifest-paths.js';
-import traverseUp from '../utils/traverse-up.js';
 import getDefaultConfig from '../utils/get-default-config.js';
 import runHook from '../utils/run-hook.js';
 
@@ -28,21 +27,22 @@ const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
 
 // default consts
 const PRODUCT_ID = path.basename(process.argv[1]) || 'lando';
-const PRODUCT_ROOT = path.dirname(traverseUp(['package.json'], __dirname).find(fs.existsSync));
+const PRODUCT_ROOT = path.resolve(__dirname, '../..');
 
 // default cli options
 const defaultOptions = {
   cache: true,
   cacheDir: getCacheDir(PRODUCT_ID),
   configTemplates: {
-    global: path.resolve(PRODUCT_ROOT, 'config', 'global.cjs'),
-    user: path.resolve(PRODUCT_ROOT, 'config', 'user.yaml'),
+    global: (await import('../config/global.cjs', { with: { type: 'file' } })).default,
+    user: (await import('../config/user.yaml', { with: { type: 'file' } })).default,
   },
   cid: PRODUCT_ID,
   debug: createDebug(PRODUCT_ID),
   enableDebugger: false,
   hooks: {},
   plugins: [],
+  pjson: await import('../../package.json'),
   root: PRODUCT_ROOT,
 };
 
@@ -116,7 +116,7 @@ export default class Cli {
       root: this.root,
     });
 
-    // other stuff eg version?
+    // @TODO: other stuff eg version?
   }
 
   async #getStorageBackend(cache = this.cache) {
@@ -163,6 +163,8 @@ export default class Cli {
       throw new CLIError('root is required.');
     }
 
+    console.log(await import('../config/user.yaml', { with: { type: 'file' } }));
+    process.exit(1);
     return this.run(this.args ?? process.argv.slice(2))
       .catch(async (error) => handle(error))
       .finally(async () => flush());

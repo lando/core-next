@@ -7,6 +7,7 @@
   "repository": "lando/core",
   "bugs": "https://github.com/lando/core-next/issues/new/choose",
   "homepage": "https://github.com/lando/core-next",
+  "type": "module",
   "keywords": [
     "lando",
     "lando-plugin"
@@ -18,24 +19,6 @@
   "main": "lib/lando.js",
   "bin": {
     "lando": "./bin/lando"
-  },
-  "nyc": {
-    "include": [
-      "builders/**/*.js",
-      "components/**/*.js",
-      "hooks/**/*.js",
-      "lib/**/*.js",
-      "recipes/**/*.js",
-      "renderers/**/*.js",
-      "services/**/*.js",
-      "types/**/*.js",
-      "utils/**/*.js"
-    ],
-    "exclude": [
-      "test/**"
-    ],
-    "cache": true,
-    "all": true
   },
   "oclif": {
     "bin": "lando",
@@ -60,7 +43,7 @@
     "docs:mvb": "mvb docs && bun run docs:rename-sitemap",
     "docs:preview": "vitepress preview docs",
     "docs:rename-sitemap": "bun docs/.vitepress/rename-sitemap.js",
-    "lint": "eslint . bin/lando --ext .cjs --ext .js --ext .mjs  --ext .ts",
+    "lint": "eslint . bin/lando",
     "pkg": "bun build bin/lando --compile --outfile dist/lando --minify --target bun",
     "test:unit": "nyc --reporter=html --reporter=text mocha --timeout 5000 test/**/*.spec.js",
     "test:leia": "leia \"examples/**/README.md\" -c 'Destroy tests' --stdin",
@@ -130,22 +113,25 @@
     "yargs-parser": "^11.1.1"
   },
   "devDependencies": {
+    "@eslint/js": "^9.39.2",
     "@lando/leia": "^1.0.0-beta.4",
     "@lando/vitepress-theme-default-plus": "^1.1.1",
     "chai": "^4.3.4",
     "chai-as-promised": "^7.1.1",
     "chai-events": "^0.0.1",
-    "eslint": "^8.57.1",
+    "eslint": "^9.14.0",
+    "eslint-config-flat-gitignore": "^2.1.0",
     "eslint-config-prettier": "^10.1.1",
     "eslint-import-resolver-exports": "^1.0.0-beta.5",
     "eslint-import-resolver-typescript-bun": "^0.0.104",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-prettier": "^5.2.3",
     "eslint-plugin-vue": "^10.0.0",
-    "prettier": "^3.5.3",
+    "globals": "^16.5.0",
     "mocha": "^9.1.2",
     "mock-fs": "^5.4.0",
     "nyc": "^15.1.0",
+    "prettier": "^3.5.3",
     "sinon": "^4.3.0",
     "sinon-chai": "^2.14.0",
     "ua-parser-js": "^1.0.39",

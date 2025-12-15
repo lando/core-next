@@ -41,6 +41,7 @@ checksums.txt
 plugins/*
 FATCORE
 !plugins/.gitkeep
+!plugins/test
 
 # docs
 .temp

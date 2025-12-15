@@ -22,17 +22,20 @@ import pkg from '../package.json';
 
 import Cli from '../_new/lib/cli.js';
 
-console.log(pkg);
-process.exit(1);
-
 // Set DNS result order to IPv4 first
 dns.setDefaultResultOrder('ipv4first');
 
 // cli opts
 const options = {
   cache: !argv.hasOption('--clear') && !argv.hasOption('--no-cache'),
+  // configTemplates: {
+  //   global: (await import('../_new/config/global.cjs', { with: { type: 'file' } })).default,
+  //   user: (await import('../_new/config/user.yaml', { with: { type: 'file' } })).default,
+  // },
   enableDebugger: false,
 };
+
+console.log(options);
 
 // if DEBUG is set then unset it, we dont want it to toggle any debugging inside of lando
 // @NOTE: are we sure? or at the very least are we sure dont want to do something with its value?
@@ -57,7 +60,7 @@ if (argv.hasOption('--debug')) options.enableDebugger = argv.getOption('--debug'
 const cli = new Cli(options);
 
 // execute
-cli.execute();
+await cli.execute();
 
 /*
 import fs from 'node:fs';
