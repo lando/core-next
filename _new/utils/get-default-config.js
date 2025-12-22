@@ -3,7 +3,6 @@ import fs from 'node:fs';
 import path from 'node:path';
 import url from 'node:url';
 
-import isInteractive from 'is-interactive';
 import isRoot from 'is-root';
 
 import getContext from './get-context.js';
@@ -22,7 +21,7 @@ const __dirname = path.dirname(url.fileURLToPath(import.meta.url));
  * @param {string} [id='devtool'] - Product identifier.
  * @returns {object} Default configuration values.
  */
-export default function getDefaultConfig(id = 'devtool') {
+export default function getDefaultConfig(id = 'lando') {
   // compute some system things
   const home = os.homedir();
   const baseDir = path.join(home, `.${id}`);
@@ -46,7 +45,7 @@ export default function getDefaultConfig(id = 'devtool') {
   return {
     core: {
       app: 'app',
-      appfile: '.devtool',
+      appfile: '.appfile',
       appfiles: ['base', 'dist', 'recipe', 'upstream', '', 'local', 'user'],
       caching: true,
       minapp: 'minapp',
@@ -74,6 +73,7 @@ export default function getDefaultConfig(id = 'devtool') {
     },
     system: {
       arch: os.arch(),
+      bun: process.versions.bun,
       cacheDir,
       configDir,
       coreDir: root,
@@ -85,7 +85,6 @@ export default function getDefaultConfig(id = 'devtool') {
       gid: user.gid,
       home,
       id,
-      isInteractive: isInteractive(),
       isRoot: isRoot(),
       isWslInterop: isWslInteropt(),
       interface: 'lib',
@@ -106,7 +105,7 @@ export default function getDefaultConfig(id = 'devtool') {
       wsl: platform === 'wsl',
       uid: user.uid,
       user: user.username,
-      userAgent: `${pjson.name}/${pjson.version} ${os.platform()}-${os.arch()}`,
+      userAgent: `${pjson.name}/${pjson.version} ${os.platform()}-${os.arch()} bun-${process.versions.bun}`,
     },
     updates: {
       notify: true,

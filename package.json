@@ -24,17 +24,6 @@
     "bin": "lando",
     "dirname": "lando",
     "name": "@lando/core",
-    "plugins": [],
-    "hooks": {
-      "pre-config": [
-        "./hooks/test.js",
-        "./hooks/test2.js"
-      ],
-      "post-config": [
-        "./hooks/test2.js",
-        "./hooks/test.cjs"
-      ]
-    },
     "topicSeparator": ":"
   },
   "scripts": {
@@ -44,7 +33,7 @@
     "docs:preview": "vitepress preview docs",
     "docs:rename-sitemap": "bun docs/.vitepress/rename-sitemap.js",
     "lint": "eslint . bin/lando",
-    "pkg": "bun build bin/lando --compile --outfile dist/lando --minify --target bun",
+    "pkg": "bun run scripts/build.js",
     "test:unit": "nyc --reporter=html --reporter=text mocha --timeout 5000 test/**/*.spec.js",
     "test:leia": "leia \"examples/**/README.md\" -c 'Destroy tests' --stdin",
     "test": "bun run lint && bun run test:unit"
@@ -75,9 +64,9 @@
     "inquirer": "^6.5.2",
     "inquirer-autocomplete-prompt": "^1.4.0",
     "is-class": "^0.0.9",
-    "is-docker": "^2.2.1",
-    "is-interactive": "^1",
-    "is-root": "^2",
+    "is-docker": "^4.0.0",
+    "is-interactive": "^2.0.0",
+    "is-root": "^3.0.0",
     "js-yaml": "^4.1.1",
     "jsonfile": "^2.4.0",
     "kebabcase-keys": "^1.0.0",

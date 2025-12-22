@@ -11,7 +11,16 @@ import write from '../utils/write-file.js';
  */
 class Templator {
   static id = 'templator';
-  static debug = createDebug('devtool:templator');
+  static debug = createDebug('lando:templator');
+
+  static getType(source) {
+    // is a file
+    if (typeof source === 'string' && fs.existsSync(source)) return 'file';
+    // is a function or object
+    if (typeof source === 'function' || typeof source === 'object') return typeof source;
+
+    return undefined;
+  }
 
   /*
    * source can be path or object?
@@ -22,6 +31,11 @@ class Templator {
     // required props
     this.source = source;
     this.dest = dest;
+    this.name = this.source?.name ?? this.source;
+
+    // handle objects with bad names
+    if (typeof this.name === 'object') this.name = 'object';
+
     // options
     this.debug = debug;
     this.encode = encode;
@@ -45,12 +59,20 @@ class Templator {
       return;
     }
 
-    // read in source
-    const data = typeof read(this.source) === 'function' ? read(this.source)(funcOpts) : read(this.source, readOpts);
+    // get original type
+    const type = Templator.getType(this.source);
 
-    // write out data as appropriate
-    this.encode ? write(this.dest, encodeKeys(data)) : write(this.dest, data);
-    this.debug('generated %o file %o from template %o', this.encode ? 'encoded' : 'as is', this.dest, this.source);
+    // if source is a file then lets read it in
+    if (Templator.getType(this.source) === 'file') this.source = read(this.source, { extension: undefined, ...readOpts });
+
+    // if source is a function then lets invoke it
+    if (Templator.getType(this.source) === 'function') this.source = this.source(funcOpts);
+
+    // if source is an objec then we are done?
+    if (Templator.getType(this.source) === 'object') {
+      this.encode ? write(this.dest, encodeKeys(this.source)) : write(this.dest, this.source);
+      this.debug('generated %o file %o from %o template %o', this.encode ? 'encoded' : 'as is', this.dest, type, this.name);
+    }
   }
 }
 

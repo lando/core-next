@@ -14,28 +14,21 @@
  *
  * @name lando
  */
+
 import dns from 'node:dns';
 
 import argv from '@lando/argv';
 
-import pkg from '../package.json';
-
 import Cli from '../_new/lib/cli.js';
+
+// set some defaults
+Cli.id = 'lando';
 
 // Set DNS result order to IPv4 first
 dns.setDefaultResultOrder('ipv4first');
 
-// cli opts
-const options = {
-  cache: !argv.hasOption('--clear') && !argv.hasOption('--no-cache'),
-  // configTemplates: {
-  //   global: (await import('../_new/config/global.cjs', { with: { type: 'file' } })).default,
-  //   user: (await import('../_new/config/user.yaml', { with: { type: 'file' } })).default,
-  // },
-  enableDebugger: false,
-};
-
-console.log(options);
+// enableDebugger
+let enableDebugger = false;
 
 // if DEBUG is set then unset it, we dont want it to toggle any debugging inside of lando
 // @NOTE: are we sure? or at the very least are we sure dont want to do something with its value?
@@ -44,7 +37,7 @@ if (process.env.DEBUG) delete process.env.DEBUG;
 
 // start assessing debug situation with DEVTOOL_DEBUG
 if (process.env.LANDO_DEBUG) {
-  options.enableDebugger =
+  enableDebugger =
     process.env.LANDO_DEBUG === 1 ||
     process.env.LANDO_DEBUG === '1' ||
     process.env.LANDO_DEBUG === true ||
@@ -54,10 +47,34 @@ if (process.env.LANDO_DEBUG) {
 }
 
 // and finally prefer --debug
-if (argv.hasOption('--debug')) options.enableDebugger = argv.getOption('--debug', { defaultValue: 'lando*' });
+if (argv.hasOption('--debug')) enableDebugger = argv.getOption('--debug', { defaultValue: 'lando*' });
+
+const namedfunc = async ({ debug }) => {
+  debug('named');
+};
 
 // construct the cli
-const cli = new Cli(options);
+const cli = new Cli({
+  cache: !argv.hasOption('--clear') && !argv.hasOption('--no-cache'),
+  configTemplates: {
+    managed: (await import('../_new/config/managed.js')).default,
+    user: (await import('../_new/config/user.yaml-bun-asset', { with: { type: 'file' } })).default,
+  },
+  hooks: {
+    'pre-config': [
+      './_new/hooks/test.js',
+      './_new/hooks/test.cjs',
+      async () => await import('../_new/hooks/test.cjs'),
+      async () => await import('../_new/hooks/test2.js'),
+      namedfunc,
+      async function inlinefunc({ debug }) {
+        debug('inline');
+      },
+    ],
+    'post-config': ['./_new/hooks/test.js'],
+  },
+  enableDebugger,
+});
 
 // execute
 await cli.execute();

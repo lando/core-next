@@ -94,7 +94,7 @@ async function resolvePath(file) {
           fileExists = false;
           isDirectory = true;
         }
-      } catch (e) {
+      } catch {
         // Ignore errors during lstat
       }
     }

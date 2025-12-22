@@ -39,9 +39,9 @@ const macosCacheDir = (product) => {
 /**
  * Determine the cache directory for the given product.
  *
- * @param {string} [product='devtool'] - Product identifier used to compute the directory.
+ * @param {string} [product='lando'] - Product identifier used to compute the directory.
  * @returns {string} The cache directory path.
  */
-export default function getCacheDir(product = 'devtool') {
+export default function getCacheDir(product = 'lando') {
   return env[`${product.toUpperCase()}_CACHE_DIR`] ?? macosCacheDir(product) ?? getOClifBase(product);
 }

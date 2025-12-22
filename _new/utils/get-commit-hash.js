@@ -10,11 +10,11 @@ import path from 'node:path';
  * @param {boolean} [options.short=false] - Whether to return the short hash.
  * @returns {string|false} The commit hash or `false` if it cannot be found.
  */
-export default function getCommitHash(dir, { refFile = path.join(dir, '.git', 'HEAD'), short = false } = {}) {
+export default function getCommitHash(dir = path.resolve(), { refFile = path.join(dir, '.git', 'HEAD'), short = false } = {}) {
   // if reffile doesnt exist then return false
   if (!fs.existsSync(refFile)) return false;
 
-  const gitBase = path.join(dir, '.git');
+  const gitBase = path.join(path.resolve(dir), '.git');
 
   // if the refFile has another ref in it then we need to reset the reffile
   if (fs.readFileSync(refFile, { encoding: 'utf-8' }).startsWith('ref: ')) {

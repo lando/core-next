@@ -1,15 +1,36 @@
-/* eslint-disable import/no-commonjs */
-'use strict';
+import fs from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
+import isInteractive from 'is-interactive';
+import which from 'which';
 
-const which = require('which');
+// import isDevVersion from '../utils/is-dev-version.js';
 
-module.exports = (options) => {
+export default function managedConfigTemplate(options) {
   // 0 0 0 destruct 0
-  const { bin, cache, cacheDir, configDir, coreDir, dataDir, env, errlog, name, id, root, shell, version } = options;
+  const {
+    bin,
+    binPath,
+    cache,
+    cacheDir,
+    commit,
+    configDir,
+    coreDir,
+    dataDir,
+    entrypoint,
+    env,
+    errlog,
+    fromSource,
+    id,
+    isCompiled,
+    isDevVersion,
+    name,
+    root,
+    shell,
+    time,
+    version,
+  } = options;
 
   // get other stuff
   const logsDir = path.join(dataDir, 'logs');
@@ -20,9 +41,16 @@ module.exports = (options) => {
 
   // return the CLI system config
   return {
+    cli: {
+      bin,
+      binPath,
+      entrypoint,
+      isCompiled,
+    },
     core: {
-      app: 'appfile-app',
-      minapp: 'appfile-minapp',
+      app: 'lando-app',
+      appfile: '.lando',
+      appfiles: ['base', 'dist', 'recipe', 'upstream', '', 'local', 'user'],
       caching: cache,
     },
     plugin: {
@@ -36,19 +64,23 @@ module.exports = (options) => {
       ],
     },
     system: {
-      bin,
+      buildCommit: commit,
+      buildDev: isDevVersion,
+      buildTime: time,
       cacheDir,
       configDir,
       coreDir,
       dataDir,
-      dev: !Object.hasOwn(process, 'pkg'),
       env,
       errlog,
+      fromSource,
+      id,
       interface: 'cli',
+      isInteractive: isInteractive(),
       leia: Object.hasOwn(process.env, 'LEIA_PARSER_RUNNING'),
       logsDir,
-      bun: process.versions.bun,
       mode: 'cli',
+      name,
       packaged: Object.hasOwn(process, 'pkg'),
       root,
       shell: which.sync(shell, { nothrow: true }),
@@ -95,4 +127,4 @@ module.exports = (options) => {
     // @TODO: figure out how to implement this exactly
     // env: {},
   };
-};
+}

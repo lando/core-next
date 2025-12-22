@@ -88,7 +88,7 @@ class FileStorage extends NodeCache {
         this.debug('retrieved %o items from file storage at %o', size(data), path.join(this.dir, key));
         this.__set(key, data, 0);
         return data;
-      } catch (e) {
+      } catch {
         this.debug('file storage cache miss with key %o', key);
       }
     }
@@ -103,7 +103,7 @@ class FileStorage extends NodeCache {
     // otherwise look for it in file storage
     try {
       return read(path.join(this.dir, key), { extension: 'json' }) ? true : false;
-    } catch (e) {
+    } catch {
       return false;
     }
   }
@@ -129,7 +129,7 @@ class FileStorage extends NodeCache {
     try {
       this.debug('removed key %o from memory and file storage', key);
       fs.unlinkSync(path.join(this.dir, key));
-    } catch (e) {
+    } catch {
       this.debug('no file storage with key %o', key);
     }
   }

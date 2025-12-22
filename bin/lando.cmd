@@ -1,3 +1,3 @@
 @echo off
 
-bun "%~dp0\lando" %*
+bun "%~dp0\lando.js" %*
