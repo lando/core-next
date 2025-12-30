@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "compilerOptions": {
+    // Target modern Node.js
+    "target": "ES2022",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "lib": ["ES2022"],
+
+    // Allow gradual migration from JS to TS
+    "allowJs": true,
+    "checkJs": false,
+    "declaration": true,
+    "declarationMap": true,
+    "emitDeclarationOnly": true,
+    "declarationDir": "./dist/types",
+
+    // Permissive settings for gradual adoption
+    "strict": false,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
+    "strictFunctionTypes": false,
+    "strictBindCallApply": false,
+    "strictPropertyInitialization": false,
+    "noImplicitThis": false,
+    "useUnknownInCatchVariables": false,
+    "alwaysStrict": false,
+
+    // Interop settings
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+
+    // Skip lib check for faster builds
+    "skipLibCheck": true,
+
+    // Type roots
+    "typeRoots": [
+      "./types",
+      "./node_modules/@types",
+      "./node_modules/bun-types"
+    ],
+
+    // Base URL for path resolution
+    "baseUrl": ".",
+    "paths": {
+      "@lando/core": ["./lib/lando.js"],
+      "@lando/core/*": ["./*"]
+    }
+  },
+  "include": [
+    "types/**/*.d.ts",
+    "lib/**/*.js",
+    "utils/**/*.js",
+    "hooks/**/*.js",
+    "builders/**/*.js",
+    "tasks/**/*.js",
+    "components/**/*.js",
+    "messages/**/*.js",
+    "renderers/**/*.js",
+    "sources/**/*.js",
+    "inits/**/*.js",
+    "packages/**/*.js",
+    "app.js",
+    "index.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "docs",
+    "examples",
+    "experimental",
+    "test"
+  ]
+}
