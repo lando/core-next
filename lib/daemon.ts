@@ -47,6 +47,18 @@ const getMacProp = prop => shell.sh(['defaults', 'read', `${MACOS_BASE}/Contents
  * Creates a new Daemon instance.
  */
 module.exports = class LandoDaemon {
+  cache: any;
+  compose: any;
+  debug: any;
+  orchestratorVersion: string;
+  context: string;
+  docker: any;
+  events: any;
+  log: any;
+  scriptsDir: string;
+  isRunning: boolean;
+  platform: string;
+
   constructor(
       cache = new Cache(),
       events = new Events(),

@@ -17,7 +17,11 @@ const serviceDefaults = {
  * @TODO: presumably this will get larger over time as we add more options
  */
 const dockerCompose = class ComposeService {
-  constructor(id, info = {}, ...sources) {
+  id: string;
+  info: any;
+  data: any[];
+
+  constructor(id: string, info: any = {}, ...sources: any[]) {
     this.id = id;
     this.info = info;
     this.data = _(sources).map(source => _.merge({}, source)).value();
@@ -29,7 +33,10 @@ const dockerCompose = class ComposeService {
  * @TODO: presumably this will get larger over time as we add more options
  */
 const landoRecipe = class LandoRecipe {
-  constructor(id, config = {}) {
+  id: string;
+  config: any;
+
+  constructor(id: string, config: any = {}) {
     // Move our config into the userconfroot if we have some
     // NOTE: we need to do this because on macOS and Windows not all host files
     // are shared into the docker vm
@@ -47,6 +54,8 @@ const landoRecipe = class LandoRecipe {
  * @TODO
  */
 module.exports = class Factory {
+  registry: any[];
+
   // @TODO add recipe base class as well?
   constructor(classes = [
     {api: 3, name: '_compose', builder: dockerCompose},

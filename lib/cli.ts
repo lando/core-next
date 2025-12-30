@@ -54,6 +54,13 @@ const globalOptions = {
  * Construct the CLI
  */
 module.exports = class Cli {
+  prefix: string;
+  logLevel: string;
+  userConfRoot: string;
+  coreBase: string;
+  debug: any;
+  chalk: any;
+
   constructor(
     prefix = 'LANDO',
     logLevel = 'warn',

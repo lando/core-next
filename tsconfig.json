@@ -5,6 +5,7 @@
     "target": "ES2022",
     "module": "CommonJS",
     "moduleResolution": "node",
+    "moduleDetection": "force",
     "lib": ["ES2022"],
 
     // Allow gradual migration from JS to TS
@@ -37,32 +38,50 @@
 
     // Type roots
     "typeRoots": [
-      "./types",
       "./node_modules/@types",
       "./node_modules/bun-types"
     ],
+    // Explicitly list type packages to avoid picking up docs/vendor dirs
+    "types": [
+      "node"
+    ],
+    
+
 
     // Base URL for path resolution
     "baseUrl": ".",
     "paths": {
-      "@lando/core": ["./lib/lando.js"],
+      "@lando/core": ["./lib/lando.ts"],
       "@lando/core/*": ["./*"]
     }
   },
   "include": [
     "types/**/*.d.ts",
+    "lib/**/*.ts",
     "lib/**/*.js",
+    "utils/**/*.ts",
     "utils/**/*.js",
+    "hooks/**/*.ts",
     "hooks/**/*.js",
+    "builders/**/*.ts",
     "builders/**/*.js",
+    "tasks/**/*.ts",
     "tasks/**/*.js",
+    "components/**/*.ts",
     "components/**/*.js",
+    "messages/**/*.ts",
     "messages/**/*.js",
+    "renderers/**/*.ts",
     "renderers/**/*.js",
+    "sources/**/*.ts",
     "sources/**/*.js",
+    "inits/**/*.ts",
     "inits/**/*.js",
+    "packages/**/*.ts",
     "packages/**/*.js",
+    "app.ts",
     "app.js",
+    "index.ts",
     "index.js"
   ],
   "exclude": [

@@ -140,7 +140,9 @@ const keySanitizer = sanitizeKey => (level, msg, meta) => {
  * lando.log.warning('Something is up with app %s in directory %s', appName, dir);
  */
 module.exports = class Log extends winston.Logger {
-  constructor({logDir, extra, logLevelConsole = 'warn', logLevel = 'debug', logName = 'lando'} = {}) {
+  lasttime: number;
+
+  constructor({logDir, extra, logLevelConsole = 'warn', logLevel = 'debug', logName = 'lando'}: {logDir?: string, extra?: string, logLevelConsole?: string | number, logLevel?: string, logName?: string} = {}) {
     // If loglevelconsole is numeric lets map it!
     if (_.isInteger(logLevelConsole)) logLevelConsole = logLevels[logLevelConsole];
 

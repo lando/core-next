@@ -5,6 +5,9 @@ const Log = require('./logger');
 const Metrics = require('./metrics');
 
 module.exports = class ErrorHandler {
+  log: any;
+  metrics: any;
+
   constructor(log = new Log(), metrics = new Metrics()) {
     this.log = log;
     this.metrics = metrics;

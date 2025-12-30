@@ -37,6 +37,9 @@ const buildPlugin = (file, namespace)=> ({
  * @TODO
  */
 module.exports = class Plugins {
+  registry: any[];
+  log: any;
+
   constructor(log = new Log()) {
     this.registry = [];
     this.log = log;

@@ -33,6 +33,18 @@ const getPluginClass = ({channel, config, debug} = {}) => {
 };
 
 module.exports = class UpdateManager {
+  agent: string;
+  _plugins: any[];
+  channel: string;
+  cli: any;
+  config: any;
+  dir: string;
+  debug: any;
+  lando: any;
+  hasChecked: boolean;
+  internalCore?: boolean;
+  internalCoreVersion?: string;
+
   constructor({
     agent = 'Lando',
     config = {},
@@ -41,7 +53,7 @@ module.exports = class UpdateManager {
     debug = require('debug')('@lando/updates'),
     dir = os.tmpdir(),
     plugins = [],
-  } = {}) {
+  }: any = {}) {
     // set things
     this.agent = agent;
     this._plugins = plugins;

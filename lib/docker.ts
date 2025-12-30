@@ -22,7 +22,9 @@ const srcExists = (files = []) => _.reduce(files, (exists, file) => fs.existsSyn
  * Creates a new yaml instance.
  */
 module.exports = class Landerode extends Dockerode {
-  constructor(opts = {}, id = 'lando', promise = Promise) {
+  id: string;
+
+  constructor(opts: any = {}, id = 'lando', promise = Promise) {
     opts.Promise = promise;
     super(opts);
     this.id = id;

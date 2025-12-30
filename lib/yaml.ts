@@ -11,6 +11,8 @@ const Log = require('./logger');
  * Creates a new yaml instance.
  */
 module.exports = class Yaml {
+  log: any;
+
   constructor(log = new Log()) {
     this.log = log;
   }

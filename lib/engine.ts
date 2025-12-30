@@ -11,8 +11,18 @@ const router = require('./router');
  * @TODO
  */
 module.exports = class Engine {
+  docker: any;
+  daemon: any;
+  compose: any;
+  engineCmd: any;
+  composeInstalled: boolean;
+  dockerInstalled: boolean;
+  separator: string;
+  supportedVersions: any;
+  platform: string;
+
   // @TODO: We need to figure out compose a bit better here, there is no default option right now, see similar comments in ./lando.js
-  constructor(daemon = new LandoDaemon(), docker = new Landerode(), compose = () => {}, config = {}) {
+  constructor(daemon = new LandoDaemon(), docker = new Landerode(), compose = () => {}, config: any = {}) {
     this.docker = docker;
     this.daemon = daemon;
     this.compose = compose;

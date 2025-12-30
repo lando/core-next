@@ -28,6 +28,11 @@ const cleanseData = data => {
  * Creates a new Metrics thing.
  */
 module.exports = class Metrics {
+  id: string;
+  log: any;
+  endpoints: any[];
+  data: any;
+
   constructor({id = 'unknown', log = new Log(), endpoints = [], data = {}} = {}) {
     this.id = id;
     this.log = log;

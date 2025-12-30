@@ -195,6 +195,29 @@ const bootstrapRouter = async (level, lando) => {
  * });
  */
 module.exports = class Lando {
+  BOOTSTRAP_LEVELS: Record<string, number>;
+  config: any;
+  Promise: any;
+  tasks: any[];
+  cache: any;
+  log: any;
+  metrics: any;
+  error: any;
+  events: any;
+  user: any;
+  updates: any;
+  debuggy: boolean;
+  plugins: any;
+  versions: any;
+  shell: any;
+  scanUrls: any;
+  engine: any;
+  utils: any;
+  factory: any;
+  yaml: any;
+  _bootstrap: any;
+  _bootstrapLevel: number;
+
   constructor(options = {}) {
     const getPluginConfig = require('../utils/get-plugin-config');
 

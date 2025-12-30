@@ -68,6 +68,11 @@ const spawn = (run, {stdio}, silent = false, shell, stdout = '', stderr = '') =>
 
 // We make this module into a function so we can pass in a logger
 module.exports = class Shell {
+  log: any;
+  running: any[];
+  stdout: any;
+  stderr: any;
+
   constructor(log = new Log()) {
     this.log = log;
     this.running = [];

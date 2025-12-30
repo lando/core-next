@@ -43,7 +43,53 @@ const loadPlugins = async (app, lando) => {
  * @return {App} An App instance
  */
 module.exports = class App {
-  constructor(name, config, lando = {}) {
+  name: string;
+  project: string;
+  id: string;
+  root: string;
+  _serviceApi: number;
+  _config: any;
+  _defaultService: string;
+  _dir: string;
+  _lando: any;
+  _name: string;
+  _coreToolingOverrides: Record<string, any>;
+  debuggy: any;
+  log: any;
+  shell: any;
+  engine: any;
+  metrics: any;
+  Promise: any;
+  events: any;
+  scanUrls: any;
+  plugins: any;
+  config: any;
+  configFiles: string[];
+  configHash: string;
+  ComposeService: any;
+  env: Record<string, string>;
+  envFiles: string[];
+  checks: any[];
+  info: any[];
+  labels: Record<string, string>;
+  opts: Record<string, any>;
+  metaCache: string;
+  meta: Record<string, any>;
+  nonRoot: any[];
+  tasks: any[];
+  messages: any[];
+  warnings: any[];
+  composeData: any[];
+  services: any[];
+  allServices: any[];
+  sapis: Record<string, number>;
+  containers: Record<string, string>;
+  initialized: boolean;
+  compose: string[];
+  serviceGroups: Record<string, any[]>;
+  v4: any;
+
+  constructor(name: string, config: any, lando: any = {}) {
     const AsyncEvents = require('./events');
     const Log = require('./logger');
     const scan = require('../utils/legacy-scan');
@@ -457,8 +503,7 @@ module.exports = class App {
     .then(() => this.log.info('restarted app.'));
   }
 
-  // run tasks
-  async runTasks(tasks, options = {}) {
+  async runTasks(tasks: any[], options: Record<string, any> = {}) {
     // some defaults
     const defaults = {rendererOptions: {log: this.log.debug}};
 
