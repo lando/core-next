@@ -10,6 +10,7 @@ const EOL = os.EOL;
 
 const formatters = require('./formatters');
 const getSysDataPath = require('../utils/get-system-data-dir');
+const Lando = require('./lando');
 
 // Global options
 const globalOptions = {
@@ -409,8 +410,6 @@ module.exports = class Cli {
       const secretToggleFile = path.join(this.defaultConfig().userConfRoot, 'secret-toggle');
       if (fs.existsSync(secretToggleFile)) fs.unlinkSync(secretToggleFile);
 
-      // Summon lando
-      const Lando = require(this.coreBase);
       const lando = new Lando(this.defaultConfig(config));
 
       // Add this to lando

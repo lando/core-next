@@ -3,16 +3,24 @@
 const _ = require('lodash');
 const fs = require('fs');
 const path = require('path');
-const shell = require('shelljs');
+
+const which = (bin: string): string | null => {
+  if (typeof Bun !== 'undefined' && Bun.which) return Bun.which(bin);
+  const {execSync} = require('child_process');
+  try {
+    return execSync(`which ${bin}`, {encoding: 'utf8'}).trim();
+  } catch {
+    return null;
+  }
+};
 
 const getDockerBin = (bin, base, pathFallback = true) => {
-  // Do platform appropriate things to get started
   const join = (process.platform === 'win32') ? path.win32.join : path.posix.join;
   let binPath = (process.platform === 'win32') ? join(base, `${bin}.exe`) : join(base, bin);
 
-  // Use PATH compose executable on posix if ours does not exist
+  // Fall back to PATH executable on posix if the expected binary doesn't exist
   if (pathFallback && process.platform !== 'win32' && (!fs.existsSync(binPath) || fs.statSync(binPath).isDirectory())) {
-    binPath = _.toString(shell.which(bin));
+    binPath = _.toString(which(bin));
   }
 
   // If the binpath still does not exist then we should set to false and handle downstream
