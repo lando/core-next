@@ -1,12 +1,12 @@
 # PROJECT KNOWLEDGE BASE
 
 **Generated:** 2025-12-30
-**Commit:** 996b015
-**Branch:** main
+**Commit:** 46d8ec9
+**Branch:** refactor/phase-6-bun-compile
 
 ## OVERVIEW
 
-Lando core - Docker-based local development environment orchestrator. Node.js 20+, event-driven plugin architecture, manages Docker Compose services with automatic proxying, SSL certs, and tooling injection.
+Lando core - Docker-based local development environment orchestrator. Bun runtime, TypeScript, ESM modules, event-driven plugin architecture. Manages Docker Compose services with automatic proxying, SSL certs, and tooling injection.
 
 ## STRUCTURE
 
@@ -34,14 +34,14 @@ lando--core-next/
 
 | Task | Location | Notes |
 |------|----------|-------|
-| Add CLI command | `tasks/` | Export async function, gets (app, lando) |
-| Add service type | `builders/` | Extend _service.js or _service-v4.js |
-| Hook into lifecycle | `hooks/` | Name: `[context]-[action]-[subject].js` |
+| Add CLI command | `tasks/` | Export default async function |
+| Add service type | `builders/` | Extend _service.ts or _service-v4.ts |
+| Hook into lifecycle | `hooks/` | Name: `[context]-[action]-[subject].ts` |
 | Add utility function | `utils/` | Pure functions, no state |
-| Modify Docker behavior | `lib/engine.js`, `lib/compose.js` | dockerode wrapper |
+| Modify Docker behavior | `lib/engine.ts`, `lib/compose.ts` | dockerode wrapper |
 | Change proxy config | `packages/proxy/` | Traefik-based |
-| Add setup step | `hooks/lando-setup-*.js` | Runs on `lando setup` |
-| Debug bootstrap | `lib/lando.js` | 4 levels: config→tasks→engine→app |
+| Add setup step | `hooks/lando-setup-*.ts` | Runs on `lando setup` |
+| Debug bootstrap | `lib/lando.ts` | 4 levels: config→tasks→engine→app |
 
 ## ARCHITECTURE
 
@@ -58,11 +58,11 @@ config → tasks → engine → app
 
 | Class | Role | File |
 |-------|------|------|
-| `Lando` | Orchestrator, bootstrap, plugin registry | `lib/lando.js` |
-| `App` | Project context, services, events | `lib/app.js` |
-| `Factory` | Builder registry, inheritance resolution | `lib/factory.js` |
-| `Engine` | Docker daemon wrapper | `lib/engine.js` |
-| `AsyncEvents` | Priority-based event emitter | `lib/events.js` |
+| `Lando` | Orchestrator, bootstrap, plugin registry | `lib/lando.ts` |
+| `App` | Project context, services, events | `lib/app.ts` |
+| `Factory` | Builder registry, inheritance resolution | `lib/factory.ts` |
+| `Engine` | Docker daemon wrapper | `lib/engine.ts` |
+| `AsyncEvents` | Priority-based event emitter | `lib/events.ts` |
 
 ### Plugin Discovery
 - Built-in: `./` (this repo is a plugin)
@@ -81,22 +81,22 @@ config → tasks → engine → app
 - JSDoc required for function declarations only
 
 ### Naming
-- Hooks: `[context]-[action]-[subject].js` (e.g., `app-add-tooling.js`)
+- Hooks: `[context]-[action]-[subject].ts` (e.g., `app-add-tooling.ts`)
 - Builders: `_prefix` = internal/base class
-- Utils: kebab-case, verb-noun (e.g., `build-docker-exec.js`)
+- Utils: kebab-case, verb-noun (e.g., `build-docker-exec.ts`)
 
-### Module Pattern
-```javascript
-// Hooks, tasks, builders
-module.exports = async (app, lando) => { ... };
+### Module Pattern (ESM)
+```typescript
+// Hooks, tasks, builders - default export
+export default async (app, lando) => { ... };
 
-// Utils - pure functions
-module.exports = (input) => output;
+// Utils - named or default exports
+export default (input) => output;
+export const helper = () => { ... };
 ```
 
 ### Heavy Dependencies
 - `lodash`: Use throughout (`_.get`, `_.merge`, `_.map`)
-- `bluebird`: Promise utilities (avoid native where bluebird used)
 - `dockerode`: Docker API (wrapped by Engine)
 
 ## ANTI-PATTERNS (THIS PROJECT)
@@ -106,22 +106,26 @@ module.exports = (input) => output;
 | Direct `docker` CLI calls | Bypasses Engine abstraction | Use `lando.engine.*` |
 | Sync file operations | Blocks event loop | Use async `fs/promises` |
 | Mutating shared state | Race conditions | Return new objects |
-| `as any` / `@ts-ignore` | This is JS, but don't start | Type with JSDoc |
+| `as any` / `@ts-ignore` | Undermines type safety | Use proper types |
 | Running as root | Security risk | Warn and exit |
 
 ### Known Technical Debt
-- "Orchestrator reset" hack for v3/v4 compat in `app.js`
+- "Orchestrator reset" hack for v3/v4 compat in `app.ts`
 - "Mega loop" for bind address detection
 - Many `TODO` comments for v4 migration
 - `ignoreReturnCode` usage in setup (fragile)
+- Legacy CommonJS patterns being migrated to ESM
 
 ## COMMANDS
 
 ```bash
-# Development
-npm run lint              # ESLint check
-npm run test:unit         # Mocha unit tests
-npm run test:leia         # Integration tests (requires Docker)
+# Development (all via Bun)
+bun run lint              # ESLint check
+bun test                  # Unit tests (Bun test runner)
+bun run test:leia         # Integration tests (Leia, requires Docker)
+
+# Build
+bun run build             # Compile to standalone binaries
 
 # Using Lando
 ./bin/lando <command>     # Run local dev version
@@ -132,7 +136,7 @@ lando destroy             # Remove app completely
 
 ## TESTING
 
-- **Unit**: `test/*.spec.js` (Mocha + Chai)
+- **Unit**: `test/*.spec.ts` (Bun test runner)
 - **Integration**: `examples/*/README.md` files contain bash code blocks parsed by Leia framework
   - Each example dir (e.g., `exec`, `proxy`, `tooling`) has a README.md with test commands
   - Code blocks under "Start up tests", "Verification commands", "Destroy tests" headers

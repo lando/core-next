@@ -10,18 +10,18 @@ Service builders define container types. Underscore prefix (`_`) = internal base
 ## INHERITANCE HIERARCHY
 
 ```
-_service.js (v3 base)
-├── _lando.js
-│   ├── _appserver.js
+_service.ts (v3 base)
+├── _lando.ts
+│   ├── _appserver.ts
 │   │   └── (recipe services extend this)
-│   ├── _webserver.js
-│   └── _landoutil.js
-├── _mounter.js
-├── _proxy.js
-└── lando.js (user-facing)
+│   ├── _webserver.ts
+│   └── _landoutil.ts
+├── _mounter.ts
+├── _proxy.ts
+└── lando.ts (user-facing)
 
-_service-v4.js (v4 base, l337 spec)
-└── lando-v4.js (user-facing)
+_service-v4.ts (v4 base, l337 spec)
+└── lando-v4.ts (user-facing)
 ```
 
 ## BUILDER TYPES
@@ -44,10 +44,8 @@ _service-v4.js (v4 base, l337 spec)
 
 Builders use Factory's functional mixin pattern:
 
-```javascript
-'use strict';
-
-module.exports = {
+```typescript
+export default {
   name: '_myservice',
   parent: '_lando',  // Inherits from _lando
   

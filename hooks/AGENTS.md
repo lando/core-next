@@ -10,7 +10,7 @@ Lifecycle hooks for App and Lando events. Each file = one hook function register
 ## NAMING CONVENTION
 
 ```
-[context]-[action]-[subject].js
+[context]-[action]-[subject].ts
     │        │         └── what's being modified
     │        └── verb: add, run, set, build, check, setup, load, purge
     └── "app" or "lando"
@@ -33,9 +33,10 @@ Lifecycle hooks for App and Lando events. Each file = one hook function register
 
 Hooks can specify priority (lower = earlier):
 
-```javascript
-module.exports = async (app, lando) => { /* ... */ };
-module.exports.priority = 100;  // Optional, default varies by event
+```typescript
+const hook = async (app, lando) => { /* ... */ };
+hook.priority = 100;  // Optional, default varies by event
+export default hook;
 ```
 
 Common priorities:
@@ -45,12 +46,10 @@ Common priorities:
 
 ## ADDING NEW HOOKS
 
-1. **Create file**: `hooks/[context]-[action]-[subject].js`
+1. **Create file**: `hooks/[context]-[action]-[subject].ts`
 2. **Export async function**:
-```javascript
-'use strict';
-
-module.exports = async (app, lando) => {
+```typescript
+const hook = async (app, lando) => {
   // For app hooks: receives (app, lando)
   // For lando hooks: receives (lando)
   
@@ -60,10 +59,11 @@ module.exports = async (app, lando) => {
 };
 
 // Optional priority
-module.exports.priority = 100;
+hook.priority = 100;
+export default hook;
 ```
 
-3. **Register in plugin**: Add to `app.js` or `index.js` hooks array
+3. **Register in plugin**: Add to `app.ts` or `index.ts` hooks array
 
 ## KEY HOOKS
 

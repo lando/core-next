@@ -9,7 +9,7 @@ Pure, stateless functions decoupled from `App` and `Engine` state. Utility-first
 
 ## NAMING CONVENTIONS
 
-- **Pattern:** `[verb]-[noun].js` (e.g., `get-host-path.js`)
+- **Pattern:** `[verb]-[noun].ts` (e.g., `get-host-path.ts`)
 - **Format:** kebab-case
 - **Style:** Single-purpose, descriptive names
 
@@ -28,17 +28,17 @@ Pure, stateless functions decoupled from `App` and `Engine` state. Utility-first
 
 ## USAGE PATTERN
 
-```javascript
-// Direct import, single function per file
-const buildDockerExec = require('../utils/build-docker-exec');
+```typescript
+// ESM import, single function per file
+import buildDockerExec from '../utils/build-docker-exec';
 const cmd = buildDockerExec(service, options);
 ```
 
 ## ADDING NEW UTILS
 
-1. **Name:** `verb-noun.js` pattern required
-2. **Purity:** Stateless - never `require` App, Engine, or other stateful classes
-3. **Dependencies:** Use `lodash`, `bluebird` for complex operations
+1. **Name:** `verb-noun.ts` pattern required
+2. **Purity:** Stateless - never import App, Engine, or other stateful classes
+3. **Dependencies:** Use `lodash` for complex operations
 4. **Input:** Prefer plain objects over class instances
 5. **Output:** Return new objects; never mutate inputs
-6. **Docs:** JSDoc required for main export
+6. **Export:** Use `export default` for main function
