@@ -47,6 +47,6 @@ module.exports = {
       super(id, options, ...sources);
     }
 
-    addBuildStep
+    addBuildStep;
   },
 };

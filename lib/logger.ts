@@ -142,7 +142,9 @@ const keySanitizer = sanitizeKey => (level, msg, meta) => {
 module.exports = class Log extends winston.Logger {
   lasttime: number;
 
-  constructor({logDir, extra, logLevelConsole = 'warn', logLevel = 'debug', logName = 'lando'}: {logDir?: string, extra?: string, logLevelConsole?: string | number, logLevel?: string, logName?: string} = {}) {
+  constructor({logDir, extra, logLevelConsole = 'warn', logLevel = 'debug', logName = 'lando'}: {
+    logDir?: string, extra?: string, logLevelConsole?: string | number, logLevel?: string, logName?: string
+  } = {}) {
     // If loglevelconsole is numeric lets map it!
     if (_.isInteger(logLevelConsole)) logLevelConsole = logLevels[logLevelConsole];
 

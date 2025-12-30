@@ -9,7 +9,7 @@ describe('legacy-scan', () => {
   let originalCreate;
 
   beforeEach(() => {
-    let counter = {};
+    const counter = {};
     originalCreate = axios.create;
     axios.create = jest.fn(() => ({
       get: url => {

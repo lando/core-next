@@ -25,9 +25,9 @@ const hasInstructions = require('../utils/has-instructions');
 const toPosixPath = require('../utils/to-posix-path');
 
 class L337ServiceV4 extends EventEmitter {
-  #app
-  #data
-  #lando
+  #app;
+  #data;
+  #lando;
 
   static debug = require('debug')('@lando/l337-service-v4');
   static bengineConfig = {};

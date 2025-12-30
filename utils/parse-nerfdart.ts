@@ -10,7 +10,7 @@ module.exports = (key, registry = 'https://registry.npmjs.org') => {
     return {registry, method};
 
   // if its not then handle the two cases and recurse
-  } catch (e) {
+  } catch {
     // if key starts with // then add a bogus protocol and recurse
     if (key.startsWith('//')) return module.exports(`lando:${key}`);
     // key needs default

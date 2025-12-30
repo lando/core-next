@@ -48,7 +48,7 @@ describe('logger', () => {
     });
 
     test('should create a log directory and file transports if logDir specified', () => {
-      require(path.resolve('./node_modules/winston/lib/winston/transports/file')).File;
+      void require(path.resolve('./node_modules/winston/lib/winston/transports/file')).File;
       const log = new Log({logDir: '/tmp/logz', logLevel: 'warn'});
       expect(fs.existsSync('/tmp/logz')).toBe(true);
       _.forEach(['error-file', 'log-file'], transport => {

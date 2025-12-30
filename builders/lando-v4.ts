@@ -98,7 +98,7 @@ module.exports = {
       environment: [],
       labels: {},
       mounts: [],
-    }
+    };
 
     #installers = {
       'certs': require('../packages/certs/certs'),
@@ -237,7 +237,7 @@ module.exports = {
         .filter(volume => volume.type === 'volume' || volume.type === 'bind')
         .map(data => {
           // blow it up
-          const {destination, labels, name, owner, permissions, scope, ...volume} = data; // eslint-disable-line no-unused-vars
+          const {destination, labels, name, owner, permissions, scope, ...volume} = data; // eslint-disable-line @typescript-eslint/no-unused-vars
           // return what we need
           return volume;
         }),

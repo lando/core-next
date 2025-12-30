@@ -1,18 +1,20 @@
 {
   "env": {
     "node": true,
-    "mocha": true,
     "es2021": true
   },
-  "parser": "@babel/eslint-parser",
+  "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "sourceType": "module",
-    "ecmaVersion": 8,
-    "requireConfigFile": false
+    "ecmaVersion": 2021
   },
+  "plugins": [
+    "@typescript-eslint"
+  ],
   "extends": [
     "eslint:recommended",
-    "google"
+    "google",
+    "plugin:@typescript-eslint/recommended"
   ],
   "rules": {
     "arrow-parens": ["error",
@@ -25,12 +27,17 @@
     "no-empty": ["error", {
       "allowEmptyCatch": true
     }],
-    "no-unused-vars": ["error", {
+    "no-unused-vars": "off",
+    "@typescript-eslint/no-unused-vars": ["error", {
       "vars": "all",
       "args": "after-used",
       "ignoreRestSiblings": false
     }],
-
+    "@typescript-eslint/no-require-imports": "off",
+    "@typescript-eslint/no-explicit-any": "off",
+    "@typescript-eslint/no-empty-object-type": ["error", {
+      "allowInterfaces": "with-single-extends"
+    }],
     "require-jsdoc": ["error", {
       "require": {
         "FunctionDeclaration": true,

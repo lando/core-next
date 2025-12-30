@@ -89,7 +89,7 @@ class AsyncEvents extends EventEmitter {
       return Promise.resolve(result);
     };
     // Save for later
-    const self = this;
+    const self = this; // eslint-disable-line @typescript-eslint/no-this-alias
     // Grab name of event from first argument.
     const name = args.shift();
 

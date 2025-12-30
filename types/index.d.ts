@@ -6,10 +6,10 @@
  * and tighten as the codebase migrates to TypeScript.
  */
 
-import type { EventEmitter } from 'events';
-import type { Logger as WinstonLogger } from 'winston';
+import type {EventEmitter} from 'events';
+import type {Logger as WinstonLogger} from 'winston';
 import type Dockerode from 'dockerode';
-import type { LoDashStatic } from 'lodash';
+import type {LoDashStatic} from 'lodash';
 
 // =============================================================================
 // Utility Types

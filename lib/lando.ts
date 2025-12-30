@@ -232,7 +232,7 @@ module.exports = class Lando {
     this.cache = require('../utils/setup-cache')(this.log, this.config);
     this.log = new Log(this.config);
     this.metrics = require('../utils/setup-metrics')(this.log, this.config);
-    this.error = new ErrorHandler(this.log, this.metrics),
+    this.error = new ErrorHandler(this.log, this.metrics);
     this.events = new AsyncEvents(this.log);
     this.user = require('./user');
 

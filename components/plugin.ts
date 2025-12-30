@@ -274,7 +274,7 @@ class Plugin {
 
     // if we have ignoreDependencies then lets mutate this.pjson.dependencies for downstream considerations
     if (this.pjson.ignoreDependencies && this.pjson.dependencies) {
-      for (const ignored of this.pjson?.ignoreDependencies) {
+      for (const ignored of this.pjson.ignoreDependencies) {
         delete this.pjson.dependencies[ignored];
       }
     }

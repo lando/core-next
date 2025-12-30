@@ -355,7 +355,7 @@ module.exports = class Cli {
     }
 
     // YARGZ MATEY
-    yargs.argv;
+    void yargs.argv;
   }
 
 

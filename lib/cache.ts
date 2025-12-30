@@ -90,7 +90,7 @@ class Cache extends NodeCache {
       try {
         this.log.debug('Trying to retrieve from file cache with key %s', key);
         return jsonfile.readFileSync(path.join(this.cacheDir, key));
-      } catch (e) {
+      } catch {
         this.log.debug('File cache miss with key %s', key);
       }
     }
@@ -114,7 +114,7 @@ class Cache extends NodeCache {
     // Also remove file if applicable
     try {
       fs.unlinkSync(path.join(this.cacheDir, key));
-    } catch (e) {
+    } catch {
       this.log.debug('No file cache with key %s', key);
     }
   }
