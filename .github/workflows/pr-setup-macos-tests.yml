@@ -18,6 +18,8 @@ jobs:
           - setup-macos
         node-version:
           - "20"
+        bun-version:
+          - "1.3.5"
         os:
           - macos-15
 
@@ -29,7 +31,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
           registry-url: https://registry.npmjs.org
-          cache: npm
+      - name: Install bun ${{ matrix.bun-version }}
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ matrix.bun-version }}
       - name: Bundle Deps
         uses: lando/prepare-release-action@v3
         with:
@@ -37,7 +42,7 @@ jobs:
           version: dev
           sync: false
       - name: Install pkg dependencies
-        run: npm clean-install --prefer-offline --frozen-lockfile --production
+        run: bun install --frozen-lockfile --production
       - name: Package into node binary
         uses: lando/pkg-action@v6
         id: pkg-action
@@ -49,7 +54,7 @@ jobs:
           upload: false
           pkg: "@yao-pkg/pkg@5.16.1"
       - name: Install full deps
-        run: npm clean-install --prefer-offline --frozen-lockfile
+        run: bun install --frozen-lockfile
       - name: Setup lando ${{ steps.pkg-action.outputs.file }}
         uses: lando/setup-lando@v3
         with:

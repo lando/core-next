@@ -10,19 +10,18 @@ jobs:
       matrix:
         os:
           - ubuntu-24.04
-        node-version:
-          - "20"
+        bun-version:
+          - "1.3.5"
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
-      - name: Install node ${{ matrix.node-version }}
-        uses: actions/setup-node@v6
+      - name: Install Bun ${{ matrix.bun-version }}
+        uses: oven-sh/setup-bun@v2
         with:
-          node-version: ${{ matrix.node-version }}
-          cache: npm
+          bun-version: ${{ matrix.bun-version }}
       - name: Install dependencies
-        run: npm clean-install --prefer-offline --frozen-lockfile
-      - name: Run license cehck
+        run: bun install --frozen-lockfile
+      - name: Run license check
         run: |
-          npm install --global license-checker
-          npx license-checker --production --summary
+          bun add -g license-checker
+          bunx license-checker --production --summary

@@ -48,9 +48,12 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: ${{ inputs.node-version }}
-          cache: npm
+      - name: Install bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: "1.3.5"
       - name: Install dependencies
-        run: npm clean-install --prefer-offline --frozen-lockfile --production
+        run: bun install --frozen-lockfile --production
       - name: Install plugins
         run: scripts/install-plugins.sh --lando bin/lando ${{ inputs.edge == true && '--edge' || '' }}
       - name: Switch to edge channel
