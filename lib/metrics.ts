@@ -46,19 +46,15 @@ module.exports = class Metrics {
     const id = this.id;
     // Attempt to sanitize merged data as much as possible
     const send = cleanseData(_.merge({}, this.data, data, {action, created: new Date().toJSON()}));
-    // Start the reporting chain
-    return Promise.resolve(this.endpoints)
-    // Filter out any inactive endpoints
-    .filter(endpoint => endpoint.report)
-    // Get the client and report
-    .map(endpoint => {
-      // Log the attempt
+    // Filter out any inactive endpoints and report to each
+    const activeEndpoints = this.endpoints.filter(endpoint => endpoint.report);
+
+    return Promise.all(activeEndpoints.map(endpoint => {
       log.verbose('reporting %s action to', action, this.endpoints);
       log.debug('reporting data', send);
 
       const agent = getAxios({baseURL: endpoint.url});
 
-      // Post the data
       return agent.post('/metrics/v2/' + id, send).catch(error => {
         const url = _.get(endpoint, 'url', 'unknown');
         const status = _.get(error, 'response.status', 'unknown');
@@ -66,6 +62,6 @@ module.exports = class Metrics {
         const message = _.get(error, 'response.data.message', 'unknown');
         log.debug('metrics post to %s failed with %s (%s) %s', url, status, reason, message);
       });
-    });
+    }));
   }
 };

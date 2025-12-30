@@ -30,7 +30,7 @@ exports.eventWrapper = (name, daemon, events, data, run) =>
   .then(() => daemon.up())
   .then(() => events.emit(`pre-engine-${name}`, data))
   .then(() => run(data))
-  .tap(() => events.emit(`post-engine-${name}`, data));
+  .then(result => events.emit(`post-engine-${name}`, data).then(() => result));
 
 /*
  * Helper to route to build command
@@ -56,11 +56,13 @@ exports.exists = (data, compose, docker, ids = []) => {
   if (data.compose) return compose('getId', data).then(id => !_.isEmpty(id));
   else {
     return docker.list()
-    .each(container => {
-      ids.push(container.id);
-      ids.push(container.name);
-    })
-    .then(() => _.includes(ids, getContainerId(data)));
+    .then(containers => {
+      containers.forEach(container => {
+        ids.push(container.id);
+        ids.push(container.name);
+      });
+      return _.includes(ids, getContainerId(data));
+    });
   }
 };
 
@@ -90,18 +92,12 @@ exports.run = (data, compose, docker, started = true) => Promise.mapSeries(norma
       });
     }
   })
-  // Why were we still using dockerode for this on non-win?
   .then(() => compose('run', _.merge({}, datum, {opts: {cmd: datum.cmd, id: datum.id}})))
-  // Stop if we have to
-  .tap(() => {
-    // If this is the last step of a build we need to make sure all the containers are stopped
+  .then(async result => {
     if (_.get(datum, 'opts.prestart', false) && _.get(datum, 'opts.last', false)) delete datum.opts.services;
-    // Stop if we have to and remove build flags so lando doesn't get tripped up downstream
-    if (!started || _.get(datum, 'opts.last', false)) return exports.stop(stripRun(datum), compose, docker);
-  })
-  // Destroy if we have to
-  .tap(() => {
-    if (!started && _.get(datum, 'opts.autoRemove', false)) return exports.destroy(stripRun(datum), compose, docker);
+    if (!started || _.get(datum, 'opts.last', false)) await exports.stop(stripRun(datum), compose, docker);
+    if (!started && _.get(datum, 'opts.autoRemove', false)) await exports.destroy(stripRun(datum), compose, docker);
+    return result;
   });
 });
 

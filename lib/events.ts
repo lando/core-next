@@ -109,26 +109,15 @@ class AsyncEvents extends EventEmitter {
     this.log.debug('emitting event %s', name);
     this.log.silly('event %s has %s listeners', name, fns.length);
 
-    // Make listener functions to a promise in series.
     return Promise.each(fns, listener => {
       const {fn, id} = listener;
-      // Clone function arguments.
       const fnArgs = args.slice();
-      // Add listener function to front of arguments.
       fnArgs.unshift(fn);
-      // If its a onetimer then remove it from listeners
       if (fn.name && fn.name.includes('onceWrapper')) {
         this._listeners = this._listeners.filter(listener => listener.id !== id);
       }
-      // Apply function that calls the listener function and returns a promise.
       return handle.apply(self, fnArgs);
-    })
-
-    // Make sure to wait for all mappings.
-    .all()
-
-    // Return true if event had listeners just like the original emit function.
-    .return(!!fns.length);
+    }).then(() => !!fns.length);
   }
 
   removeAllListeners() {
