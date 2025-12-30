@@ -1,33 +1,26 @@
-/**
- * Tests for user module.
- * @file user.spec.js
- */
-
 'use strict';
 
-const chai = require('chai');
-chai.should();
+const {describe, expect, test} = require('bun:test');
 
 const user = require('./../lib/user');
 
-// @todo: we need to actually stub out shell-exec because this relies on OS specific things like `id`
 describe('user', () => {
   describe('#getUid', () => {
-    it('should return a uid', () => {
+    test('should return a uid', () => {
       const uid = user.getUid();
-      uid.should.be.a('string');
+      expect(typeof uid).toBe('string');
     });
   });
   describe('#getGid', () => {
-    it('should return a gid', () => {
+    test('should return a gid', () => {
       const gid = user.getGid();
-      gid.should.be.a('string');
+      expect(typeof gid).toBe('string');
     });
   });
   describe('#getUsername', () => {
-    it('should return a username', () => {
+    test('should return a username', () => {
       const username = user.getUsername();
-      username.should.be.a('string');
+      expect(typeof username).toBe('string');
     });
   });
 });

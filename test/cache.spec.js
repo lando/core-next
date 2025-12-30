@@ -1,17 +1,9 @@
-/**
- * Tests for cache system.
- * @file cache.spec.js
- */
-
 'use strict';
 
 const _ = require('lodash');
-const chai = require('chai');
-const expect = chai.expect;
-const sinon = require('sinon');
+const {describe, expect, test, beforeEach, jest} = require('bun:test');
 const fs = require('fs');
 const NodeCache = require('node-cache');
-chai.should();
 
 const Cache = require('./../lib/cache');
 
@@ -21,57 +13,58 @@ describe('cache', () => {
   });
 
   describe('#Cache', () => {
-    it('should return a cache instance with correct default options', () => {
+    test('should return a cache instance with correct default options', () => {
       const cache = new Cache();
-      cache.should.be.instanceof(Cache);
-      cache.should.be.an('object').with.property('options');
-      cache.options.should.have.property('stdTTL', 0);
-      cache.options.should.have.property('checkperiod', 600);
-      cache.options.should.have.property('errorOnMissing', false);
-      cache.options.should.have.property('useClones', true);
-      cache.options.should.have.property('deleteOnExpire', true);
+      expect(cache).toBeInstanceOf(Cache);
+      expect(typeof cache).toBe('object');
+      expect(cache).toHaveProperty('options');
+      expect(cache.options).toHaveProperty('stdTTL', 0);
+      expect(cache.options).toHaveProperty('checkperiod', 600);
+      expect(cache.options).toHaveProperty('errorOnMissing', false);
+      expect(cache.options).toHaveProperty('useClones', true);
+      expect(cache.options).toHaveProperty('deleteOnExpire', true);
     });
 
-    it('should return a cache instance with custom log option', () => {
-      const log = sinon.spy();
+    test('should return a cache instance with custom log option', () => {
+      const log = jest.fn();
       const cache = new Cache({log: log});
-      cache.should.have.deep.property('log', log);
+      expect(cache.log).toBe(log);
     });
 
-    it('should return a cache instance with custom cachedir option', () => {
+    test('should return a cache instance with custom cachedir option', () => {
       const cache = new Cache({cacheDir: '/tmp/cache'});
-      cache.should.have.property('cacheDir', '/tmp/cache');
+      expect(cache.cacheDir).toBe('/tmp/cache');
     });
 
-    it('should create the cache directory', () => {
+    test('should create the cache directory', () => {
       const cache = new Cache({cacheDir: '/tmp/cache'});
-      cache.should.have.property('cacheDir', '/tmp/cache');
-      fs.existsSync('/tmp/cache').should.be.true;
+      expect(cache.cacheDir).toBe('/tmp/cache');
+      expect(fs.existsSync('/tmp/cache')).toBe(true);
     });
   });
 
   describe('#__get', () => {
-    it('should be the same as new NodeCache().get', () => {
+    test('should be the same as new NodeCache().get', () => {
       const cache = new Cache();
       cache.set('yyz', 'amazing');
 
       const nCache = new NodeCache();
       nCache.set('yyz', 'amazing');
 
-      cache.__get('yyz').should.eql(nCache.get('yyz'));
+      expect(cache.__get('yyz')).toEqual(nCache.get('yyz'));
     });
   });
 
   describe('#__set', () => {
-    it('should be the same as new NodeCache().set', () => {
+    test('should be the same as new NodeCache().set', () => {
       const cache = new Cache();
       const nCache = new NodeCache();
-      cache.__set('yyz', 'amazing').should.eql(nCache.set('yyz', 'amazing'));
+      expect(cache.__set('yyz', 'amazing')).toEqual(nCache.set('yyz', 'amazing'));
     });
   });
 
   describe('#__del', () => {
-    it('should be the same as new NodeCache().del', () => {
+    test('should be the same as new NodeCache().del', () => {
       const cache = new Cache();
       const nCache = new NodeCache();
       cache.__set('yyz', 'amazing');
@@ -79,98 +72,97 @@ describe('cache', () => {
       nCache.set('yyz', 'amazing');
       const returntwo = nCache.del('yyz');
 
-      returnone.should.eql(returntwo);
+      expect(returnone).toEqual(returntwo);
     });
   });
 
   describe('#set', () => {
-    it('should set a cached key in memory', () => {
+    test('should set a cached key in memory', () => {
       const cache = new Cache({cacheDir: '/tmp/cache'});
       cache.set('yyz', 'amazing');
-      fs.existsSync('/tmp/cache/yyz').should.be.false;
+      expect(fs.existsSync('/tmp/cache/yyz')).toBe(false);
     });
 
-    it('should log a failure when key cannot be cached in memory', () => {
-      const cache = new Cache({log: {debug: sinon.spy()}});
-      sinon.stub(cache, '__set').returns(false);
+    test('should log a failure when key cannot be cached in memory', () => {
+      const debugSpy = jest.fn();
+      const cache = new Cache({log: {debug: debugSpy}});
+      jest.spyOn(cache, '__set').mockReturnValue(false);
       cache.set('test', 'thing');
-      const call = cache.log.debug.getCall(0);
-      expect(_.includes(call.args[0], 'Failed')).to.equal(true);
-      cache.log.debug.callCount.should.equal(1);
+      const call = debugSpy.mock.calls[0];
+      expect(_.includes(call[0], 'Failed')).toBe(true);
+      expect(debugSpy).toHaveBeenCalledTimes(1);
     });
 
-    it('should remove a cached key in memory after ttl has expired', () => {
-      const clock = sinon.useFakeTimers();
+    test('should remove a cached key in memory after ttl has expired', () => {
+      jest.useFakeTimers();
 
       const cache = new Cache();
 
       cache.set('yyz', 'amazing', {ttl: 1});
-      expect(cache.get('yyz')).to.eql('amazing');
+      expect(cache.get('yyz')).toEqual('amazing');
 
-      clock.tick(1500);
+      jest.advanceTimersByTime(1500);
 
-      expect(cache.get('yyz')).to.be.undefined;
-      clock.restore();
+      expect(cache.get('yyz')).toBeUndefined();
+      jest.useRealTimers();
     });
 
-    it('should set a cached key in a file if persist is set', () => {
+    test('should set a cached key in a file if persist is set', () => {
       const cache = new Cache({cacheDir: '/tmp/cache'});
       cache.set('yyz', 'amazing', {persist: true});
-      fs.existsSync('/tmp/cache/yyz').should.be.true;
+      expect(fs.existsSync('/tmp/cache/yyz')).toBe(true);
     });
 
-    it('should throw an error for unsafe cache keys', () => {
+    test('should throw an error for unsafe cache keys', () => {
       const cache = new Cache();
-      expect(() => cache.set('yyz:amazing', 'alltime')).to.throw('Invalid cache key');
+      expect(() => cache.set('yyz:amazing', 'alltime')).toThrow('Invalid cache key');
     });
   });
 
   describe('#get', () => {
-    it('should return a cached key from memory', () => {
+    test('should return a cached key from memory', () => {
       const cache = new Cache();
       cache.set('best_drummer', 'Neal Peart');
-      cache.get('best_drummer').should.eql('Neal Peart');
+      expect(cache.get('best_drummer')).toEqual('Neal Peart');
     });
 
-    it('should fail to return a cached key from memory if ttl is expired', () => {
-      const clock = sinon.useFakeTimers();
+    test('should fail to return a cached key from memory if ttl is expired', () => {
+      jest.useFakeTimers();
 
       const cache = new Cache();
 
       cache.set('yyz', 'amazing', {ttl: 1});
-      expect(cache.get('yyz')).to.eql('amazing');
+      expect(cache.get('yyz')).toEqual('amazing');
 
-      clock.tick(1500);
+      jest.advanceTimersByTime(1500);
 
-      expect(cache.get('yyz')).to.be.undefined;
-      clock.restore();
+      expect(cache.get('yyz')).toBeUndefined();
+      jest.useRealTimers();
     });
 
-    it('should return a cached key from file if persists is set', () => {
+    test('should return a cached key from file if persists is set', () => {
       const cache = new Cache({cacheDir: '/tmp/cache'});
       cache.set('yyz', 'amazing', {persist: true});
-      cache.get('yyz').should.eql('amazing');
+      expect(cache.get('yyz')).toEqual('amazing');
     });
 
-    it('should return undefined when grabbing an unset key', () => {
-      // Get the result of a key that has not been set
+    test('should return undefined when grabbing an unset key', () => {
       const cache = new Cache();
-      // What were you expecting?
-      expect(cache.get('BOGUSKEY-I-LOVE-NICK3LBACK-4-LYF')).to.be.undefined;
+      expect(cache.get('BOGUSKEY-I-LOVE-NICK3LBACK-4-LYF')).toBeUndefined();
     });
   });
 
   describe('#remove', () => {
-    it('should remove a cached key from memory', () => {
+    test('should remove a cached key from memory', () => {
       const cache = new Cache();
       cache.set('limelight', 'universal dream');
-      cache.get('limelight').should.eql('universal dream');
+      expect(cache.get('limelight')).toEqual('universal dream');
 
       cache.remove('limelight');
-      expect(cache.get('limelight')).to.be.undefined;
+      expect(cache.get('limelight')).toBeUndefined();
     });
 
-    it('should remove file for cached key if it was persistent', () => {
+    test('should remove file for cached key if it was persistent', () => {
       const cache = new Cache({cacheDir: '/tmp/cache/'});
       cache.set(
         'subdivisions',
@@ -178,19 +170,20 @@ describe('cache', () => {
         {persist: true},
       );
 
-      fs.existsSync('/tmp/cache/subdivisions').should.be.true;
+      expect(fs.existsSync('/tmp/cache/subdivisions')).toBe(true);
       cache.remove('subdivisions');
 
-      fs.existsSync('/tmp/cache/subdivisions').should.be.false;
+      expect(fs.existsSync('/tmp/cache/subdivisions')).toBe(false);
     });
 
-    it('should log a failure when key cannot be removed from memory', () => {
-      const cache = new Cache({log: {debug: sinon.spy()}});
-      sinon.stub(cache, '__del').returns(false);
+    test('should log a failure when key cannot be removed from memory', () => {
+      const debugSpy = jest.fn();
+      const cache = new Cache({log: {debug: debugSpy}});
+      jest.spyOn(cache, '__del').mockReturnValue(false);
       cache.remove('test');
-      const call = cache.log.debug.getCall(0);
-      expect(_.includes(call.args[0], 'Failed')).to.equal(true);
-      cache.log.debug.callCount.should.equal(2);
+      const call = debugSpy.mock.calls[0];
+      expect(_.includes(call[0], 'Failed')).toBe(true);
+      expect(debugSpy).toHaveBeenCalledTimes(2);
     });
   });
 });

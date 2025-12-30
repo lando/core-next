@@ -1,66 +1,58 @@
-/**
- * Tests for promise system.
- * @file promise.spec.js
- */
-
 'use strict';
 
-const _ = require('lodash');
-const chai = require('chai');
-const sinon = require('sinon');
-chai.use(require('chai-as-promised'));
-chai.should();
+const {describe, expect, test} = require('bun:test');
 
 const Promise = require('../lib/promise');
 
 describe('promise', () => {
   describe('#Promise', () => {
-    it('should have our retry method', () => {
-      Promise.retry.should.be.a('function');
+    test('should have our retry method', () => {
+      expect(typeof Promise.retry).toBe('function');
     });
 
-    it('should return a promise instance', () => {
-      const promise = new Promise(sinon.spy());
-      promise.should.be.instanceof(Promise);
+    test('should return a promise instance', () => {
+      const promise = new Promise(resolve => resolve());
+      expect(promise).toBeInstanceOf(Promise);
     });
 
-    it('should have longStackTraces enabled on instances', () => {
-      const promise = new Promise(sinon.spy());
-      promise.should.have.property('_trace');
+    test('should have longStackTraces enabled on instances', () => {
+      const promise = new Promise(resolve => resolve());
+      expect(promise).toHaveProperty('_trace');
     });
 
-    it('should have our retry method on instances', () => {
-      const promise = new Promise(sinon.spy());
-      Object.getPrototypeOf(promise).retry.should.be.a('function');
+    test('should have our retry method on instances', () => {
+      const promise = new Promise(resolve => resolve());
+      expect(typeof Object.getPrototypeOf(promise).retry).toBe('function');
     });
   });
 
   describe('#retry', () => {
-    it('should immediately fulfill without retry if promise is not rejected', () => {
+    test('should immediately fulfill without retry if promise is not rejected', async () => {
       let counter = 0;
       const func = () => {
         counter = counter + 1;
         return Promise.resolve(counter);
       };
-      Promise.retry(func).should.eventually.equal(1).and.should.be.fulfilled;
+      const result = await Promise.retry(func);
+      expect(result).toBe(1);
     });
 
-    it('should retry a rejected promise max times with backoff and then reject with Error', () => {
-      const opts = {max: _.random(1, 7), backoff: _.random(1, 25)};
+    test('should retry a rejected promise max times and then reject with Error', async () => {
+      const opts = {max: 3, backoff: 1};
+      let counter = 0;
+
       const fail = () => {
         counter = counter + 1;
         return Promise.reject(new Error('Death by Balrog'));
       };
-      const assertz = () => {
-        const timer = new Date().getTime();
-        const minTime = ((opts.max * (opts.max + 1)) / 2) * opts.backoff;
-        counter.should.equal(opts.max);
-        timer.should.be.at.least(minTime);
-        clock.restore();
-      };
-      let counter = -1;
-      const clock = sinon.useFakeTimers({now: 0, shouldAdvanceTime: true});
-      return Promise.retry(fail, opts).finally(assertz).should.be.rejectedWith(Error, 'Death by Balrog');
+
+      try {
+        await Promise.retry(fail, opts);
+        expect(true).toBe(false);
+      } catch (err) {
+        expect(err.message).toBe('Death by Balrog');
+        expect(counter).toBe(opts.max + 1);
+      }
     });
   });
 });

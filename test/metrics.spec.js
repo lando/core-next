@@ -1,48 +1,44 @@
-/**
- * Tests for metrics system.
- * @file metrics.spec.js
- */
-
 'use strict';
 
+const {describe, expect, test, jest, afterEach} = require('bun:test');
 const _ = require('lodash');
 const axios = require('axios');
-const chai = require('chai');
-const sinon = require('sinon');
 const EventEmitter = require('events').EventEmitter;
 const Promise = require('./../lib/promise');
-chai.use(require('chai-as-promised'));
-chai.should();
 
 const Metrics = require('./../lib/metrics');
 
 describe('metrics', () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   describe('#Metrics', () => {
-    it('should return a Metrics instance with correct default options', () => {
+    test('should return a Metrics instance with correct default options', () => {
       const metrics = new Metrics();
-      metrics.should.be.instanceof(Metrics);
-      metrics.should.have.property('id', 'unknown');
-      metrics.endpoints.should.be.instanceof(Array);
-      metrics.endpoints.should.be.empty;
-      metrics.data.should.be.instanceof(Object);
-      metrics.data.should.be.empty;
-      metrics.log.should.be.instanceof(EventEmitter);
+      expect(metrics).toBeInstanceOf(Metrics);
+      expect(metrics.id).toBe('unknown');
+      expect(metrics.endpoints).toBeInstanceOf(Array);
+      expect(metrics.endpoints.length).toBe(0);
+      expect(metrics.data).toBeInstanceOf(Object);
+      expect(Object.keys(metrics.data).length).toBe(0);
+      expect(metrics.log).toBeInstanceOf(EventEmitter);
     });
 
-    it('should return a Metrics instance with user options', () => {
+    test('should return a Metrics instance with user options', () => {
       const metrics = new Metrics({id: '24601', endpoints: [1, 2], data: {prisoner: 'valjean'}});
-      metrics.should.be.instanceof(Metrics);
-      metrics.should.have.property('id', '24601');
-      metrics.data.prisoner.should.equal('valjean');
-      metrics.endpoints.should.have.length(2);
-      metrics.endpoints.should.be.not.empty;
-      metrics.data.should.be.not.empty;
-      metrics.log.should.be.instanceof(EventEmitter);
+      expect(metrics).toBeInstanceOf(Metrics);
+      expect(metrics.id).toBe('24601');
+      expect(metrics.data.prisoner).toBe('valjean');
+      expect(metrics.endpoints.length).toBe(2);
+      expect(metrics.endpoints.length).toBeGreaterThan(0);
+      expect(Object.keys(metrics.data).length).toBeGreaterThan(0);
+      expect(metrics.log).toBeInstanceOf(EventEmitter);
     });
   });
 
   describe('#report', () => {
-    it('should report to each report=true endpoint', () => {
+    test('should report to each report=true endpoint', async () => {
       const endpoints = [
         {url: 'https://place.for.the.things/metrics', report: true},
         {url: 'https://place.for.more.things', report: true},
@@ -52,55 +48,49 @@ describe('metrics', () => {
       const id = '24601';
       const reportable = _.size(_.filter(endpoints, endpoint => endpoint.report));
       const metrics = new Metrics({id, endpoints, data: {prisoner: 'valjean'}});
-      sinon.stub(axios, 'create').callsFake(({baseURL = 'localhost'} = {}) => ({
+      jest.spyOn(axios, 'create').mockImplementation(({baseURL = 'localhost'} = {}) => ({
         post: (path, data) => {
-          baseURL.should.equal(endpoints[counter].url);
-          path.should.equal('/metrics/v2/' + id);
-          data.prisoner.should.equal('valjean');
-          data.inspecter.should.equal('javier');
-          data.created.should.be.not.empty;
-          data.action.should.equal('escape');
+          expect(baseURL).toBe(endpoints[counter].url);
+          expect(path).toBe('/metrics/v2/' + id);
+          expect(data.prisoner).toBe('valjean');
+          expect(data.inspecter).toBe('javier');
+          expect(data.created).toBeTruthy();
+          expect(data.action).toBe('escape');
           counter = counter + 1;
           return Promise.resolve();
         },
       }));
-      return metrics.report('escape', {inspecter: 'javier'})
-        .should.be.fulfilled
-        .then(() => {
-          counter.should.equal(reportable);
-        })
-        .then(() => axios.create.restore());
+      await metrics.report('escape', {inspecter: 'javier'});
+      expect(counter).toBe(reportable);
     });
 
-    it('should log a failed report but not throw an error', () => {
+    test('should log a failed report but not throw an error', async () => {
       const endpoints = [
         {url: 'https://place.for.the.things/metrics', report: true},
         {url: 'https://place.for.more.things', report: true},
         {url: 'https://nsa.gov/prism', report: true},
       ];
-      const metrics = new Metrics({endpoints, log: {debug: sinon.spy(), verbose: sinon.spy()}});
-      sinon.stub(axios, 'create').callsFake(() => ({
-        post: () => Promise.reject(),
+      const metrics = new Metrics({endpoints, log: {debug: jest.fn(), verbose: jest.fn()}});
+      jest.spyOn(axios, 'create').mockImplementation(() => ({
+        post: () => Promise.reject(new Error('Network error')),
       }));
-      return metrics.report()
-        .should.be.fulfilled
-        .then(() => axios.create.restore());
+      const result = await metrics.report();
+      expect(Array.isArray(result)).toBe(true);
     });
 
-    it('should properly reset the data from previous reports', () => {
+    test('should properly reset the data from previous reports', async () => {
       const endpoints = [{url: 'https://place.for.the.things/metrics', report: true}];
       const metrics = new Metrics({endpoints, data: {inspector: 'javier'}});
-      sinon.stub(axios, 'create').callsFake(() => ({
+      jest.spyOn(axios, 'create').mockImplementation(() => ({
         post: (path, data) => {
-          if (data.action === 'escape') data.should.have.property('freedman', 'valjean');
-          if (data.action === 'apprehended') data.should.not.have.property('freedman');
+          if (data.action === 'escape') expect(data).toHaveProperty('freedman', 'valjean');
+          if (data.action === 'apprehended') expect(data).not.toHaveProperty('freedman');
           return Promise.resolve();
         },
       }));
-      return metrics.report('escape', {freedman: 'valjean'})
-        .delay(5)
-        .then(() => metrics.report('apprehended', {prisoner: 'valjean'}))
-        .then(() => axios.create.restore());
+      await metrics.report('escape', {freedman: 'valjean'});
+      await new Promise(resolve => setTimeout(resolve, 5));
+      await metrics.report('apprehended', {prisoner: 'valjean'});
     });
   });
 });

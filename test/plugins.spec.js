@@ -1,86 +1,86 @@
-/**
- * Tests for plugin system.
- * @file plugins.spec.js
- */
-
 'use strict';
 
-// Setup chai.
-const _ = require('lodash');
-const chai = require('chai');
-const sinon = require('sinon');
-const filesystem = require('mock-fs');
-chai.use(require('chai-as-promised'));
-chai.should();
+const {afterEach, beforeEach, describe, expect, jest, test} = require('bun:test');
+const fs = require('fs-extra');
 const os = require('os');
 const path = require('path');
 const Plugins = require('./../lib/plugins');
 
 const testPlugin = path.resolve(__dirname, '..', 'examples', 'plugins', 'test-plugin-2', 'index.js');
-const searchDirs = [
-  path.join(os.tmpdir(), 'dir1'),
-  path.join(os.tmpdir(), 'dir2'),
-  path.join(os.tmpdir(), 'dir3'),
-];
+const testPluginYml = path.resolve(__dirname, '..', 'examples', 'plugins', 'test-plugin-2', 'plugin.yml');
 
-const fsConfig = {};
-_.forEach(searchDirs, dir => {
-  fsConfig[path.resolve(dir, 'plugins', 'test', 'index.js')] = filesystem.load(testPlugin);
-  fsConfig[path.resolve(dir, 'plugins', 'test', 'plugin.yml')] = 'DONT MATTER';
-});
+let tempDir;
+let searchDirs;
 
-// This is the file we are testing
 describe('plugins', () => {
   describe('#load', () => {
     beforeEach(() => {
-      filesystem(fsConfig);
+      tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'lando-test-'));
+      searchDirs = [
+        path.join(tempDir, 'dir1'),
+        path.join(tempDir, 'dir2'),
+        path.join(tempDir, 'dir3'),
+      ];
+
+      searchDirs.forEach(dir => {
+        const pluginDir = path.join(dir, 'plugins', 'test');
+        fs.mkdirSync(pluginDir, {recursive: true});
+        fs.copyFileSync(testPlugin, path.join(pluginDir, 'index.js'));
+        if (fs.existsSync(testPluginYml)) {
+          fs.copyFileSync(testPluginYml, path.join(pluginDir, 'plugin.yml'));
+        } else {
+          fs.writeFileSync(path.join(pluginDir, 'plugin.yml'), 'name: test\n');
+        }
+      });
+
       delete global.__webpack_require__;
       delete global.__non_webpack_require__;
     });
 
-    it('should use __non_webpack_require__ if __webpack_require__ is a func', () => {
-      filesystem.restore();
+    test('should use __non_webpack_require__ if __webpack_require__ is a func', () => {
       const plugins = new Plugins();
       const find = plugins.find([path.resolve(__dirname, '..', 'examples', 'plugins')]);
-      global.__webpack_require__ = sinon.spy();
+      global.__webpack_require__ = jest.fn();
       global.__non_webpack_require__ = require;
       const data = plugins.load(find[0]);
-      data.should.be.an('Object');
-      data.data['app-plugin-test'].should.be.true;
-      data.name.should.equal(find[0].name);
-      data.path.should.equal(find[0].path);
-      data.dir.should.equal(find[0].dir);
+      expect(typeof data).toBe('object');
+      expect(data.data['app-plugin-test']).toBe(true);
+      expect(data.name).toBe(find[0].name);
+      expect(data.path).toBe(find[0].path);
+      expect(data.dir).toBe(find[0].dir);
     });
 
-    it('should use the plugin from the last location it finds it', () => {
+    test('should use the plugin from the last location it finds it', () => {
       const plugins = new Plugins();
       const find = plugins.find(searchDirs);
-      find[0].dir.should.match(/dir3\/plugins\/test$/);
+      expect(find[0].dir).toMatch(/dir3\/plugins\/test$/);
     });
 
-    it('should push a plugin to the plugin registry after it is loaded', () => {
+    test('should push a plugin to the plugin registry after it is loaded', () => {
       const plugins = new Plugins();
       const find = plugins.find(searchDirs);
-      global.__webpack_require__ = sinon.spy();
+      global.__webpack_require__ = jest.fn();
       global.__non_webpack_require__ = require;
       plugins.load(find[0]);
-      plugins.registry.should.be.lengthOf(1);
+      expect(plugins.registry).toHaveLength(1);
     });
 
-    it('should throw an error if dynamic require fails', () => {
-      filesystem();
+    test('should throw an error if dynamic require fails', () => {
+      const errorSpy = jest.fn();
       const plugins = new Plugins({
-        silly: sinon.spy(),
-        debug: sinon.spy(),
-        error: sinon.spy(),
-        verbose: sinon.spy(),
+        silly: jest.fn(),
+        debug: jest.fn(),
+        error: errorSpy,
+        verbose: jest.fn(),
       });
       plugins.load({name: 'something'}, 'somewhere', {});
-      plugins.log.error.callCount.should.equal(1);
+      expect(errorSpy).toHaveBeenCalledTimes(1);
     });
 
     afterEach(() => {
-      filesystem.restore();
+      if (tempDir) {
+        fs.rmSync(tempDir, {recursive: true, force: true});
+      }
     });
   });
 });

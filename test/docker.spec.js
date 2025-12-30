@@ -1,22 +1,16 @@
-/*
- * Tests for docker.
- * @file docker.spec.js
- */
-
 'use strict';
 
-// Setup chai.
-const chai = require('chai');
-const expect = chai.expect;
-const filesystem = require('mock-fs');
-chai.should();
-chai.use(require('chai-as-promised'));
-const sinon = require('sinon');
+const {describe, expect, test, beforeEach, afterEach, jest} = require('bun:test');
+const fs = require('fs-extra');
+const os = require('os');
+const path = require('path');
 const Landerode = require('./../lib/docker');
 const landerode = new Landerode();
 const Dockerode = require('dockerode');
-const Promise = require('./../lib/promise');
 const _ = require('lodash');
+const Promise = require('./../lib/promise');
+
+let tempDir;
 
 const dummyContainer = (overrides = {}) => {
   return _.assign(
@@ -41,229 +35,220 @@ const dummyContainer = (overrides = {}) => {
 
 describe('docker', () => {
   describe('#Landerode', () => {
-    it('should inherit things from Dockerode', () => {
-      expect(Landerode.prototype).to.be.an.instanceOf(Dockerode);
+    test('should inherit things from Dockerode', () => {
+      expect(Landerode.prototype).toBeInstanceOf(Dockerode);
     });
   });
 
   describe('#createNetwork', () => {
-    it('should merge name correctly into opts', () => {
-      const stub = sinon.stub(landerode, 'createNetwork')
-        .usingPromise(Promise)
-        .resolves();
-      return landerode.createNet('elthree', {}).then(() => {
-        // for some reason should/expect doesn't work here...
-        stub.calledWith({Name: 'elthree'});
-        stub.restore();
-      });
+    test('should merge name correctly into opts', async () => {
+      const stub = jest.spyOn(landerode, 'createNetwork').mockResolvedValue();
+      await landerode.createNet('elthree', {});
+      expect(stub).toHaveBeenCalled();
+      const callArgs = stub.mock.calls[0][0];
+      expect(callArgs.Name).toBe('elthree');
+      expect(callArgs.Internal).toBe(true);
+      stub.mockRestore();
     });
-    it('should throw an error if can\'t create network', () => {
-      const stub = sinon.stub(landerode, 'createNetwork').rejects('Too Many Capes');
 
-      return landerode.createNet('hardtimes').should.be.rejectedWith('Too Many Capes')
-      .then(() => {
-        stub.restore();
-      });
+    test('should throw an error if can\'t create network', async () => {
+      const stub = jest.spyOn(landerode, 'createNetwork').mockRejectedValue(new Error('Too Many Capes'));
+
+      await expect(landerode.createNet('hardtimes')).rejects.toThrow('Too Many Capes');
+      stub.mockRestore();
     });
   });
 
   describe('#inspect', () => {
-    it('should throw an error if inspect fails', () => {
-      // We need this chain of stubs to send our call down an explicit line that
-      // will eventually throw a solid exception.
-      let bogusContainer = dummyContainer();
-      const inspectStub = sinon.stub(bogusContainer, 'inspect').throws();
-      const stub = sinon.stub(landerode, 'getContainer').returns(bogusContainer);
+    test('should throw an error if inspect fails', () => {
+      const bogusContainer = dummyContainer();
+      const inspectStub = jest.spyOn(bogusContainer, 'inspect').mockImplementation(() => {
+        throw new Error('inspect failed');
+      });
+      const stub = jest.spyOn(landerode, 'getContainer').mockReturnValue(bogusContainer);
 
-      // Throw needs a function to check rather than a function result
       const cptPhasma = () => landerode.inspect('fn-2187');
 
-      expect(cptPhasma).to.throw();
+      expect(cptPhasma).toThrow();
 
-      inspectStub.restore();
-      stub.restore();
+      inspectStub.mockRestore();
+      stub.mockRestore();
     });
   });
 
   describe('#isRunning', () => {
-    it('should return false if State.Running inspect data is false', () => {
-      // Container to return from 'getContainer'
+    test('should return false if State.Running inspect data is false', async () => {
       const bogusContainer = dummyContainer();
-      // Force the state of the container to not be running.
-      const inspectStub = sinon.stub(bogusContainer, 'inspect').resolves({
+      const inspectStub = jest.spyOn(bogusContainer, 'inspect').mockResolvedValue({
         State: {
           Running: false,
         },
       });
-      // Force the return of our container
-      const getStub = sinon.stub(landerode, 'getContainer').returns(bogusContainer);
+      const getStub = jest.spyOn(landerode, 'getContainer').mockReturnValue(bogusContainer);
 
-      return landerode.isRunning('YT-1300').should.eventually.be.false
-      .then(() => {
-        inspectStub.restore();
-        getStub.restore();
-      });
+      const result = await landerode.isRunning('YT-1300');
+      expect(result).toBe(false);
+
+      inspectStub.mockRestore();
+      getStub.mockRestore();
     });
 
-    it('should return true if State.Running inspect data is true', () => {
-      // Container to return from 'getContainer';;l
+    test('should return true if State.Running inspect data is true', async () => {
       const bogusContainer = new Dockerode.Container({}, 'YT-1300');
-      // Force the state of the container to be running.
-      const inspectStub = sinon.stub(bogusContainer, 'inspect').resolves({
+      const inspectStub = jest.spyOn(bogusContainer, 'inspect').mockResolvedValue({
         State: {
           Running: true,
         },
       });
-      // Force the return of our container
-      const getStub = sinon.stub(landerode, 'getContainer').returns(bogusContainer);
+      const getStub = jest.spyOn(landerode, 'getContainer').mockReturnValue(bogusContainer);
 
-      return landerode.isRunning('YT-1300').should.eventually.be.true
-      .then(() => {
-        inspectStub.restore();
-        getStub.restore();
-      });
+      const result = await landerode.isRunning('YT-1300');
+      expect(result).toBe(true);
+
+      inspectStub.mockRestore();
+      getStub.mockRestore();
     });
 
-    it('should return false if container doesn\'t exist', () => {
-      // Our own little bad container.
+    test('should return false if container doesn\'t exist', async () => {
       const bogusContainer = new Dockerode.Container();
-      // Throw the proper error.
-      const inspectStub = sinon.stub(bogusContainer, 'inspect')
-      .rejects(new Error('No such container: foo'));
-      // Make sure we return the proper failing container.
-      const getStub = sinon.stub(landerode, 'getContainer')
-      .returns(bogusContainer);
+      const inspectStub = jest.spyOn(bogusContainer, 'inspect')
+        .mockRejectedValue(new Error('No such container: foo'));
+      const getStub = jest.spyOn(landerode, 'getContainer')
+        .mockReturnValue(bogusContainer);
 
-      return landerode.isRunning('foo').should.eventually.be.false.then(() => {
-        getStub.restore();
-        inspectStub.restore();
-      });
+      const result = await landerode.isRunning('foo');
+      expect(result).toBe(false);
+
+      getStub.mockRestore();
+      inspectStub.mockRestore();
     });
 
-    it('should throw an error on all other catches', () => {
-      // Our own little bad container.
+    test('should throw an error on all other catches', async () => {
       const bogusContainer = new Dockerode.Container();
-      // Throw the proper error.
-      const inspectStub = sinon.stub(bogusContainer, 'inspect').rejects(new Error('It\'s a trap!'));
-      // Make sure we return the proper failing container.
-      const getStub = sinon.stub(landerode, 'getContainer').returns(bogusContainer);
+      const inspectStub = jest.spyOn(bogusContainer, 'inspect').mockRejectedValue(new Error('It\'s a trap!'));
+      const getStub = jest.spyOn(landerode, 'getContainer').mockReturnValue(bogusContainer);
 
-      return landerode.isRunning('foo').should.be
-      .rejectedWith('It\'s a trap!').then(() => {
-        getStub.restore();
-        inspectStub.restore();
-      });
+      let thrownError;
+      try {
+        await landerode.isRunning('foo');
+      } catch (err) {
+        thrownError = err;
+      }
+      expect(thrownError).toBeDefined();
+      expect(thrownError.message).toContain('It\'s a trap!');
+
+      getStub.mockRestore();
+      inspectStub.mockRestore();
     });
   });
 
   describe('#list', () => {
-    // this is a hack to stop mock-fs from not finding some module deps
     require('../utils/to-lando-container');
     require('../utils/docker-composify');
 
     beforeEach(() => {
-      filesystem({
-        '/tmp/.lando.yml': 'CODEZ',
-      });
+      tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'lando-test-'));
+      fs.writeFileSync(path.join(tempDir, '.lando.yml'), 'CODEZ');
     });
 
-    it('should filter out any containers that are pending removal', () => {
-      const listStub = sinon.stub(landerode, 'listContainers')
-      .usingPromise(Promise)
-      .resolves([
-          dummyContainer({Status: 'Being Awesome'}),
-          dummyContainer({Status: 'Removal In Progress'}),
-      ]);
-      return landerode.list()
-      .should.eventually.be.an('Array').with.a.lengthOf(1)
-      .then(() => {
-        listStub.restore();
-      });
+    test('should filter out any containers that are pending removal', async () => {
+      const listStub = jest.spyOn(landerode, 'listContainers')
+        .mockImplementation(() => Promise.resolve([
+          dummyContainer({Status: 'Being Awesome', Labels: {...dummyContainer().Labels, 'io.lando.src': path.join(tempDir, '.lando.yml')}}),
+          dummyContainer({
+            Status: 'Removal In Progress',
+            Labels: {...dummyContainer().Labels, 'io.lando.src': path.join(tempDir, '.lando.yml')},
+          }),
+        ]));
+      const result = await landerode.list();
+      expect(result).toBeInstanceOf(Array);
+      expect(result).toHaveLength(1);
+      listStub.mockRestore();
     });
 
-    it('should remove any "null" containers', () => {
-      const listStub = sinon.stub(landerode, 'listContainers')
-      .usingPromise(Promise)
-      .resolves([
-        null,
-        dummyContainer({identity: 'Solo'}),
-      ]);
+    test('should remove any "null" containers', async () => {
+      const listStub = jest.spyOn(landerode, 'listContainers')
+        .mockImplementation(() => Promise.resolve([
+          null,
+          dummyContainer({identity: 'Solo', Labels: {...dummyContainer().Labels, 'io.lando.src': path.join(tempDir, '.lando.yml')}}),
+        ]));
 
-      return landerode.list()
-      .should.eventually.be.an('Array').with.a.lengthOf(1)
-      .then(() => {
-        listStub.restore();
-      });
+      const result = await landerode.list();
+      expect(result).toBeInstanceOf(Array);
+      expect(result).toHaveLength(1);
+      listStub.mockRestore();
     });
 
-    it('should filter out non-lando containers', () => {
-      const listStub = sinon.stub(landerode, 'listContainers')
-      .usingPromise(Promise)
-      .resolves([
-        dummyContainer({Labels: {'io.lando.container': 'FALSE'}}),
-        dummyContainer(),
-      ]);
+    test('should filter out non-lando containers', async () => {
+      const listStub = jest.spyOn(landerode, 'listContainers')
+        .mockImplementation(() => Promise.resolve([
+          dummyContainer({Labels: {'io.lando.container': 'FALSE'}}),
+          dummyContainer({Labels: {...dummyContainer().Labels, 'io.lando.src': path.join(tempDir, '.lando.yml')}}),
+        ]));
 
-      return landerode.list()
-      .should.eventually.be.an('Array').with.a.lengthOf(1)
-      .then(() => {
-        listStub.restore();
-      });
+      const result = await landerode.list();
+      expect(result).toBeInstanceOf(Array);
+      expect(result).toHaveLength(1);
+      listStub.mockRestore();
     });
 
-    it('should filter by app name if given', () => {
-      const listStub = sinon.stub(landerode, 'listContainers')
-      .usingPromise(Promise)
-      .resolves([
-        dummyContainer({Labels: {
-          'com.docker.compose.project': 'alderaan',
-          'com.docker.compose.service': 'Rescue Mission',
-          'com.docker.compose.container-number': 73,
-          'com.docker.compose.oneoff': 'no',
-          'io.lando.container': 'TRUE',
-          'io.lando.id': 'lando',
-          'io.lando.service-container': 'no',
-          'io.lando.src': '/tmp/.lando.yml',
-        }}),
-        dummyContainer(),
-      ]);
+    test('should filter by app name if given', async () => {
+      const listStub = jest.spyOn(landerode, 'listContainers')
+        .mockImplementation(() => Promise.resolve([
+          dummyContainer({Labels: {
+            'com.docker.compose.project': 'alderaan',
+            'com.docker.compose.service': 'Rescue Mission',
+            'com.docker.compose.container-number': 73,
+            'com.docker.compose.oneoff': 'no',
+            'io.lando.container': 'TRUE',
+            'io.lando.id': 'lando',
+            'io.lando.service-container': 'no',
+            'io.lando.src': path.join(tempDir, '.lando.yml'),
+          }}),
+          dummyContainer({Labels: {...dummyContainer().Labels, 'io.lando.src': path.join(tempDir, '.lando.yml')}}),
+        ]));
 
-      return landerode.list({app: 'alderaan'})
-      .should.eventually.be.an('Array').with.a.lengthOf(1)
-      .then(() => {
-        listStub.restore();
-      });
+      const result = await landerode.list({app: 'alderaan'});
+      expect(result).toBeInstanceOf(Array);
+      expect(result).toHaveLength(1);
+      listStub.mockRestore();
     });
 
-    it('should throw an error on all other catches', () => {
-      let container = dummyContainer();
+    test('should throw an error on all other catches', async () => {
+      const container = dummyContainer();
       delete container.lando;
-      const listStub = sinon.stub(landerode, 'listContainers').resolves([container]);
+      const listStub = jest.spyOn(landerode, 'listContainers')
+        .mockImplementation(() => Promise.resolve([container]));
 
-      const fail = () => landerode.list();
-      expect(fail).to.throw();
-      return listStub.restore();
+      let thrownError;
+      try {
+        await landerode.list();
+      } catch (err) {
+        thrownError = err;
+      }
+      expect(thrownError).toBeDefined();
+      listStub.mockRestore();
     });
 
     afterEach(() => {
-      filesystem.restore();
+      if (tempDir) {
+        fs.rmSync(tempDir, {recursive: true, force: true});
+      }
     });
   });
 
   describe('#remove', () => {
-    it('should throw an error if remove fails', () => {
+    test('should throw an error if remove fails', async () => {
       const container = dummyContainer({Id: '1234'});
 
-      const getStub = sinon.stub(landerode, 'getContainer').returns(container);
-      const removeStub = sinon.stub(container, 'remove')
-        .usingPromise(Promise)
-        .rejects('Oh No!');
+      const getStub = jest.spyOn(landerode, 'getContainer').mockReturnValue(container);
+      const removeStub = jest.spyOn(container, 'remove')
+        .mockRejectedValue(new Error('Oh No!'));
 
-      landerode.remove('1234').should.be.rejectedWith('Oh No!')
-      .then(() => {
-        getStub.restore();
-        removeStub.restore();
-      });
+      await expect(landerode.remove('1234')).rejects.toThrow('Oh No!');
+
+      getStub.mockRestore();
+      removeStub.mockRestore();
     });
   });
 });

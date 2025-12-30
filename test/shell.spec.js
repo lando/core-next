@@ -1,36 +1,30 @@
-/**
- * Tests for shell module.
- * @file shell.spec.js
- */
-
 'use strict';
 
+const {describe, test, expect, beforeEach, afterEach, jest} = require('bun:test');
 const _ = require('lodash');
 const _shell = require('shelljs');
 const child = require('child_process');
-const chai = require('chai');
-const expect = chai.expect;
-const filesystem = require('mock-fs');
+const fs = require('fs');
 const os = require('os');
 const path = require('path');
-const sinon = require('sinon');
 const Shell = require('./../lib/shell');
-chai.use(require('sinon-chai'));
-chai.use(require('chai-as-promised'));
-chai.should();
 
-// Return mock error code based on commands
+let tempDir;
+
 const errorCode = cmd => {
   return !_.includes(cmd, 'bomb') ? 0 : _.random(1, 666);
 };
 
-// Fake Spawner
 const fakeSpawn = (cmd, args) => {
   const command = cmd + ' ' + args.join(' ');
   return {
     connected: !_.includes(command, 'van the man'),
     stdout: {on: (type, fn) => {
         fn(Buffer.from('SPAWN: ' + command, 'utf8'));
+      },
+    },
+    stderr: {on: (type, fn) => {
+        fn(Buffer.from('', 'utf8'));
       },
     },
     on: (type, fn) => {
@@ -40,127 +34,151 @@ const fakeSpawn = (cmd, args) => {
   };
 };
 
-// Fake execer
 const fakeExec = (cmd, opts, resolve) => {
   resolve(errorCode(cmd), 'EXEC: ' + cmd, '');
 };
 
 describe('shell', () => {
   describe('#Shell', () => {
-    it('should return a Shell instance with correct default options', () => {
+    test('should return a Shell instance with correct default options', () => {
       const shell = new Shell();
-      shell.should.be.instanceof(Object);
-      shell.should.have.property('log');
+      expect(shell).toBeInstanceOf(Object);
+      expect(shell).toHaveProperty('log');
     });
   });
 
   describe('#sh', () => {
-    it('should use shelljs.exec when mode is exec and detached is false', () => {
+    test('should use shelljs.exec when mode is exec and detached is false', async () => {
       const shell = new Shell();
-      sinon.stub(_shell, 'exec').callsFake(fakeExec);
-      return shell.sh(['slip', 'sliding', 'away'])
-        .then(result => {
-          result.should.equal('EXEC: slip sliding away');
-        })
-        .then(_shell.exec.restore())
-        .should.be.fulfilled;
+      const originalExec = _shell.exec;
+      _shell.exec = fakeExec;
+      try {
+        const result = await shell.sh(['slip', 'sliding', 'away']);
+        expect(result).toBe('EXEC: slip sliding away');
+      } finally {
+        _shell.exec = originalExec;
+      }
     });
 
-    it('should use child_process.spawn when mode is not exec or detached is true', () => {
+    test('should use child_process.spawn when mode is not exec or detached is true', async () => {
       const shell = new Shell();
-      sinon.stub(child, 'spawn').callsFake(fakeSpawn);
-      _.forEach([{mode: 'collect'}, {detached: true}], opts => {
-        return shell.sh(['tupelo', 'honey', 'baby'], opts)
-          .then(result => {
-            result.should.equal('SPAWN: tupelo honey baby');
-          })
-          .should.be.fulfilled;
-      });
-      child.spawn.restore();
+      const originalSpawn = child.spawn;
+      child.spawn = fakeSpawn;
+      try {
+        for (const opts of [{mode: 'collect'}, {detached: true}]) {
+          const result = await shell.sh(['tupelo', 'honey', 'baby'], opts);
+          expect(result).toBe('SPAWN: tupelo honey baby');
+        }
+      } finally {
+        child.spawn = originalSpawn;
+      }
     });
 
-    it('should reject on a non zero code with stderr as the message', () => {
+    test('should reject on a non zero code with stderr as the message', async () => {
       const shell = new Shell();
-      sinon.stub(child, 'spawn').callsFake(fakeSpawn);
-      return shell.sh(['set', 'us', 'up', 'the', 'bomb'], {mode: 'attach'}).should.be.rejected
-        .then(child.spawn.restore());
+      const originalSpawn = child.spawn;
+      child.spawn = fakeSpawn;
+      try {
+        let rejected = false;
+        try {
+          await shell.sh(['set', 'us', 'up', 'the', 'bomb'], {mode: 'attach'});
+        } catch (err) {
+          rejected = true;
+          expect(err).toBeDefined();
+        }
+        expect(rejected).toBe(true);
+      } finally {
+        child.spawn = originalSpawn;
+      }
     });
 
-    it('should resolve immediately when detached is true and run.connected is false', () => {
+    test('should resolve immediately when detached is true and run.connected is false', async () => {
       const shell = new Shell();
-      sinon.stub(child, 'spawn').callsFake(fakeSpawn);
-      return shell.sh(['van', 'the', 'man'], {detached: true}).should.be.fulfilled
-        .then(child.spawn.restore());
+      const originalSpawn = child.spawn;
+      child.spawn = fakeSpawn;
+      try {
+        const result = await shell.sh(['van', 'the', 'man'], {detached: true});
+        expect(result).toBeDefined();
+      } finally {
+        child.spawn = originalSpawn;
+      }
     });
 
-    it('should ignore stdin and pipe stdout and stderr when process.lando is not node', () => {
+    test('should ignore stdin and pipe stdout and stderr when process.lando is not node', async () => {
       const shell = new Shell();
       process.lando = 'browser';
-      sinon.stub(child, 'spawn').callsFake((cmd, args, opts) => {
-        opts.stdio[0].should.equal('ignore');
-        opts.stdio[1].should.equal('pipe');
-        opts.stdio[2].should.equal('pipe');
+      const originalSpawn = child.spawn;
+      child.spawn = (cmd, args, opts) => {
+        expect(opts.stdio[0]).toBe('ignore');
+        expect(opts.stdio[1]).toBe('pipe');
+        expect(opts.stdio[2]).toBe('pipe');
         return {
-          stdout: {on: sinon.spy()},
-          stderr: {on: sinon.spy()},
+          stdout: {on: jest.fn()},
+          stderr: {on: jest.fn()},
           on: (type, fn) => {
             if (type === 'close') fn(0);
           },
         };
-      });
-      return shell.sh(['van', 'the', 'man'], {mode: 'attach'}).should.be.fulfilled
-        .then(child.spawn.restore())
-        .then(() => {
-          delete process.lando;
-        });
+      };
+      try {
+        await shell.sh(['van', 'the', 'man'], {mode: 'attach'});
+      } finally {
+        child.spawn = originalSpawn;
+        delete process.lando;
+      }
     });
 
-    it('should inherit stdio when process.lando is node', () => {
+    test('should inherit stdio when process.lando is node', async () => {
       const shell = new Shell();
       process.lando = 'node';
-      sinon.stub(child, 'spawn').callsFake((cmd, args, opts) => {
-        opts.stdio.should.equal('inherit');
+      const originalSpawn = child.spawn;
+      child.spawn = (cmd, args, opts) => {
+        expect(opts.stdio).toBe('inherit');
         return {
-          stdout: {on: sinon.spy()},
+          stdout: {on: jest.fn()},
           on: (type, fn) => {
             if (type === 'close') fn(0);
           },
         };
-      });
-      return shell.sh(['van', 'the', 'man'], {mode: 'attach'}).should.be.fulfilled
-        .then(child.spawn.restore())
-        .then(() => {
-          delete process.lando;
-        });
+      };
+      try {
+        await shell.sh(['van', 'the', 'man'], {mode: 'attach'});
+      } finally {
+        child.spawn = originalSpawn;
+        delete process.lando;
+      }
     });
   });
 
   describe('#which', () => {
     const savePath = process.env.PATH;
+
     beforeEach(() => {
-      process.env.PATH = os.tmpdir();
-      const bin = {};
-      const content = 'Gorillaz on buildings throwing explosive bananas at each other with mathematical precision';
-      bin[path.join(os.tmpdir(), 'GORILLA.BAS')] = content;
-      filesystem(bin);
+      tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'lando-shell-test-'));
+      process.env.PATH = tempDir;
+      const binPath = path.join(tempDir, 'GORILLA.BAS');
+      fs.writeFileSync(binPath, 'Gorillaz on buildings');
+      fs.chmodSync(binPath, 0o755);
     });
 
-    it('should return the same as shelljs.which', () => {
+    test('should return the same as shelljs.which', () => {
       const shell = new Shell();
       const which1 = shell.which('GORILLA.BAS');
       const which2 = _shell.which('GORILLA.BAS');
-      _.toString(which1).should.equal(_.toString(which2));
+      expect(_.toString(which1)).toBe(_.toString(which2));
     });
 
-    it('should return null if command is not found', () => {
+    test('should return null if command is not found', () => {
       const shell = new Shell();
       const wolfenstein = shell.which('WOLFENSTEIN2D.exe');
-      expect(wolfenstein).to.be.null;
+      expect(wolfenstein).toBeNull();
     });
 
     afterEach(() => {
-      filesystem.restore();
       process.env.PATH = savePath;
+      if (tempDir && fs.existsSync(tempDir)) {
+        fs.rmSync(tempDir, {recursive: true, force: true});
+      }
     });
   });
 });

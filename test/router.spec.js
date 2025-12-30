@@ -1,9 +1,6 @@
-/*
- * Tests for router.
- * @file router.spec.js
- */
-
 'use strict';
+
+const {describe} = require('bun:test');
 
 describe('router', () => {
 });

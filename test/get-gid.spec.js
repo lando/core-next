@@ -1,14 +1,8 @@
-/**
- * Tests for user module.
- * @file user.spec.js
- */
-
 'use strict';
 
-const chai = require('chai');
-const expect = chai.expect;
+const {describe, test, expect} = require('bun:test');
+
 const originalPlatform = process.platform;
-chai.should();
 
 const setPlatform = function(platform) {
   Object.defineProperty(process, 'platform', {value: platform});
@@ -20,24 +14,23 @@ const resetPlatform = function() {
 const getGid = require('../utils/get-uid');
 
 describe('get-gid', () => {
-  it('should return group 1000 on Windows', () => {
+  test('should return group 1000 on Windows', () => {
     setPlatform('win32');
     const gid = getGid();
-    expect(gid).to.equal('1000');
-    expect(gid).to.be.a('string');
-    expect(isFinite(gid)).to.equal(true);
+    expect(gid).toBe('1000');
+    expect(typeof gid).toBe('string');
+    expect(isFinite(gid)).toBe(true);
     resetPlatform();
   });
 
-  it('should return a gid when no argument is specified', () => {
+  test('should return a gid when no argument is specified', () => {
     const gid = getGid();
-    expect(gid).to.be.a('string');
-    expect(isFinite(gid)).to.equal(true);
+    expect(typeof gid).toBe('string');
+    expect(isFinite(gid)).toBe(true);
   });
 
-
-  it('should return gid as a string', () => {
+  test('should return gid as a string', () => {
     const gid = getGid();
-    expect(gid).to.be.a('string');
+    expect(typeof gid).toBe('string');
   });
 });
