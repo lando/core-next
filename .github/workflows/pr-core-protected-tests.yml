@@ -61,9 +61,10 @@ jobs:
           config: |
             setup.skipCommonPlugins=true
       - name: Run Leia Tests
-        uses: lando/run-leia-action@v2
+        uses: lando/run-leia-action@bunify # TODO: switch to v2 after bunify is merged
         with:
           leia-test: "./examples/${{ matrix.leia-test }}/README.md"
           cleanup-header: "Destroy tests"
           shell: ${{ matrix.shell }}
           stdin: true
+          runtime: bun
