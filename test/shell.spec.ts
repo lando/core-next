@@ -1,11 +1,11 @@
-'use strict';
 
-const {describe, test, expect, beforeEach, afterEach} = require('bun:test');
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
 
-const Shell = require('./../lib/shell');
+import {describe, test, expect, beforeEach, afterEach} from 'bun:test';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+
+import Shell from './../lib/shell';
 
 let tempDir: string;
 

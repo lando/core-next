@@ -1,8 +1,8 @@
-'use strict';
 
-const {describe, expect, test, beforeEach, afterEach, jest} = require('bun:test');
 
-const UpdateManager = require('./../lib/updates');
+import {describe, expect, test, beforeEach, afterEach, jest} from 'bun:test';
+
+import UpdateManager from './../lib/updates';
 const updates = new UpdateManager();
 
 describe('updates', () => {

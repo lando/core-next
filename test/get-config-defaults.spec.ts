@@ -1,10 +1,10 @@
-'use strict';
 
-const {describe, test, expect} = require('bun:test');
-const _ = require('lodash');
-const hasher = require('object-hash');
 
-const getConfigDefaults = require('../utils/get-config-defaults');
+import {describe, test, expect} from 'bun:test';
+import _ from 'lodash';
+import hasher from 'object-hash';
+
+import getConfigDefaults from '../utils/get-config-defaults';
 
 describe('get-config-defaults', () => {
   test('should return a properly structured default config object', () => {

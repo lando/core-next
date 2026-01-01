@@ -1,12 +1,12 @@
-'use strict';
 
-const {describe, expect, test, beforeEach} = require('bun:test');
-const _ = require('lodash');
+
+import {describe, expect, test, beforeEach} from 'bun:test';
+import _ from 'lodash';
 const EventEmitter = require('events').EventEmitter;
-const fs = require('fs');
-const path = require('path');
+import fs from 'fs';
+import path from 'path';
 
-const Log = require('./../lib/logger');
+import Log from './../lib/logger';
 
 describe('logger', () => {
   beforeEach(() => {

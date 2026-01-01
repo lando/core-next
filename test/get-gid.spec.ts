@@ -1,6 +1,6 @@
-'use strict';
 
-const {describe, test, expect} = require('bun:test');
+
+import {describe, test, expect} from 'bun:test';
 
 const originalPlatform = process.platform;
 
@@ -11,7 +11,7 @@ const resetPlatform = function() {
   Object.defineProperty(process, 'platform', {value: originalPlatform});
 };
 
-const getGid = require('../utils/get-uid');
+import getGid from '../utils/get-uid';
 
 describe('get-gid', () => {
   test('should return group 1000 on Windows', () => {

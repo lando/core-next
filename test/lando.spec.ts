@@ -1,10 +1,10 @@
-'use strict';
 
-const {describe, expect, test, beforeEach} = require('bun:test');
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
-const Lando = require('./../.');
+
+import {describe, expect, test, beforeEach} from 'bun:test';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import Lando from './../.';
 
 const cliMock = {
   confirm: () => {},

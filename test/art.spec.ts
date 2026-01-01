@@ -1,8 +1,6 @@
-'use strict';
-
-const _ = require('lodash');
-const art = require('../lib/art');
-const {describe, expect, test} = require('bun:test');
+import _ from 'lodash';
+import art from '../lib/art';
+import {describe, expect, test} from 'bun:test';
 
 describe('art', () => {
   test('should return an object', () => {

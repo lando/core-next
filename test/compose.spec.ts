@@ -1,8 +1,8 @@
-'use strict';
 
-const {describe, expect, test} = require('bun:test');
 
-const compose = require('./../lib/compose');
+import {describe, expect, test} from 'bun:test';
+
+import compose from './../lib/compose';
 
 const myOpts = {
   'id': 'appname_service_1',

@@ -1,6 +1,6 @@
-'use strict';
 
-const {describe} = require('bun:test');
+
+import {describe} from 'bun:test';
 
 describe('router', () => {
 });

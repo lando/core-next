@@ -1,7 +1,7 @@
-'use strict';
 
-const {describe, test, expect, afterEach} = require('bun:test');
-const path = require('path');
+
+import {describe, test, expect, afterEach} from 'bun:test';
+import path from 'path';
 
 const originalPlatform = process.platform;
 
@@ -12,7 +12,7 @@ const resetPlatform = () => {
   Object.defineProperty(process, 'platform', {value: originalPlatform});
 };
 
-const getDockerBinPath = require('./../utils/get-docker-bin-path');
+import getDockerBinPath from './../utils/get-docker-bin-path';
 
 describe('get-docker-bin-path', () => {
   afterEach(() => {

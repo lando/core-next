@@ -1,7 +1,7 @@
-'use strict';
 
-const {describe, test, expect} = require('bun:test');
-const Table = require('../lib/table');
+
+import {describe, test, expect} from 'bun:test';
+import Table from '../lib/table';
 
 describe('table', () => {
   describe('#Table', () => {

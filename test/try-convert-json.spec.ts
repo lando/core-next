@@ -1,7 +1,7 @@
-'use strict';
 
-const {describe, test, expect} = require('bun:test');
-const tryConvertJson = require('../utils/try-convert-json');
+
+import {describe, test, expect} from 'bun:test';
+import tryConvertJson from '../utils/try-convert-json';
 
 describe('try-convert-json', () => {
   test('should return the unaltered input if input is not a parsable JSON string', () => {

@@ -87,7 +87,8 @@ const getRepos = answers => {
 // Helper to get sites for autocomplete
 const getAutoCompleteRepos = (answers, Promise, input = null) => {
   if (!_.isEmpty(gitHubRepos)) {
-    return Promise.resolve(gitHubRepos).filter(site => _.startsWith(site.name, input));
+    const filtered = gitHubRepos.filter(site => _.startsWith(site.name, input));
+    return Promise.resolve(filtered);
   } else {
     return getRepos(answers).then(sites => {
       gitHubRepos = sites;

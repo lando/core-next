@@ -1,9 +1,9 @@
-'use strict';
 
-const {describe, test, expect, beforeEach, afterEach} = require('bun:test');
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
+
+import {describe, test, expect, beforeEach, afterEach} from 'bun:test';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
 
 const originalPlatform = process.platform;
 let tempDir;
@@ -15,7 +15,7 @@ const resetPlatform = () => {
   Object.defineProperty(process, 'platform', {value: originalPlatform});
 };
 
-const getComposeExecutable = require('../utils/get-compose-x');
+import getComposeExecutable from '../utils/get-compose-x';
 
 describe('get-compose-x', () => {
   beforeEach(() => {

@@ -1,12 +1,12 @@
-'use strict';
 
-const {describe, expect, test, beforeEach, afterEach} = require('bun:test');
-const fs = require('fs');
-const os = require('os');
-const path = require('path');
-const hasher = require('object-hash');
 
-const loadFiles = require('../utils/load-config-files');
+import {describe, expect, test, beforeEach, afterEach} from 'bun:test';
+import fs from 'fs';
+import os from 'os';
+import path from 'path';
+import hasher from 'object-hash';
+
+import loadFiles from '../utils/load-config-files';
 
 let tempDir;
 

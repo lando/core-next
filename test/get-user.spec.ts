@@ -1,8 +1,8 @@
-'use strict';
 
-const {describe, expect, test} = require('bun:test');
 
-const getUser = require('../utils/get-user');
+import {describe, expect, test} from 'bun:test';
+
+import getUser from '../utils/get-user';
 
 describe('get-user', () => {
   test('should return "www-data" if no matching service is found', () => {

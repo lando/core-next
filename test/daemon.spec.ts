@@ -1,11 +1,11 @@
-'use strict';
 
-const {describe, expect, test} = require('bun:test');
 
-const Daemon = require('./../lib/daemon');
-const Log = require('./../lib/logger');
+import {describe, expect, test} from 'bun:test';
 
-const getDockerExecutable = require('../utils/get-docker-x');
+import Daemon from './../lib/daemon';
+import Log from './../lib/logger';
+
+import getDockerExecutable from '../utils/get-docker-x';
 
 describe('daemon', () => {
   describe('#LandoDaemon', () => {

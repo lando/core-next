@@ -1,11 +1,11 @@
-'use strict';
 
-const _ = require('lodash');
-const {describe, expect, test, beforeEach, jest} = require('bun:test');
-const fs = require('fs');
-const NodeCache = require('node-cache');
 
-const Cache = require('./../lib/cache');
+import _ from 'lodash';
+import {describe, expect, test, beforeEach, jest} from 'bun:test';
+import fs from 'fs';
+import NodeCache from 'node-cache';
+
+import Cache from './../lib/cache';
 
 describe('cache', () => {
   beforeEach(() => {

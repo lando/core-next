@@ -1,8 +1,8 @@
-'use strict';
 
-const {describe, expect, test} = require('bun:test');
 
-const Promise = require('../lib/promise');
+import {describe, expect, test} from 'bun:test';
+
+import Promise from '../lib/promise';
 
 describe('promise', () => {
   describe('#Promise', () => {

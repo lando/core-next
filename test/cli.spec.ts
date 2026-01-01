@@ -1,9 +1,9 @@
-'use strict';
 
-const {describe, expect, test, jest} = require('bun:test');
-const _ = require('lodash');
-const art = require('../lib/art');
-const Cli = require('../lib/cli');
+
+import {describe, expect, test, jest} from 'bun:test';
+import _ from 'lodash';
+import art from '../lib/art';
+import Cli from '../lib/cli';
 
 const fakeTask = {
   command: 'task [arg1]',

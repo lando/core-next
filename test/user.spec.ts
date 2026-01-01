@@ -1,8 +1,8 @@
-'use strict';
 
-const {describe, expect, test} = require('bun:test');
 
-const user = require('./../lib/user');
+import {describe, expect, test} from 'bun:test';
+
+import user from './../lib/user';
 
 describe('user', () => {
   describe('#getUid', () => {

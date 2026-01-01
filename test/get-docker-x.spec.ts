@@ -1,9 +1,9 @@
-'use strict';
 
-const {describe, test, expect, afterEach, beforeEach} = require('bun:test');
-const fs = require('fs-extra');
-const os = require('os');
-const path = require('path');
+
+import {describe, test, expect, afterEach, beforeEach} from 'bun:test';
+import fs from 'fs-extra';
+import os from 'os';
+import path from 'path';
 
 const originalPlatform = process.platform;
 let tempDir;
@@ -15,7 +15,7 @@ const resetPlatform = () => {
   Object.defineProperty(process, 'platform', {value: originalPlatform});
 };
 
-const getDockerExecutable = require('../utils/get-docker-x');
+import getDockerExecutable from '../utils/get-docker-x';
 
 describe('get-docker-x', () => {
   beforeEach(() => {

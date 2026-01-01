@@ -1,11 +1,11 @@
-'use strict';
 
-const {describe, expect, test, beforeEach, afterEach} = require('bun:test');
-const fs = require('fs-extra');
-const hasher = require('object-hash');
-const os = require('os');
-const path = require('path');
-const Yaml = require('./../lib/yaml');
+
+import {describe, expect, test, beforeEach, afterEach} from 'bun:test';
+import fs from 'fs-extra';
+import hasher from 'object-hash';
+import os from 'os';
+import path from 'path';
+import Yaml from './../lib/yaml';
 
 let tempDir;
 

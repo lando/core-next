@@ -1,9 +1,9 @@
-'use strict';
 
-const {describe, expect, test, jest} = require('bun:test');
-const ErrorHandler = require('./../lib/error');
+
+import {describe, expect, test, jest} from 'bun:test';
+import ErrorHandler from './../lib/error';
 const EventEmitter = require('events').EventEmitter;
-const Metrics = require('./../lib/metrics');
+import Metrics from './../lib/metrics';
 
 describe('error', () => {
   describe('#ErrorHandler', () => {

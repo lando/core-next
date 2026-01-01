@@ -1,7 +1,7 @@
-'use strict';
 
-const {describe, test, expect} = require('bun:test');
-const stripEnv = require('../utils/strip-env');
+
+import {describe, test, expect} from 'bun:test';
+import stripEnv from '../utils/strip-env';
 
 describe('strip-env', () => {
   test('should return process.env stripped of all keys that start with prefix', () => {

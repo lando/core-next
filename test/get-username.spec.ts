@@ -1,8 +1,8 @@
-'use strict';
 
-const {describe, test, expect} = require('bun:test');
 
-const getUsername = require('../utils/get-username');
+import {describe, test, expect} from 'bun:test';
+
+import getUsername from '../utils/get-username';
 
 describe('get-username', () => {
   test('should return a string', () => {

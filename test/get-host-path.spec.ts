@@ -1,8 +1,8 @@
-'use strict';
 
-const {describe, test, expect} = require('bun:test');
 
-const getHostPath = require('../utils/get-host-path');
+import {describe, test, expect} from 'bun:test';
+
+import getHostPath from '../utils/get-host-path';
 
 describe('get-host-path', () => {
   test('should return the correct host path on posix', () => {

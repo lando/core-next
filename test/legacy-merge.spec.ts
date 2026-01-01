@@ -1,10 +1,10 @@
-'use strict';
 
-const {describe, expect, test} = require('bun:test');
-const _ = require('lodash');
-const hasher = require('object-hash');
 
-const merge = require('../utils/legacy-merge');
+import {describe, expect, test} from 'bun:test';
+import _ from 'lodash';
+import hasher from 'object-hash';
+
+import merge from '../utils/legacy-merge';
 
 describe('merge', () => {
   test('should return the same as _.merge for objects', () => {

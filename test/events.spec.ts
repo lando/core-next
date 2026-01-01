@@ -1,9 +1,9 @@
-'use strict';
 
-const _ = require('lodash');
-const {describe, expect, test} = require('bun:test');
 
-const AsyncEvents = require('../lib/events');
+import _ from 'lodash';
+import {describe, expect, test} from 'bun:test';
+
+import AsyncEvents from '../lib/events';
 
 describe('events', () => {
   describe('#AsyncEvents', () => {

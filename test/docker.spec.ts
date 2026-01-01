@@ -1,14 +1,14 @@
-'use strict';
 
-const {describe, expect, test, beforeEach, afterEach, jest} = require('bun:test');
-const fs = require('fs-extra');
-const os = require('os');
-const path = require('path');
-const Landerode = require('./../lib/docker');
+
+import {describe, expect, test, beforeEach, afterEach, jest} from 'bun:test';
+import fs from 'fs-extra';
+import os from 'os';
+import path from 'path';
+import Landerode from './../lib/docker';
 const landerode = new Landerode();
-const Dockerode = require('dockerode');
-const _ = require('lodash');
-const Promise = require('./../lib/promise');
+import Dockerode from 'dockerode';
+import _ from 'lodash';
+import Promise from './../lib/promise';
 
 let tempDir;
 

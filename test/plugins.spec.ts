@@ -1,10 +1,10 @@
-'use strict';
 
-const {afterEach, beforeEach, describe, expect, jest, test} = require('bun:test');
-const fs = require('fs-extra');
-const os = require('os');
-const path = require('path');
-const Plugins = require('./../lib/plugins');
+
+import {afterEach, beforeEach, describe, expect, jest, test} from 'bun:test';
+import fs from 'fs-extra';
+import os from 'os';
+import path from 'path';
+import Plugins from './../lib/plugins';
 
 const testPlugin = path.resolve(__dirname, '..', 'examples', 'plugins', 'test-plugin-2', 'index.js');
 const testPluginYml = path.resolve(__dirname, '..', 'examples', 'plugins', 'test-plugin-2', 'plugin.yml');

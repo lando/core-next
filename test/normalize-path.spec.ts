@@ -1,10 +1,10 @@
-'use strict';
 
-const {describe, expect, test} = require('bun:test');
-const os = require('os');
-const path = require('path');
 
-const normalizePath = require('../utils/normalize-path');
+import {describe, expect, test} from 'bun:test';
+import os from 'os';
+import path from 'path';
+
+import normalizePath from '../utils/normalize-path';
 
 describe('#normalize-path', () => {
   test('should return itself if it starts with $', () => {

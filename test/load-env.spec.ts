@@ -1,8 +1,8 @@
-'use strict';
 
-const {describe, expect, test} = require('bun:test');
 
-const loadEnvs = require('../utils/load-env');
+import {describe, expect, test} from 'bun:test';
+
+import loadEnvs from '../utils/load-env';
 
 describe('load-env', () => {
   test('should return an object built from all keys from process.env that start with a given prefix', () => {

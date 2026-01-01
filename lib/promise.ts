@@ -100,6 +100,26 @@ const mapSeries = async <T, R>(
 };
 
 /**
+ * Filter an array with an async predicate function.
+ *
+ * @param {Array} arr - Array to filter
+ * @param {Function} fn - Async predicate function returning boolean
+ * @return {Promise<Array>} - Resolves with filtered array
+ */
+const filter = async <T>(
+  arr: T[],
+  fn: (item: T, index: number, array: T[]) => boolean | Promise<boolean>,
+): Promise<T[]> => {
+  const results: T[] = [];
+  for (let i = 0; i < arr.length; i++) {
+    if (await fn(arr[i], i, arr)) {
+      results.push(arr[i]);
+    }
+  }
+  return results;
+};
+
+/**
  * Retry a function up to max times with exponential backoff.
  *
  * @since 3.0.0
@@ -134,6 +154,7 @@ interface LandoPromiseConstructor extends PromiseConstructor {
   delay: typeof delay;
   try: typeof promiseTry;
   each: typeof each;
+  filter: typeof filter;
   map: typeof map;
   mapSeries: typeof mapSeries;
   retry: typeof retry;
@@ -143,6 +164,7 @@ const LandoPromise = Promise as LandoPromiseConstructor;
 (LandoPromise as any).delay = delay;
 (LandoPromise as any).try = promiseTry;
 (LandoPromise as any).each = each;
+(LandoPromise as any).filter = filter;
 (LandoPromise as any).map = map;
 (LandoPromise as any).mapSeries = mapSeries;
 (LandoPromise as any).retry = retry;
