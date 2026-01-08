@@ -51,6 +51,9 @@ class Product {
     // @TODO: WTF IS THIS?
     // this.config.defaults('product-defaults', require('../workspace/product-defaults')({ id: this.id, env: this.id }));
 
+    this.debug('am i here?');
+    console.log(this.config.get('system'));
+
     // get the id
     if (!this.config.get(`${this.config.managed}:system.instance`)) {
       const data = { system: { instance: generateId() } };

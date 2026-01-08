@@ -16,6 +16,7 @@ import getDefaultConfig from '../utils/get-default-config.js';
 import getObjectSizes from '../utils/get-object-sizes.js';
 import getSize from '../utils/get-size.js';
 import getSystemDataDir from '../utils/get-system-data-dir.js';
+import loadComponent from '../utils/load-component.js';
 import normalizeManifestPaths from '../utils/normalize-manifest-paths.js';
 import runHook from '../utils/run-hook.js';
 import write from '../utils/write-file.js';
@@ -66,9 +67,9 @@ export default class Cli {
     debug = createDebug(Cli.id),
     enableDebugger = false,
     hooks = {},
+    pjson = packageJson,
     plugins = [],
     product = Product,
-    pjson = packageJson,
     root = Cli.getRoot(),
   } = {}) {
     // id
@@ -82,8 +83,9 @@ export default class Cli {
     this.hooks = hooks;
     this.pjson = pjson;
     this.plugins = plugins;
-    this.product = product;
     this.root = root;
+
+    this.Product = product;
 
     // enable debug if needed
     if (enableDebugger !== false) this.enableDebugger(enableDebugger);
@@ -251,7 +253,7 @@ export default class Cli {
       cached: this.#_oclif.configCache,
       debug: this.debug.contract().extend('config'),
       id: this.id,
-      managed: 'managed',
+      managed: 'global',
     });
 
     // get early oclif hooks, these are special hooks you can use to mutate the cli config before we start
@@ -305,14 +307,19 @@ export default class Cli {
     // dump cache
     config.dump();
 
+    // any post config changes
     await this.runHook('post-config', { config });
 
-    // console.log(config.get());
-    process.exit(1);
+    // run product through loadComponent to handle different input types
+    this.Product = await loadComponent(this.Product);
+    // and instantiate
+    const product = new this.Product(config, { debug: this.debug.contract().extend(this.id) });
 
     // @TODO:
-    // 1. get "product" allow this to be overridden in CLI options?
-    // 2. is the "product" basically our "core" plugin? does this replace the "plugins" option in the CLI?
+    // 1. get product with load-component?
+    console.log(product);
+
+    process.exit(1);
 
     // this.debug('going to use %o as product', minstrapper.product);
 

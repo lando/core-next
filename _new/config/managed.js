@@ -81,7 +81,7 @@ export default function managedConfigTemplate(options) {
       logsDir,
       mode: 'cli',
       name,
-      packaged: Object.hasOwn(process, 'pkg'),
+      packaged: isCompiled,
       root,
       shell: which.sync(shell, { nothrow: true }),
       syscacheDir,
