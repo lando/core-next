@@ -1,3 +1,3 @@
-export default async function hello2({ debug }) {
+export default async function test3({ debug }) {
   debug('hello there2!');
 }

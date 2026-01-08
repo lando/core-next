@@ -1,7 +1,10 @@
 import createDebug from '../lib/debug.js';
 import id2key from '../utils/normalize-id2key.js';
 
-class NoStorage {
+/*
+ * Return the class
+ */
+export default class NoStorage {
   static name = 'no-storage';
   static cspace = 'no-storage';
   static debug = createDebug('@lando/devtool:no-storage');
@@ -50,8 +53,3 @@ class NoStorage {
     this.debug('caching disabled and/or using no storage backend so did not update key %o', id2key(key));
   }
 }
-
-/*
- * Return the class
- */
-export default NoStorage;

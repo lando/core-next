@@ -31,7 +31,7 @@ import write from '../utils/write-file.js';
  */
 class Config extends nconf.Provider {
   static id = 'config';
-  static debug = createDebug('devtool:config');
+  static debug = createDebug('lando:config');
 
   static keys(data, { prefix = '', expandArrays = true } = {}) {
     return getObjectKeys(data, { prefix, expandArrays });
@@ -89,7 +89,7 @@ class Config extends nconf.Provider {
 
   add(name, options) {
     // log
-    const dopts = { encode: get(options, 'encode', this.encode), source: options.file };
+    const dopts = { encode: get(options, 'encode', this.encode), source: options.file ?? name };
     this.debug('adding %o store %o to %o config %o', options.type, name, this.id, dopts);
     // kick upstream
     super.add(name, { logicalSeparator: '.', parseValues: true, ...options });

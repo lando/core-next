@@ -4,7 +4,7 @@ import path from 'node:path';
 import isDocker from 'is-docker';
 import isRoot from 'is-root';
 
-export default async ({ cli, debug }) => {
+export default async function preFlightChecks({ cli, debug }) {
   // get the main things
   const { arch, bin, cacheDir, platform } = cli.product.config.get('system');
   const uid = process.getuid ? process.getuid() : '-1';
@@ -75,4 +75,4 @@ export default async ({ cli, debug }) => {
   } catch (error) {
     debug('something went wrong saving the compat hashmap, not critical so just ignoring. error was %o', error);
   }
-};
+}

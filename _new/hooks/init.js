@@ -1,4 +1,4 @@
-export default async ({ id, argv, cli }) => {
+export default async function init({ id, argv, cli }) {
   // hook for preflight checks
   await cli.runHook('init-preflight');
 
@@ -16,4 +16,4 @@ export default async ({ id, argv, cli }) => {
   await cli.runHook('init-tasks', { id, argv, tasks: cli.tasks });
   // final hook to do stuff to the init
   await cli.runHook('init-final');
-};
+}

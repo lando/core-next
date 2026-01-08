@@ -8,6 +8,7 @@ import get from 'lodash-es/get.js';
 
 import Config from '../lib/config.js';
 import Templator from '../lib/templator.js';
+// import Product from '../lib/product.js';
 
 import createDebug from '../lib/debug.js';
 import getCacheDir from '../utils/get-cache-dir.js';
@@ -48,20 +49,7 @@ process.stdout.on('error', (err) => {
  * Construct the CLI
  */
 export default class Cli {
-  static id = 'lando';
-  static globalFlags = {
-    'clear': Flags.boolean({ hidden: true }),
-    'config': Flags.string({
-      char: 'c',
-      description: 'use configuration from specified file',
-      env: `${Cli.id.toUpperCase()}_CONFIG_FILE`,
-      default: undefined,
-      hidden: true,
-      helpGroup: 'GLOBAL',
-    }),
-    'debug': Flags.boolean({ hidden: false }),
-    'no-cache': Flags.boolean({ hidden: false }),
-  };
+  static id = 'lando:cli';
 
   static getRoot() {
     return BUILD_IS_COMPILED ? path.resolve(__dirname) : path.resolve(__dirname, '../..');
@@ -79,6 +67,7 @@ export default class Cli {
     enableDebugger = false,
     hooks = {},
     plugins = [],
+    // product = Product,
     pjson = packageJson,
     root = Cli.getRoot(),
   } = {}) {
@@ -93,6 +82,7 @@ export default class Cli {
     this.hooks = hooks;
     this.pjson = pjson;
     this.plugins = plugins;
+    //this.product = product;
     this.root = root;
 
     // enable debug if needed
@@ -111,18 +101,6 @@ export default class Cli {
     // @TODO: other stuff eg version?
   }
 
-  async #getStorageBackend(cache = this.cache) {
-    // @IDEA: get this from core plugin manifest?
-    const backends = {
-      'file-storage': async () => await import('../components/file-storage.js'),
-      'no-storage': async () => await import('../components/no-storage.js'),
-    };
-
-    const { default: StorageBackend } = await backends[cache === true ? 'file-storage' : 'no-storage']();
-
-    return StorageBackend;
-  }
-
   async #generateConfigTemplates(templates = [], genOpts = {}) {
     // filter out stuff so we only end up with stuff we actually need to template
     templates = templates.filter(([source, dest, options = {}]) => {
@@ -138,10 +116,38 @@ export default class Cli {
 
     if (templates.length > 0) {
       for (const [source, dest, options] of templates) {
-        const templator = new Templator(source, dest, { debug: this.debug.extend('templator'), ...options });
+        const templator = new Templator(source, dest, { debug: this.debug.contract().extend('templator'), ...options });
         templator.generate(genOpts);
       }
     }
+  }
+
+  #getGlobalFlags(id = this.id) {
+    return {
+      'clear': Flags.boolean({ hidden: true }),
+      'config-file': Flags.string({
+        char: 'c',
+        description: 'use configuration from specified file',
+        env: `${id.toUpperCase()}_CONFIG_FILE`,
+        default: undefined,
+        hidden: true,
+        helpGroup: 'GLOBAL',
+      }),
+      'debug': Flags.boolean({ hidden: false }),
+      'no-cache': Flags.boolean({ hidden: false }),
+    };
+  }
+
+  async #getStorageBackend(cache = this.cache) {
+    // @IDEA: get this from core plugin manifest?
+    const backends = {
+      'file-storage': async () => await import('../components/file-storage.js'),
+      'no-storage': async () => await import('../components/no-storage.js'),
+    };
+
+    const { default: StorageBackend } = await backends[cache === true ? 'file-storage' : 'no-storage']();
+
+    return StorageBackend;
   }
 
   enableDebugger(namespace) {
@@ -202,7 +208,7 @@ export default class Cli {
   async parse(argv = process.argv.slice(2), options = {}) {
     // NOTE: we are only interested in parsing and normalizing so its ok for validation to fail
     try {
-      options._parsed = await parse(argv, { strict: false, flags: Cli.globalFlags, ...options });
+      options._parsed = await parse(argv, { strict: false, flags: this.#getGlobalFlags(this.id), ...options });
     } catch (error) {
       options._parsed = error.parse.output;
     }
@@ -243,7 +249,7 @@ export default class Cli {
     // start our config collection and load config sources in decreasing priority
     const config = new Config({
       cached: this.#_oclif.configCache,
-      debug: this.debug.extend('config'),
+      debug: this.debug.contract().extend('config'),
       id: this.id,
       managed: 'managed',
     });
@@ -262,56 +268,50 @@ export default class Cli {
     // FWIW if you are interested in modifying things at this level you should probably just get in touch with us
     // see: https://lando.dev/support
     await this.runHook('pre-config', { config });
-    console.log('hook done');
-    process.exit(1);
 
-    // @TODO:
-    // 1. config file loading via flag
+    // normalize our argv
+    const [id, ...argvSlice] = normalizeArgv(this.#_oclif, argv);
+    // get flags @TODO: and other things TBD?
+    const { flags } = await this.parse(argv, options);
+    this.debug('about to run command id %o with argv %o and parsed flags %o', id, argvSlice, flags);
 
-    // // normalize our argv
-    // const [id, ...argvSlice] = normalizeArgv(this.#_oclif, argv);
+    // normalize and process passed in config file
+    // @TODO: put this in parse?
+    if (flags['config-file']) {
+      if (fs.existsSync(path.resolve(flags['config-file']))) {
+        this.#_oclif.cliConfigFile = path.resolve(flags['config-file']);
+      } else {
+        this.debug('tried to load %o into config but it doesnt exist', flags['config-file']);
+      }
 
-    // // set command and remaining args
-    // this.command = id;
-
-    // // parse argv
-    // // @TODO: where does this stuff go?
-    // // parses options, flags, command, sets into this?
-    // const parsed = await this.parse(argvSlice, options);
-
-    // // debug if flag config file doesnt exist
-    // // @NOTE: should this be a proper error?
-    // // @NOTE: should we try to get an absolute path?
-    // if (this.flags.config && !fs.existsSync(this.flags.config)) {
-    //   this.debug('tried to load %o into config but it doesnt exist', this.flags.config);
-    // }
-
-    // debug
-    // this.debug('running command %o with args %o', id, argvSlice);
+      // remove from env so it doesnt end up in config below
+      delete process.env.LANDO_CONFIG_FILE;
+    }
 
     // if we have a CLI provided config source then thats first
-    if (oclif.configFile) config.overrides('userfile', Config.read(oclif.configFile), { encode: false });
+    if (this.#_oclif.cliConfigFile) config.overrides('userfile', Config.read(this.#_oclif.cliConfigFile), { encode: false });
     // then load in product envvars
     config.env(this.id);
     // then the user config
-    config.file('user', oclif.userConfigFile);
+    config.file('user', this.#_oclif.userConfigFile);
     // then the global/managed config
-    config.file('global', oclif.globalConfigFile);
+    config.file('global', this.#_oclif.managedConfigFile);
     // then system configuration if it exits
-    if (fs.existsSync(oclif.sysConfigFile)) config.file('system', oclif.sysConfigFile);
+    if (fs.existsSync(this.#_oclif.sysConfigFile)) config.file('system', this.#_oclif.sysConfigFile);
     // then defaults
     config.defaults('defaults', getDefaultConfig(this.id));
     // dump cache
     config.dump();
+
     // this.debug('oclif config loaded %O', oclif);
     await this.runHook('post-config', { config });
-    process.exit(1);
 
-    // const config = getProductConfig(oclif);
-
-    // console.log(getDefaultConfig(this.id));
     // console.log(config.get());
     process.exit(1);
+
+    // @TODO:
+    // 1. get "product" allow this to be overridden in CLI options?
+    // 2. is the "product" basically our "core" plugin? does this replace the "plugins" option in the CLI?
 
     // this.debug('going to use %o as product', minstrapper.product);
 

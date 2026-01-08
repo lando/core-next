@@ -22,7 +22,7 @@ const _read = (file) => fs.readFileSync(file, { encoding: 'utf8' });
 export default function read(file, options = {}) {
   // @TODO: file does nto exist?
 
-  // if no extension and discovered extension is .asset then this is a special workaround so bun build
+  // if no extension and discovered extension ends with -bun-asset then this is a special workaround so bun build
   // works nice with our templator
   if (!options.extension && file.endsWith('-bun-asset')) {
     options.extension = path.extname(file.replace(/-bun-asset$/, ''));

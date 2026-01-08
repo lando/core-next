@@ -6,7 +6,7 @@ function createDebug(namespace) {
   const debug = Debug(namespace);
 
   // this does the opposite of extend, moves the namespace back by size delimiter
-  debug.contract = (size) =>
+  debug.contract = (size = 1) =>
     createDebug(
       debug.namespace
         .split(':')

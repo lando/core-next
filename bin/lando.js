@@ -19,6 +19,7 @@ import dns from 'node:dns';
 
 import argv from '@lando/argv';
 
+import createDebug from '../_new/lib/debug.js';
 import Cli from '../_new/lib/cli.js';
 
 // set some defaults
@@ -49,10 +50,6 @@ if (process.env.LANDO_DEBUG) {
 // and finally prefer --debug
 if (argv.hasOption('--debug')) enableDebugger = argv.getOption('--debug', { defaultValue: 'lando*' });
 
-const namedfunc = async ({ debug }) => {
-  debug('named');
-};
-
 // construct the cli
 const cli = new Cli({
   cache: !argv.hasOption('--clear') && !argv.hasOption('--no-cache'),
@@ -60,18 +57,21 @@ const cli = new Cli({
     managed: (await import('../_new/config/managed.js')).default,
     user: (await import('../_new/config/user.yaml-bun-asset', { with: { type: 'file' } })).default,
   },
+  debug: createDebug('lando:cli'),
   hooks: {
     'pre-config': [
-      './_new/hooks/test.js',
-      './_new/hooks/test.cjs',
-      async () => await import('../_new/hooks/test.cjs'),
-      async () => await import('../_new/hooks/test2.js'),
-      namedfunc,
+      await import('../_new/hooks/test.cjs'),
+      {
+        async load() {
+          return await import('../_new/hooks/test.cjs');
+        },
+      },
+      async () => await import('../_new/hooks/test.js'),
       async function inlinefunc({ debug }) {
         debug('inline');
       },
     ],
-    'post-config': ['./_new/hooks/test.js'],
+    'post-config': [],
   },
   enableDebugger,
 });

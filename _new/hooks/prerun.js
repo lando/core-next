@@ -1,4 +1,4 @@
-export default async ({ id, data, cli, debug, task }) => {
+export default async function preRun({ id, data, cli, debug, task }) {
   await cli.runHook('pretask', { id, data, cli });
   await cli.runHook(`pretask-${id}`, { data, task, cli });
 
@@ -9,4 +9,4 @@ export default async ({ id, data, cli, debug, task }) => {
   // @TODO: we need to replace these with stuff from new handle interactive ^?
 
   await cli.runHook(id, { id, data });
-};
+}

@@ -1,4 +1,4 @@
-export default async ({ cli, debug }) => {
+export default async function cacheRebuild({ cli, debug }) {
   const { app, context, product } = cli;
 
   // reinit product syscache if caching is on
@@ -23,4 +23,4 @@ export default async ({ cli, debug }) => {
     cli.getHooks(context.app ? app : product);
     debug('reinitialized %o cache!', 'cli');
   }
-};
+}

@@ -3,6 +3,6 @@
 
 'use strict';
 
-module.exports = async function bob(thing) {
+module.exports = async function test1(thing) {
   thing.debug('test cjs.');
 };

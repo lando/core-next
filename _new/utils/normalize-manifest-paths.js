@@ -1,4 +1,5 @@
 import path from 'node:path';
+import util from 'node:util';
 
 import get from 'lodash-es/get.js';
 import set from 'lodash-es/set.js';
@@ -21,10 +22,13 @@ export default function normalizeManifestPaths(data = {}, base, pathyKeys = defa
   for (const key of getKeys(data)) {
     // skip if not a pathy key
     if (!pathyKeys.includes(key.split('.')[0])) continue;
-    // reset data to be an absolute path
-    // @TODO: should we test if abolute path exists?
+
+    // reset data to be an absolute path unless parent is a Module
     if (key && typeof get(data, key) === 'string' && !path.isAbsolute(get(data, key))) {
-      set(data, key, path.resolve(base, get(data, key)));
+      const parentKey = key.replace(/\.[^.]+$/, '');
+      if (util.types.isModuleNamespaceObject(get(data, parentKey)) === false) {
+        set(data, key, path.resolve(base, get(data, key)));
+      }
     }
   }
 
