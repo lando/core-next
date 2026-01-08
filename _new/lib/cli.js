@@ -8,7 +8,7 @@ import get from 'lodash-es/get.js';
 
 import Config from '../lib/config.js';
 import Templator from '../lib/templator.js';
-// import Product from '../lib/product.js';
+import Product from '../lib/product.js';
 
 import createDebug from '../lib/debug.js';
 import getCacheDir from '../utils/get-cache-dir.js';
@@ -67,7 +67,7 @@ export default class Cli {
     enableDebugger = false,
     hooks = {},
     plugins = [],
-    // product = Product,
+    product = Product,
     pjson = packageJson,
     root = Cli.getRoot(),
   } = {}) {
@@ -82,7 +82,7 @@ export default class Cli {
     this.hooks = hooks;
     this.pjson = pjson;
     this.plugins = plugins;
-    //this.product = product;
+    this.product = product;
     this.root = root;
 
     // enable debug if needed
@@ -285,7 +285,9 @@ export default class Cli {
       }
 
       // remove from env so it doesnt end up in config below
-      delete process.env.LANDO_CONFIG_FILE;
+      const { 'config-file': cfMeta } = this.#getGlobalFlags(this.id);
+      // remove envvar so it doesnt muck with downstream Config() stuff
+      delete process.env[cfMeta.env];
     }
 
     // if we have a CLI provided config source then thats first
@@ -303,7 +305,6 @@ export default class Cli {
     // dump cache
     config.dump();
 
-    // this.debug('oclif config loaded %O', oclif);
     await this.runHook('post-config', { config });
 
     // console.log(config.get());

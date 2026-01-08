@@ -1,7 +1,14 @@
 import fs from 'node:fs';
 
+import Config from '../lib/config.js';
+import FileStorage from '../components/file-storage.js';
+
+import createDebug from '../lib/debug.js';
+import generateId from '../utils/generate-id.js';
+
 class Product {
-  static debug = require('./debug')('@lando/core:product');
+  static debug = createDebug('lando:product');
+  static id = 'product';
 
   static findApp(files, startFrom) {
     return require('../utils/find-app')(files, startFrom);
@@ -23,10 +30,10 @@ class Product {
     this.#_init();
   }
 
-  constructor(config, { debug = Product.debug, StorageBackend = require('../components/file-storage') } = {}) {
+  constructor(config, { debug = Product.debug, StorageBackend = FileStorage } = {}) {
     // @TODO: throw error if not a config class?
     // @TODO: options for config?
-    this.config = config || new require('./config')(); // eslint-disable-line new-cap
+    this.config = config || new Config();
     // reset the config debugger
     this.config.constructor.debug = this.config.debug;
 
@@ -37,15 +44,16 @@ class Product {
     this.plugins = {};
 
     // core stuff
-    this.id = config.id || 'lando';
+    this.id = config.id ?? Product.id;
     this.debug = debug;
 
     // add our defaults as a source
-    this.config.defaults('product-defaults', require('../workspace/product-defaults')({ id: this.id, env: this.id }));
+    // @TODO: WTF IS THIS?
+    // this.config.defaults('product-defaults', require('../workspace/product-defaults')({ id: this.id, env: this.id }));
 
     // get the id
     if (!this.config.get(`${this.config.managed}:system.instance`)) {
-      const data = { system: { instance: require('../utils/generate-id')() } };
+      const data = { system: { instance: generateId() } };
       this.config.save(data);
       this.config.set('system.instance', data.system.instance);
       this.debug('could not locate instance id, setting to %o', this.config.get('system.instance'));
