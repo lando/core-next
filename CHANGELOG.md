@@ -1,5 +1,7 @@
 ## {{ UNRELEASED_VERSION }} - [{{ UNRELEASED_DATE }}]({{ UNRELEASED_LINK }})
 
+* Fixed `buildx` built images not being available locally by adding `--load` flag [lando/core#424](https://github.com/lando/core/pull/424)
+
 ## v4.0.0-unstable.8 - [December 9, 2025](https://github.com/lando/core-next/releases/tag/v4.0.0-unstable.8)
 
 * Updated to prep for `bunification` part 2
