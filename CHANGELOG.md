@@ -1,5 +1,7 @@
 ## {{ UNRELEASED_VERSION }} - [{{ UNRELEASED_DATE }}]({{ UNRELEASED_LINK }})
 
+* Fixed crash when `config.yml` is empty instead of containing `{}` [lando/core#439](https://github.com/lando/core/issues/439)
+
 ## v4.0.0-unstable.8 - [December 9, 2025](https://github.com/lando/core-next/releases/tag/v4.0.0-unstable.8)
 
 * Updated to prep for `bunification` part 2
